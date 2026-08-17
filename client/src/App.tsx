@@ -1,11 +1,8 @@
-import { Routes, Route } from 'react-router-dom';
-import LoginPage from './pages/loginPage';
-
 function App() {
     return (
-        <Routes>
-            <Route path="/" element={<LoginPage />} />
-        </Routes>
+        <h1 className="text-4xl font-bold text-center mt-10">
+            Student Academic Management System
+        </h1>
     );
 }
 
