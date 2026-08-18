@@ -1,5 +1,7 @@
-import express from "express";
-import authRoutes from "./routes/authRoutes.js"; 
+import express from 'express';
+import cors from 'cors';
+
+import authRoutes from './routes/authRoutes.js';
 import testRoutes from './routes/testRoutes.js';
 import departmentRoutes from './routes/departmentRoutes.js';
 import classRoutes from './routes/classRoutes.js';
@@ -12,10 +14,16 @@ import assignmentRoutes from './routes/assignmentRoutes.js';
 import submissionRoutes from './routes/submissionRoutes.js';
 import noticeRoutes from './routes/noticeRoutes.js';
 import reportRoutes from './routes/reportRoutes.js';
+import adminRoutes from './routes/adminRoutes.js';
 
 const app = express();
 
+app.use(cors({
+    origin: 'http://localhost:5173'
+}));
+
 app.use(express.json());
+
 app.use('/auth', authRoutes);
 app.use('/test', testRoutes);
 app.use('/departments', departmentRoutes);
@@ -29,12 +37,13 @@ app.use('/assignments', assignmentRoutes);
 app.use('/submissions', submissionRoutes);
 app.use('/notices', noticeRoutes);
 app.use('/reports', reportRoutes);
+app.use('/admins', adminRoutes);
 
-app.get("/", (_req, res) => {
-  res.status(200).json({
-    success: true,
-    message: "Student Academic Management System API is running",
-  });
+app.get('/', (_req, res) => {
+    res.status(200).json({
+        success: true,
+        message: 'Student Academic Management System API is running'
+    });
 });
 
-export default app;   
+export default app;
