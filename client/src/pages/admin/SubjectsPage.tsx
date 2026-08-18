@@ -1,15 +1,51 @@
+import { useEffect, useState } from 'react';
+import api from '../../services/api';
+
+interface Subject {
+    id: number;
+    class_id: number;
+    name: string;
+    code: string;
+    class_name?: string;
+}
+
 function SubjectsPage() {
+    const [subjects, setSubjects] = useState<Subject[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+
+    useEffect(() => {
+        const fetchSubjects = async () => {
+            try {
+                const response = await api.get('/subjects');
+                setSubjects(response.data);
+            } catch {
+                setError('Could not load subjects.');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchSubjects();
+    }, []);
+
     return (
         <div>
-            <div className="flex justify-between items-center mb-6">
+            <div className="mb-6">
                 <h1 className="text-2xl font-bold">
                     Subjects
                 </h1>
 
-                <button className="bg-blue-600 text-white px-4 py-2 rounded">
-                    Add Subject
-                </button>
+                <p className="text-gray-500 mt-1">
+                    View subjects in the system.
+                </p>
             </div>
+
+            {error && (
+                <p className="text-red-500 mb-4">
+                    {error}
+                </p>
+            )}
 
             <div className="bg-white rounded shadow overflow-x-auto">
                 <table className="w-full">
@@ -26,22 +62,49 @@ function SubjectsPage() {
                             <th className="text-left p-3">
                                 Class
                             </th>
-
-                            <th className="text-left p-3">
-                                Actions
-                            </th>
                         </tr>
                     </thead>
 
                     <tbody>
-                        <tr>
-                            <td
-                                colSpan={4}
-                                className="p-4 text-center text-gray-500"
-                            >
-                                No subjects available.
-                            </td>
-                        </tr>
+                        {loading ? (
+                            <tr>
+                                <td
+                                    colSpan={3}
+                                    className="p-4 text-center"
+                                >
+                                    Loading...
+                                </td>
+                            </tr>
+                        ) : subjects.length === 0 ? (
+                            <tr>
+                                <td
+                                    colSpan={3}
+                                    className="p-4 text-center text-gray-500"
+                                >
+                                    No subjects available.
+                                </td>
+                            </tr>
+                        ) : (
+                            subjects.map((subject) => (
+                                <tr
+                                    key={subject.id}
+                                    className="border-t"
+                                >
+                                    <td className="p-3">
+                                        {subject.code}
+                                    </td>
+
+                                    <td className="p-3">
+                                        {subject.name}
+                                    </td>
+
+                                    <td className="p-3">
+                                        {subject.class_name ||
+                                            subject.class_id}
+                                    </td>
+                                </tr>
+                            ))
+                        )}
                     </tbody>
                 </table>
             </div>

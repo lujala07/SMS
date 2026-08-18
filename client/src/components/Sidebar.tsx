@@ -4,6 +4,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import {
     Menu,
     LayoutDashboard,
+    UserPlus,
     GraduationCap,
     Users,
     Building2,
@@ -17,7 +18,6 @@ import {
 
 function Sidebar() {
     const navigate = useNavigate();
-
     const [open, setOpen] = useState(true);
 
     const user = JSON.parse(
@@ -30,10 +30,15 @@ function Sidebar() {
         navigate('/');
     };
 
-    const linkStyle = ({ isActive }: { isActive: boolean }) =>
-        `flex items-center gap-3 px-3 py-2 rounded-md transition ${isActive
-            ? 'bg-slate-700'
-            : 'hover:bg-slate-800'
+    const linkStyle = ({
+        isActive
+    }: {
+        isActive: boolean;
+    }) =>
+        `flex items-center gap-3 px-3 py-2 rounded-md transition ${
+            isActive
+                ? 'bg-slate-700'
+                : 'hover:bg-slate-800'
         }`;
 
     return (
@@ -76,10 +81,16 @@ function Sidebar() {
                                 title="Dashboard"
                             >
                                 <LayoutDashboard size={20} />
+                                {open && <span>Dashboard</span>}
+                            </NavLink>
 
-                                {open && (
-                                    <span>Dashboard</span>
-                                )}
+                            <NavLink
+                                to="/admin/users"
+                                className={linkStyle}
+                                title="Users"
+                            >
+                                <UserPlus size={20} />
+                                {open && <span>Users</span>}
                             </NavLink>
 
                             <NavLink
@@ -88,10 +99,7 @@ function Sidebar() {
                                 title="Students"
                             >
                                 <GraduationCap size={20} />
-
-                                {open && (
-                                    <span>Students</span>
-                                )}
+                                {open && <span>Students</span>}
                             </NavLink>
 
                             <NavLink
@@ -100,10 +108,7 @@ function Sidebar() {
                                 title="Teachers"
                             >
                                 <Users size={20} />
-
-                                {open && (
-                                    <span>Teachers</span>
-                                )}
+                                {open && <span>Teachers</span>}
                             </NavLink>
 
                             <NavLink
@@ -112,10 +117,7 @@ function Sidebar() {
                                 title="Departments"
                             >
                                 <Building2 size={20} />
-
-                                {open && (
-                                    <span>Departments</span>
-                                )}
+                                {open && <span>Departments</span>}
                             </NavLink>
 
                             <NavLink
@@ -124,10 +126,7 @@ function Sidebar() {
                                 title="Classes"
                             >
                                 <School size={20} />
-
-                                {open && (
-                                    <span>Classes</span>
-                                )}
+                                {open && <span>Classes</span>}
                             </NavLink>
 
                             <NavLink
@@ -136,10 +135,7 @@ function Sidebar() {
                                 title="Subjects"
                             >
                                 <BookOpen size={20} />
-
-                                {open && (
-                                    <span>Subjects</span>
-                                )}
+                                {open && <span>Subjects</span>}
                             </NavLink>
 
                             <NavLink
@@ -148,12 +144,7 @@ function Sidebar() {
                                 title="Teacher Subjects"
                             >
                                 <ClipboardList size={20} />
-
-                                {open && (
-                                    <span>
-                                        Teacher Subjects
-                                    </span>
-                                )}
+                                {open && <span>Teacher Subjects</span>}
                             </NavLink>
 
                             <NavLink
@@ -162,10 +153,7 @@ function Sidebar() {
                                 title="Notices"
                             >
                                 <Bell size={20} />
-
-                                {open && (
-                                    <span>Notices</span>
-                                )}
+                                {open && <span>Notices</span>}
                             </NavLink>
 
                             <NavLink
@@ -174,10 +162,7 @@ function Sidebar() {
                                 title="Reports"
                             >
                                 <BarChart3 size={20} />
-
-                                {open && (
-                                    <span>Reports</span>
-                                )}
+                                {open && <span>Reports</span>}
                             </NavLink>
                         </>
                     )}
@@ -188,49 +173,25 @@ function Sidebar() {
                                 to="/teacher"
                                 end
                                 className={linkStyle}
-                                title="Dashboard"
                             >
                                 <LayoutDashboard size={20} />
-
-                                {open && (
-                                    <span>Dashboard</span>
-                                )}
-                            </NavLink>
-
-                            <NavLink
-                                to="/admin/users"
-                                className={linkStyle}
-                                title="Users"
-                            >
-                                <Users size={20} />
-
-                                {open && (
-                                    <span>Users</span>
-                                )}
+                                {open && <span>Dashboard</span>}
                             </NavLink>
 
                             <NavLink
                                 to="/teacher/attendance"
                                 className={linkStyle}
-                                title="Attendance"
                             >
                                 <ClipboardList size={20} />
-
-                                {open && (
-                                    <span>Attendance</span>
-                                )}
+                                {open && <span>Attendance</span>}
                             </NavLink>
 
                             <NavLink
                                 to="/teacher/assignments"
                                 className={linkStyle}
-                                title="Assignments"
                             >
                                 <BookOpen size={20} />
-
-                                {open && (
-                                    <span>Assignments</span>
-                                )}
+                                {open && <span>Assignments</span>}
                             </NavLink>
                         </>
                     )}
@@ -241,37 +202,25 @@ function Sidebar() {
                                 to="/student"
                                 end
                                 className={linkStyle}
-                                title="Dashboard"
                             >
                                 <LayoutDashboard size={20} />
-
-                                {open && (
-                                    <span>Dashboard</span>
-                                )}
+                                {open && <span>Dashboard</span>}
                             </NavLink>
 
                             <NavLink
                                 to="/student/attendance"
                                 className={linkStyle}
-                                title="Attendance"
                             >
                                 <ClipboardList size={20} />
-
-                                {open && (
-                                    <span>Attendance</span>
-                                )}
+                                {open && <span>Attendance</span>}
                             </NavLink>
 
                             <NavLink
                                 to="/student/assignments"
                                 className={linkStyle}
-                                title="Assignments"
                             >
                                 <BookOpen size={20} />
-
-                                {open && (
-                                    <span>Assignments</span>
-                                )}
+                                {open && <span>Assignments</span>}
                             </NavLink>
                         </>
                     )}
@@ -284,10 +233,7 @@ function Sidebar() {
                     title="Logout"
                 >
                     <LogOut size={20} />
-
-                    {open && (
-                        <span>Logout</span>
-                    )}
+                    {open && <span>Logout</span>}
                 </button>
             </div>
         </aside>

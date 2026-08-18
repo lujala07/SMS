@@ -1,19 +1,21 @@
 import CreateUserForm from '../../components/admin/CreateUserForm';
 
-function UsersPage() {
+function UserPage() {
     return (
         <div>
-            <h1 className="text-2xl font-bold mb-2">
-                Users
-            </h1>
+            <div className="mb-6">
+                <h1 className="text-2xl font-bold">
+                    Users
+                </h1>
 
-            <p className="text-gray-500 mb-6">
-                Create student, teacher, or admin accounts.
-            </p>
+                <p className="text-gray-500 mt-1">
+                    Create student, teacher, or admin accounts.
+                </p>
+            </div>
 
             <CreateUserForm />
         </div>
     );
 }
 
-export default UsersPage;
+export default UserPage;

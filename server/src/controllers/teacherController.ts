@@ -7,19 +7,30 @@ import {
     deleteTeacher
 } from '../services/teacherService.js';
 
-export const getTeachers = async (_req: Request, res: Response) => {
+export const getTeachers = async (
+    _req: Request,
+    res: Response
+) => {
     try {
         const teachers = await getAllTeachers();
 
         return res.status(200).json(teachers);
-    } catch {
+    } catch (error) {
+        console.error(
+            'GET TEACHERS ERROR:',
+            error
+        );
+
         return res.status(500).json({
             message: 'Failed to fetch teachers'
         });
     }
 };
 
-export const addTeacher = async (req: Request, res: Response) => {
+export const addTeacher = async (
+    req: Request,
+    res: Response
+) => {
     try {
         const {
             email,
@@ -31,7 +42,12 @@ export const addTeacher = async (req: Request, res: Response) => {
             address
         } = req.body;
 
-        if (!email || !password || !firstName || !lastName) {
+        if (
+            !email ||
+            !password ||
+            !firstName ||
+            !lastName
+        ) {
             return res.status(400).json({
                 message:
                     'Email, password, first name and last name are required'
@@ -41,22 +57,57 @@ export const addTeacher = async (req: Request, res: Response) => {
         const teacher = await createTeacher(
             email,
             password,
-            departmentId ? Number(departmentId) : null,
+            departmentId
+                ? Number(departmentId)
+                : null,
             firstName,
             lastName,
             phoneNumber,
             address
         );
 
-        return res.status(201).json(teacher);
-    } catch {
+        return res.status(201).json({
+            message: 'Teacher created successfully',
+            teacher
+        });
+
+    } catch (error: any) {
+        console.error(
+            'CREATE TEACHER ERROR:',
+            error
+        );
+
+        if (error.code === '23505') {
+            return res.status(400).json({
+                message: 'Email already exists'
+            });
+        }
+
+        if (error.code === '23503') {
+            return res.status(400).json({
+                message:
+                    'Selected department does not exist'
+            });
+        }
+
+        if (error.code === '23514') {
+            return res.status(400).json({
+                message: 'Invalid data provided'
+            });
+        }
+
         return res.status(500).json({
-            message: 'Failed to create teacher'
+            message:
+                error.message ||
+                'Failed to create teacher'
         });
     }
 };
 
-export const editTeacher = async (req: Request, res: Response) => {
+export const editTeacher = async (
+    req: Request,
+    res: Response
+) => {
     try {
         const id = Number(req.params.id);
 
@@ -70,13 +121,16 @@ export const editTeacher = async (req: Request, res: Response) => {
 
         if (!firstName || !lastName) {
             return res.status(400).json({
-                message: 'First name and last name are required'
+                message:
+                    'First name and last name are required'
             });
         }
 
         const teacher = await updateTeacher(
             id,
-            departmentId ? Number(departmentId) : null,
+            departmentId
+                ? Number(departmentId)
+                : null,
             firstName,
             lastName,
             phoneNumber,
@@ -89,15 +143,36 @@ export const editTeacher = async (req: Request, res: Response) => {
             });
         }
 
-        return res.status(200).json(teacher);
-    } catch {
+        return res.status(200).json({
+            message: 'Teacher updated successfully',
+            teacher
+        });
+
+    } catch (error: any) {
+        console.error(
+            'UPDATE TEACHER ERROR:',
+            error
+        );
+
+        if (error.code === '23503') {
+            return res.status(400).json({
+                message:
+                    'Selected department does not exist'
+            });
+        }
+
         return res.status(500).json({
-            message: 'Failed to update teacher'
+            message:
+                error.message ||
+                'Failed to update teacher'
         });
     }
 };
 
-export const removeTeacher = async (req: Request, res: Response) => {
+export const removeTeacher = async (
+    req: Request,
+    res: Response
+) => {
     try {
         const id = Number(req.params.id);
 
@@ -112,9 +187,24 @@ export const removeTeacher = async (req: Request, res: Response) => {
         return res.status(200).json({
             message: 'Teacher deleted successfully'
         });
-    } catch {
+
+    } catch (error: any) {
+        console.error(
+            'DELETE TEACHER ERROR:',
+            error
+        );
+
+        if (error.code === '23503') {
+            return res.status(400).json({
+                message:
+                    'Teacher cannot be deleted because related records exist'
+            });
+        }
+
         return res.status(500).json({
-            message: 'Failed to delete teacher'
+            message:
+                error.message ||
+                'Failed to delete teacher'
         });
     }
 };
