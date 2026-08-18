@@ -31,10 +31,9 @@ function Sidebar() {
     };
 
     const linkStyle = ({ isActive }: { isActive: boolean }) =>
-        `flex items-center gap-3 px-3 py-2 rounded-md transition ${
-            isActive
-                ? 'bg-slate-700'
-                : 'hover:bg-slate-800'
+        `flex items-center gap-3 px-3 py-2 rounded-md transition ${isActive
+            ? 'bg-slate-700'
+            : 'hover:bg-slate-800'
         }`;
 
     return (
@@ -195,6 +194,18 @@ function Sidebar() {
 
                                 {open && (
                                     <span>Dashboard</span>
+                                )}
+                            </NavLink>
+
+                            <NavLink
+                                to="/admin/users"
+                                className={linkStyle}
+                                title="Users"
+                            >
+                                <Users size={20} />
+
+                                {open && (
+                                    <span>Users</span>
                                 )}
                             </NavLink>
 

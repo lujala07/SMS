@@ -1,7 +1,5 @@
 import { useEffect, useState } from 'react';
 
-import StudentForm from '../admin/StudentForm';
-
 import {
     getStudents,
     deleteStudent,
@@ -14,9 +12,6 @@ function StudentsPage() {
 
     const [loading, setLoading] =
         useState(true);
-
-    const [showForm, setShowForm] =
-        useState(false);
 
     const [error, setError] =
         useState('');
@@ -48,7 +43,9 @@ function StudentsPage() {
 
                 setStudents(data);
             } catch {
-                setError('Could not load students.');
+                setError(
+                    'Could not load students.'
+                );
             } finally {
                 setLoading(false);
             }
@@ -70,7 +67,7 @@ function StudentsPage() {
 
         try {
             await deleteStudent(id);
-            loadStudents();
+            await loadStudents();
         } catch {
             setError(
                 'Could not delete student.'
@@ -80,32 +77,15 @@ function StudentsPage() {
 
     return (
         <div>
-            <div className="flex justify-between items-center mb-6">
+            <div className="mb-6">
                 <h1 className="text-2xl font-bold">
                     Students
                 </h1>
 
-                <button
-                    onClick={() =>
-                        setShowForm(!showForm)
-                    }
-                    className="bg-blue-600 text-white px-4 py-2 rounded"
-                >
-                    Add Student
-                </button>
+                <p className="text-gray-500 mt-1">
+                    View and manage student accounts.
+                </p>
             </div>
-
-            {showForm && (
-                <StudentForm
-                    onSuccess={() => {
-                        setShowForm(false);
-                        loadStudents();
-                    }}
-                    onCancel={() =>
-                        setShowForm(false)
-                    }
-                />
-            )}
 
             {error && (
                 <p className="text-red-500 mb-4">
@@ -205,7 +185,7 @@ function StudentsPage() {
                                                         student.id
                                                     )
                                                 }
-                                                className="text-red-600"
+                                                className="text-red-600 hover:underline"
                                             >
                                                 Delete
                                             </button>

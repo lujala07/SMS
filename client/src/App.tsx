@@ -13,9 +13,9 @@ import ClassesPage from './pages/admin/ClassesPage';
 import TeacherSubjectsPage from './pages/admin/TeacherSubjectsPage';
 import NoticesPage from './pages/admin/NoticesPage';
 import ReportsPage from './pages/admin/ReportsPage';
-
 import TeacherDashboard from './pages/teacher/TeacherDashboard';
 import StudentDashboard from './pages/student/StudentDashboard';
+import UsersPage from './pages/admin/UserPage';
 
 function App() {
     return (
@@ -29,6 +29,11 @@ function App() {
                 <Route
                     path="/admin"
                     element={<AdminDashboard />}
+                />
+
+                <Route
+                    path="/admin/users"
+                    element={<UsersPage />}
                 />
 
                 <Route
