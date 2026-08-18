@@ -5,17 +5,18 @@ import LoginPage from './pages/LoginPage';
 import DashboardLayout from './layouts/DashboardLayout';
 
 import AdminDashboard from './pages/admin/AdminDashboard';
+import UserPage from './pages/admin/UserPage';
 import StudentsPage from './pages/admin/StudentsPage';
 import TeachersPage from './pages/admin/TeachersPage';
-import SubjectsPage from './pages/admin/SubjectsPage';
 import DepartmentsPage from './pages/admin/DepartmentsPage';
 import ClassesPage from './pages/admin/ClassesPage';
+import SubjectsPage from './pages/admin/SubjectsPage';
 import TeacherSubjectsPage from './pages/admin/TeacherSubjectsPage';
 import NoticesPage from './pages/admin/NoticesPage';
 import ReportsPage from './pages/admin/ReportsPage';
+
 import TeacherDashboard from './pages/teacher/TeacherDashboard';
 import StudentDashboard from './pages/student/StudentDashboard';
-import UsersPage from './pages/admin/UserPage';
 
 function App() {
     return (
@@ -33,7 +34,7 @@ function App() {
 
                 <Route
                     path="/admin/users"
-                    element={<UsersPage />}
+                    element={<UserPage />}
                 />
 
                 <Route

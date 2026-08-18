@@ -1,8 +1,19 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import axios from 'axios';
 
 import { createAdmin } from '../../services/adminService';
 import { createStudent } from '../../services/studentService';
 import { createTeacher } from '../../services/teacherService';
+
+import {
+    getDepartments,
+    type Department
+} from '../../services/departmentService';
+
+import {
+    getClasses,
+    type ClassItem
+} from '../../services/classService';
 
 type Role = 'student' | 'teacher' | 'admin';
 
@@ -11,37 +22,101 @@ interface Props {
 }
 
 function CreateUserForm({ onSuccess }: Props) {
-    const [role, setRole] = useState<Role>('student');
+    const [role, setRole] =
+        useState<Role>('student');
 
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+    const [email, setEmail] =
+        useState('');
 
-    const [firstName, setFirstName] = useState('');
-    const [lastName, setLastName] = useState('');
+    const [password, setPassword] =
+        useState('');
 
-    const [studentCode, setStudentCode] = useState('');
-    const [classId, setClassId] = useState('');
-    const [gender, setGender] = useState('');
+    const [firstName, setFirstName] =
+        useState('');
 
-    const [departmentId, setDepartmentId] = useState('');
+    const [lastName, setLastName] =
+        useState('');
 
-    const [phoneNumber, setPhoneNumber] = useState('');
-    const [address, setAddress] = useState('');
+    const [phoneNumber, setPhoneNumber] =
+        useState('');
 
-    const [error, setError] = useState('');
-    const [success, setSuccess] = useState('');
+    const [address, setAddress] =
+        useState('');
 
-    const resetForm = () => {
+    const [studentCode, setStudentCode] =
+        useState('');
+
+    const [classId, setClassId] =
+        useState('');
+
+    const [gender, setGender] =
+        useState('');
+
+    const [departmentId, setDepartmentId] =
+        useState('');
+
+    const [departments, setDepartments] =
+        useState<Department[]>([]);
+
+    const [classes, setClasses] =
+        useState<ClassItem[]>([]);
+
+    const [error, setError] =
+        useState('');
+
+    const [success, setSuccess] =
+        useState('');
+
+    const [loading, setLoading] =
+        useState(false);
+
+    useEffect(() => {
+        const loadOptions = async () => {
+            try {
+                const [
+                    departmentData,
+                    classData
+                ] = await Promise.all([
+                    getDepartments(),
+                    getClasses()
+                ]);
+
+                setDepartments(departmentData);
+                setClasses(classData);
+            } catch (error) {
+                console.error(
+                    'Could not load departments/classes:',
+                    error
+                );
+            }
+        };
+
+        loadOptions();
+    }, []);
+
+    const clearForm = () => {
         setEmail('');
         setPassword('');
         setFirstName('');
         setLastName('');
+        setPhoneNumber('');
+        setAddress('');
+
         setStudentCode('');
         setClassId('');
         setGender('');
+
         setDepartmentId('');
-        setPhoneNumber('');
-        setAddress('');
+
+        setError('');
+        setSuccess('');
+    };
+
+    const handleRoleChange = (
+        newRole: Role
+    ) => {
+        clearForm();
+        setRole(newRole);
     };
 
     const handleSubmit = async (
@@ -69,6 +144,18 @@ function CreateUserForm({ onSuccess }: Props) {
             return;
         }
 
+        if (
+            role === 'student' &&
+            (!studentCode || !classId)
+        ) {
+            setError(
+                'Student code and class are required.'
+            );
+            return;
+        }
+
+        setLoading(true);
+
         try {
             if (role === 'admin') {
                 await createAdmin(
@@ -77,20 +164,30 @@ function CreateUserForm({ onSuccess }: Props) {
                 );
             }
 
-            if (role === 'student') {
-                if (!studentCode || !classId) {
-                    setError(
-                        'Student code and class are required.'
-                    );
-                    return;
-                }
+            if (role === 'teacher') {
+                await createTeacher({
+                    email,
+                    password,
+                    firstName,
+                    lastName,
 
+                    departmentId:
+                        departmentId
+                            ? Number(departmentId)
+                            : undefined,
+
+                    phoneNumber,
+                    address
+                });
+            }
+
+            if (role === 'student') {
                 await createStudent({
                     email,
                     password,
-                    studentCode,
                     firstName,
                     lastName,
+                    studentCode,
                     classId: Number(classId),
                     phoneNumber,
                     address,
@@ -98,34 +195,38 @@ function CreateUserForm({ onSuccess }: Props) {
                 });
             }
 
-            if (role === 'teacher') {
-                await createTeacher({
-                    email,
-                    password,
-                    firstName,
-                    lastName,
-                    departmentId:
-                        departmentId
-                            ? Number(departmentId)
-                            : undefined,
-                    phoneNumber,
-                    address
-                });
-            }
-
             setSuccess(
-                'User created successfully.'
+                `${role.charAt(0).toUpperCase() + role.slice(1)} created successfully.`
             );
 
-            resetForm();
+            setEmail('');
+            setPassword('');
+            setFirstName('');
+            setLastName('');
+            setPhoneNumber('');
+            setAddress('');
+            setStudentCode('');
+            setClassId('');
+            setGender('');
+            setDepartmentId('');
 
-            if (onSuccess) {
-                onSuccess();
+            onSuccess?.();
+
+        } catch (error) {
+            console.error(error);
+
+            if (axios.isAxiosError(error)) {
+                setError(
+                    error.response?.data?.message ||
+                    'Could not create user.'
+                );
+            } else {
+                setError(
+                    'Could not create user.'
+                );
             }
-        } catch {
-            setError(
-                'Could not create user.'
-            );
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -147,7 +248,7 @@ function CreateUserForm({ onSuccess }: Props) {
                     <select
                         value={role}
                         onChange={(event) =>
-                            setRole(
+                            handleRoleChange(
                                 event.target.value as Role
                             )
                         }
@@ -176,12 +277,10 @@ function CreateUserForm({ onSuccess }: Props) {
                         type="email"
                         value={email}
                         onChange={(event) =>
-                            setEmail(
-                                event.target.value
-                            )
+                            setEmail(event.target.value)
                         }
-                        className="w-full border p-2 rounded"
                         placeholder="Enter email"
+                        className="w-full border p-2 rounded"
                     />
                 </div>
 
@@ -194,12 +293,10 @@ function CreateUserForm({ onSuccess }: Props) {
                         type="password"
                         value={password}
                         onChange={(event) =>
-                            setPassword(
-                                event.target.value
-                            )
+                            setPassword(event.target.value)
                         }
-                        className="w-full border p-2 rounded"
                         placeholder="Enter password"
+                        className="w-full border p-2 rounded"
                     />
                 </div>
 
@@ -218,8 +315,8 @@ function CreateUserForm({ onSuccess }: Props) {
                                         event.target.value
                                     )
                                 }
-                                className="w-full border p-2 rounded"
                                 placeholder="First name"
+                                className="w-full border p-2 rounded"
                             />
                         </div>
 
@@ -236,8 +333,8 @@ function CreateUserForm({ onSuccess }: Props) {
                                         event.target.value
                                     )
                                 }
-                                className="w-full border p-2 rounded"
                                 placeholder="Last name"
+                                className="w-full border p-2 rounded"
                             />
                         </div>
 
@@ -254,8 +351,8 @@ function CreateUserForm({ onSuccess }: Props) {
                                         event.target.value
                                     )
                                 }
-                                className="w-full border p-2 rounded"
                                 placeholder="Phone number"
+                                className="w-full border p-2 rounded"
                             />
                         </div>
 
@@ -272,11 +369,46 @@ function CreateUserForm({ onSuccess }: Props) {
                                         event.target.value
                                     )
                                 }
-                                className="w-full border p-2 rounded"
                                 placeholder="Address"
+                                className="w-full border p-2 rounded"
                             />
                         </div>
                     </>
+                )}
+
+                {role === 'teacher' && (
+                    <div className="md:col-span-2">
+                        <label className="block mb-1 font-medium">
+                            Department
+                        </label>
+
+                        <select
+                            value={departmentId}
+                            onChange={(event) =>
+                                setDepartmentId(
+                                    event.target.value
+                                )
+                            }
+                            className="w-full border p-2 rounded"
+                        >
+                            <option value="">
+                                Select Department
+                            </option>
+
+                            {departments.map(
+                                (department) => (
+                                    <option
+                                        key={department.id}
+                                        value={department.id}
+                                    >
+                                        {department.code}
+                                        {' - '}
+                                        {department.name}
+                                    </option>
+                                )
+                            )}
+                        </select>
+                    </div>
                 )}
 
                 {role === 'student' && (
@@ -294,18 +426,17 @@ function CreateUserForm({ onSuccess }: Props) {
                                         event.target.value
                                     )
                                 }
+                                placeholder="e.g. STU001"
                                 className="w-full border p-2 rounded"
-                                placeholder="Student code"
                             />
                         </div>
 
                         <div>
                             <label className="block mb-1 font-medium">
-                                Class ID
+                                Class
                             </label>
 
-                            <input
-                                type="number"
+                            <select
                                 value={classId}
                                 onChange={(event) =>
                                     setClassId(
@@ -313,8 +444,25 @@ function CreateUserForm({ onSuccess }: Props) {
                                     )
                                 }
                                 className="w-full border p-2 rounded"
-                                placeholder="Class ID"
-                            />
+                            >
+                                <option value="">
+                                    Select Class
+                                </option>
+
+                                {classes.map(
+                                    (classItem) => (
+                                        <option
+                                            key={classItem.id}
+                                            value={classItem.id}
+                                        >
+                                            {classItem.name}
+                                            {classItem.semester
+                                                ? ` - Semester ${classItem.semester}`
+                                                : ''}
+                                        </option>
+                                    )
+                                )}
+                            </select>
                         </div>
 
                         <div>
@@ -351,26 +499,6 @@ function CreateUserForm({ onSuccess }: Props) {
                     </>
                 )}
 
-                {role === 'teacher' && (
-                    <div>
-                        <label className="block mb-1 font-medium">
-                            Department ID
-                        </label>
-
-                        <input
-                            type="number"
-                            value={departmentId}
-                            onChange={(event) =>
-                                setDepartmentId(
-                                    event.target.value
-                                )
-                            }
-                            className="w-full border p-2 rounded"
-                            placeholder="Department ID"
-                        />
-                    </div>
-                )}
-
                 {error && (
                     <p className="text-red-500 text-sm md:col-span-2">
                         {error}
@@ -386,9 +514,12 @@ function CreateUserForm({ onSuccess }: Props) {
                 <div className="md:col-span-2">
                     <button
                         type="submit"
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded"
+                        disabled={loading}
+                        className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-5 py-2 rounded"
                     >
-                        Create User
+                        {loading
+                            ? 'Creating...'
+                            : 'Create User'}
                     </button>
                 </div>
             </form>
