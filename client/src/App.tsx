@@ -1,7 +1,6 @@
 import { Routes, Route } from 'react-router-dom';
 
 import LoginPage from './pages/LoginPage';
-
 import DashboardLayout from './layouts/DashboardLayout';
 
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -16,6 +15,9 @@ import NoticesPage from './pages/admin/NoticesPage';
 import ReportsPage from './pages/admin/ReportsPage';
 
 import TeacherDashboard from './pages/teacher/TeacherDashboard';
+import TeacherAttendancePage from './pages/teacher/TeacherAttendancePage';
+import TeacherAssignmentsPage from './pages/teacher/TeacherAssignmentsPage';
+
 import StudentDashboard from './pages/student/StudentDashboard';
 
 function App() {
@@ -80,6 +82,16 @@ function App() {
                 <Route
                     path="/teacher"
                     element={<TeacherDashboard />}
+                />
+
+                <Route
+                    path="/teacher/attendance"
+                    element={<TeacherAttendancePage />}
+                />
+
+                <Route
+                    path="/teacher/assignments"
+                    element={<TeacherAssignmentsPage />}
                 />
 
                 <Route

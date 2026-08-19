@@ -2,6 +2,9 @@ import { Request, Response } from 'express';
 
 import {
     getAllAttendance,
+    getTeacherAttendance,
+    getTeacherSubjects,
+    getStudentsForTeacherSubject,
     createAttendance,
     updateAttendance,
     deleteAttendance,
@@ -9,16 +12,111 @@ import {
 } from '../services/attendanceService.js';
 
 export const getAttendance = async (
-    _req: Request,
+    req: Request,
     res: Response
 ) => {
     try {
-        const attendance = await getAllAttendance();
+        if (
+            req.user?.role === 'teacher' &&
+            req.user.userId
+        ) {
+            const attendance =
+                await getTeacherAttendance(
+                    req.user.userId
+                );
+
+            return res.status(200).json(attendance);
+        }
+
+        const attendance =
+            await getAllAttendance();
 
         return res.status(200).json(attendance);
-    } catch {
+
+    } catch (error) {
+        console.error(
+            'GET ATTENDANCE ERROR:',
+            error
+        );
+
         return res.status(500).json({
-            message: 'Failed to fetch attendance'
+            message:
+                'Failed to fetch attendance'
+        });
+    }
+};
+
+export const getMyTeacherSubjects = async (
+    req: Request,
+    res: Response
+) => {
+    try {
+        if (!req.user?.userId) {
+            return res.status(401).json({
+                message:
+                    'Authentication required'
+            });
+        }
+
+        const subjects =
+            await getTeacherSubjects(
+                req.user.userId
+            );
+
+        return res.status(200).json(subjects);
+
+    } catch (error) {
+        console.error(
+            'GET TEACHER SUBJECTS ERROR:',
+            error
+        );
+
+        return res.status(500).json({
+            message:
+                'Failed to fetch teacher subjects'
+        });
+    }
+};
+
+export const getSubjectStudents = async (
+    req: Request,
+    res: Response
+) => {
+    try {
+        if (!req.user?.userId) {
+            return res.status(401).json({
+                message:
+                    'Authentication required'
+            });
+        }
+
+        const subjectId =
+            Number(req.params.subjectId);
+
+        if (!subjectId) {
+            return res.status(400).json({
+                message:
+                    'Valid subject is required'
+            });
+        }
+
+        const students =
+            await getStudentsForTeacherSubject(
+                req.user.userId,
+                subjectId
+            );
+
+        return res.status(200).json(students);
+
+    } catch (error) {
+        console.error(
+            'GET SUBJECT STUDENTS ERROR:',
+            error
+        );
+
+        return res.status(500).json({
+            message:
+                'Failed to fetch students'
         });
     }
 };
@@ -28,18 +126,28 @@ export const addAttendance = async (
     res: Response
 ) => {
     try {
+        if (!req.user?.userId) {
+            return res.status(401).json({
+                message:
+                    'Authentication required'
+            });
+        }
+
         const {
             studentId,
             subjectId,
-            markedBy,
             status,
             attendanceDate
         } = req.body;
 
-        if (!studentId || !subjectId || !markedBy || !status) {
+        if (
+            !studentId ||
+            !subjectId ||
+            !status
+        ) {
             return res.status(400).json({
                 message:
-                    'Student, subject, teacher and status are required'
+                    'Student, subject and status are required'
             });
         }
 
@@ -52,22 +160,34 @@ export const addAttendance = async (
 
         if (!validStatuses.includes(status)) {
             return res.status(400).json({
-                message: 'Invalid attendance status'
+                message:
+                    'Invalid attendance status'
             });
         }
 
-        const attendance = await createAttendance(
-            Number(studentId),
-            Number(subjectId),
-            Number(markedBy),
-            status,
-            attendanceDate
+        const attendance =
+            await createAttendance(
+                req.user.userId,
+                Number(studentId),
+                Number(subjectId),
+                status,
+                attendanceDate
+            );
+
+        return res.status(201).json(
+            attendance
         );
 
-        return res.status(201).json(attendance);
-    } catch {
-        return res.status(500).json({
-            message: 'Failed to mark attendance'
+    } catch (error: any) {
+        console.error(
+            'MARK ATTENDANCE ERROR:',
+            error
+        );
+
+        return res.status(400).json({
+            message:
+                error.message ||
+                'Failed to mark attendance'
         });
     }
 };
@@ -77,7 +197,9 @@ export const editAttendance = async (
     res: Response
 ) => {
     try {
-        const id = Number(req.params.id);
+        const id =
+            Number(req.params.id);
+
         const { status } = req.body;
 
         const validStatuses = [
@@ -87,27 +209,42 @@ export const editAttendance = async (
             'excused'
         ];
 
-        if (!status || !validStatuses.includes(status)) {
+        if (
+            !status ||
+            !validStatuses.includes(status)
+        ) {
             return res.status(400).json({
-                message: 'Valid attendance status is required'
+                message:
+                    'Valid attendance status is required'
             });
         }
 
-        const attendance = await updateAttendance(
-            id,
-            status
-        );
+        const attendance =
+            await updateAttendance(
+                id,
+                status
+            );
 
         if (!attendance) {
             return res.status(404).json({
-                message: 'Attendance record not found'
+                message:
+                    'Attendance record not found'
             });
         }
 
-        return res.status(200).json(attendance);
-    } catch {
+        return res.status(200).json(
+            attendance
+        );
+
+    } catch (error) {
+        console.error(
+            'UPDATE ATTENDANCE ERROR:',
+            error
+        );
+
         return res.status(500).json({
-            message: 'Failed to update attendance'
+            message:
+                'Failed to update attendance'
         });
     }
 };
@@ -117,22 +254,33 @@ export const removeAttendance = async (
     res: Response
 ) => {
     try {
-        const id = Number(req.params.id);
+        const id =
+            Number(req.params.id);
 
-        const attendance = await deleteAttendance(id);
+        const attendance =
+            await deleteAttendance(id);
 
         if (!attendance) {
             return res.status(404).json({
-                message: 'Attendance record not found'
+                message:
+                    'Attendance record not found'
             });
         }
 
         return res.status(200).json({
-            message: 'Attendance deleted successfully'
+            message:
+                'Attendance deleted successfully'
         });
-    } catch {
+
+    } catch (error) {
+        console.error(
+            'DELETE ATTENDANCE ERROR:',
+            error
+        );
+
         return res.status(500).json({
-            message: 'Failed to delete attendance'
+            message:
+                'Failed to delete attendance'
         });
     }
 };
@@ -142,15 +290,27 @@ export const getStudentAttendance = async (
     res: Response
 ) => {
     try {
-        const studentId = Number(req.params.studentId);
+        const studentId =
+            Number(req.params.studentId);
 
         const attendance =
-            await getAttendanceByStudent(studentId);
+            await getAttendanceByStudent(
+                studentId
+            );
 
-        return res.status(200).json(attendance);
-    } catch {
+        return res.status(200).json(
+            attendance
+        );
+
+    } catch (error) {
+        console.error(
+            'GET STUDENT ATTENDANCE ERROR:',
+            error
+        );
+
         return res.status(500).json({
-            message: 'Failed to fetch student attendance'
+            message:
+                'Failed to fetch student attendance'
         });
     }
 };
