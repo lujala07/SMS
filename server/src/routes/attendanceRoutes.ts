@@ -5,11 +5,18 @@ import {
     addAttendance,
     editAttendance,
     removeAttendance,
-    getStudentAttendance
+    getStudentAttendance,
+    getMyTeacherSubjects,
+    getSubjectStudents
 } from '../controllers/attendanceController.js';
 
-import { authenticate } from '../middleware/authMiddleware.js';
-import { authorizeRoles } from '../middleware/roleMiddleware.js';
+import {
+    authenticate
+} from '../middleware/authMiddleware.js';
+
+import {
+    authorizeRoles
+} from '../middleware/roleMiddleware.js';
 
 const router = Router();
 
@@ -18,6 +25,20 @@ router.get(
     authenticate,
     authorizeRoles('admin', 'teacher'),
     getAttendance
+);
+
+router.get(
+    '/teacher/subjects',
+    authenticate,
+    authorizeRoles('teacher'),
+    getMyTeacherSubjects
+);
+
+router.get(
+    '/teacher/subjects/:subjectId/students',
+    authenticate,
+    authorizeRoles('teacher'),
+    getSubjectStudents
 );
 
 router.get(
