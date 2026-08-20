@@ -5,11 +5,17 @@ import {
     addAssignment,
     editAssignment,
     removeAssignment,
-    getSubjectAssignments
+    getSubjectAssignments,
+    getMyAssignmentSubjects
 } from '../controllers/assignmentController.js';
 
-import { authenticate } from '../middleware/authMiddleware.js';
-import { authorizeRoles } from '../middleware/roleMiddleware.js';
+import {
+    authenticate
+} from '../middleware/authMiddleware.js';
+
+import {
+    authorizeRoles
+} from '../middleware/roleMiddleware.js';
 
 const router = Router();
 
@@ -17,6 +23,13 @@ router.get(
     '/',
     authenticate,
     getAssignments
+);
+
+router.get(
+    '/teacher/subjects',
+    authenticate,
+    authorizeRoles('teacher'),
+    getMyAssignmentSubjects
 );
 
 router.get(

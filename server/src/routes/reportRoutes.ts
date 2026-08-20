@@ -7,8 +7,13 @@ import {
     assignmentSummary
 } from '../controllers/reportController.js';
 
-import { authenticate } from '../middleware/authMiddleware.js';
-import { authorizeRoles } from '../middleware/roleMiddleware.js';
+import {
+    authenticate
+} from '../middleware/authMiddleware.js';
+
+import {
+    authorizeRoles
+} from '../middleware/roleMiddleware.js';
 
 const router = Router();
 
@@ -22,7 +27,10 @@ router.get(
 router.get(
     '/attendance',
     authenticate,
-    authorizeRoles('admin', 'teacher'),
+    authorizeRoles(
+        'admin',
+        'teacher'
+    ),
     attendanceSummary
 );
 
@@ -35,7 +43,10 @@ router.get(
 router.get(
     '/assignments',
     authenticate,
-    authorizeRoles('admin', 'teacher'),
+    authorizeRoles(
+        'admin',
+        'teacher'
+    ),
     assignmentSummary
 );
 

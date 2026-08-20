@@ -8,8 +8,13 @@ import {
     getAudienceNotices
 } from '../controllers/noticeController.js';
 
-import { authenticate } from '../middleware/authMiddleware.js';
-import { authorizeRoles } from '../middleware/roleMiddleware.js';
+import {
+    authenticate
+} from '../middleware/authMiddleware.js';
+
+import {
+    authorizeRoles
+} from '../middleware/roleMiddleware.js';
 
 const router = Router();
 
@@ -28,21 +33,30 @@ router.get(
 router.post(
     '/',
     authenticate,
-    authorizeRoles('admin', 'teacher'),
+    authorizeRoles(
+        'admin',
+        'teacher'
+    ),
     addNotice
 );
 
 router.put(
     '/:id',
     authenticate,
-    authorizeRoles('admin', 'teacher'),
+    authorizeRoles(
+        'admin',
+        'teacher'
+    ),
     editNotice
 );
 
 router.delete(
     '/:id',
     authenticate,
-    authorizeRoles('admin', 'teacher'),
+    authorizeRoles(
+        'admin',
+        'teacher'
+    ),
     removeNotice
 );
 

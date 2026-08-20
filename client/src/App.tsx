@@ -1,6 +1,10 @@
-import { Routes, Route } from 'react-router-dom';
+import {
+    Routes,
+    Route
+} from 'react-router-dom';
 
 import LoginPage from './pages/LoginPage';
+
 import DashboardLayout from './layouts/DashboardLayout';
 
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -17,6 +21,9 @@ import ReportsPage from './pages/admin/ReportsPage';
 import TeacherDashboard from './pages/teacher/TeacherDashboard';
 import TeacherAttendancePage from './pages/teacher/TeacherAttendancePage';
 import TeacherAssignmentsPage from './pages/teacher/TeacherAssignmentsPage';
+import TeacherSubmissionsPage from './pages/teacher/TeacherSubmissionsPage';
+import TeacherReportsPage from './pages/teacher/TeacherReportsPage';
+import TeacherNoticesPage from './pages/teacher/TeacherNoticesPage';
 
 import StudentDashboard from './pages/student/StudentDashboard';
 
@@ -25,78 +32,133 @@ function App() {
         <Routes>
             <Route
                 path="/"
-                element={<LoginPage />}
+                element={
+                    <LoginPage />
+                }
             />
 
-            <Route element={<DashboardLayout />}>
+            <Route
+                element={
+                    <DashboardLayout />
+                }
+            >
                 <Route
                     path="/admin"
-                    element={<AdminDashboard />}
+                    element={
+                        <AdminDashboard />
+                    }
                 />
 
                 <Route
                     path="/admin/users"
-                    element={<UserPage />}
+                    element={
+                        <UserPage />
+                    }
                 />
 
                 <Route
                     path="/admin/students"
-                    element={<StudentsPage />}
+                    element={
+                        <StudentsPage />
+                    }
                 />
 
                 <Route
                     path="/admin/teachers"
-                    element={<TeachersPage />}
+                    element={
+                        <TeachersPage />
+                    }
                 />
 
                 <Route
                     path="/admin/departments"
-                    element={<DepartmentsPage />}
+                    element={
+                        <DepartmentsPage />
+                    }
                 />
 
                 <Route
                     path="/admin/classes"
-                    element={<ClassesPage />}
+                    element={
+                        <ClassesPage />
+                    }
                 />
 
                 <Route
                     path="/admin/subjects"
-                    element={<SubjectsPage />}
+                    element={
+                        <SubjectsPage />
+                    }
                 />
 
                 <Route
                     path="/admin/teacher-subjects"
-                    element={<TeacherSubjectsPage />}
+                    element={
+                        <TeacherSubjectsPage />
+                    }
                 />
 
                 <Route
                     path="/admin/notices"
-                    element={<NoticesPage />}
+                    element={
+                        <NoticesPage />
+                    }
                 />
 
                 <Route
                     path="/admin/reports"
-                    element={<ReportsPage />}
+                    element={
+                        <ReportsPage />
+                    }
                 />
 
                 <Route
                     path="/teacher"
-                    element={<TeacherDashboard />}
+                    element={
+                        <TeacherDashboard />
+                    }
                 />
 
                 <Route
                     path="/teacher/attendance"
-                    element={<TeacherAttendancePage />}
+                    element={
+                        <TeacherAttendancePage />
+                    }
                 />
 
                 <Route
                     path="/teacher/assignments"
-                    element={<TeacherAssignmentsPage />}
+                    element={
+                        <TeacherAssignmentsPage />
+                    }
+                />
+
+                <Route
+                    path="/teacher/submissions"
+                    element={
+                        <TeacherSubmissionsPage />
+                    }
+                />
+
+                <Route
+                    path="/teacher/notices"
+                    element={
+                        <TeacherNoticesPage />
+                    }
+                />
+
+                <Route
+                    path="/teacher/reports"
+                    element={
+                        <TeacherReportsPage />
+                    }
                 />
 
                 <Route
                     path="/student"
-                    element={<StudentDashboard />}
+                    element={
+                        <StudentDashboard />
+                    }
                 />
             </Route>
         </Routes>
