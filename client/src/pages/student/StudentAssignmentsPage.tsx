@@ -11,7 +11,7 @@ import {
     X
 } from 'lucide-react';
 
-import api from '../../services/api';
+import api, { API_BASE_URL } from '../../services/api';
 
 interface Assignment {
     id: number;
@@ -421,7 +421,7 @@ function StudentAssignmentsPage() {
             return fileUrl;
         }
 
-        return `http://localhost:5000${fileUrl}`;
+        return `${API_BASE_URL}${fileUrl}`;
     };
 
     const formatFileSize = (
