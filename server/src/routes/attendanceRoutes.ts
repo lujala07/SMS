@@ -6,6 +6,7 @@ import {
     editAttendance,
     removeAttendance,
     getStudentAttendance,
+    getMyAttendance,
     getMyTeacherSubjects,
     getSubjectStudents
 } from '../controllers/attendanceController.js';
@@ -28,6 +29,13 @@ router.get(
 );
 
 router.get(
+    '/me',
+    authenticate,
+    authorizeRoles('student'),
+    getMyAttendance
+);
+
+router.get(
     '/teacher/subjects',
     authenticate,
     authorizeRoles('teacher'),
@@ -44,6 +52,7 @@ router.get(
 router.get(
     '/student/:studentId',
     authenticate,
+    authorizeRoles('admin', 'student'),
     getStudentAttendance
 );
 
