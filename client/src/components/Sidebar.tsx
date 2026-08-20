@@ -18,7 +18,8 @@ import {
     Bell,
     BarChart3,
     LogOut,
-    FileCheck2
+    FileCheck2,
+    User
 } from 'lucide-react';
 
 function Sidebar() {
@@ -59,10 +60,58 @@ function Sidebar() {
                 : 'hover:bg-slate-800'
         }`;
 
+    const getFullName = () => {
+        const firstName =
+            user.first_name ||
+            user.firstName ||
+            '';
+
+        const lastName =
+            user.last_name ||
+            user.lastName ||
+            '';
+
+        const fullName =
+            `${firstName} ${lastName}`.trim();
+
+        if (fullName) {
+            return fullName;
+        }
+
+        if (user.name) {
+            return user.name;
+        }
+
+        if (
+            user.role === 'admin'
+        ) {
+            return 'Administrator';
+        }
+
+        if (
+            user.role === 'teacher'
+        ) {
+            return 'Teacher';
+        }
+
+        if (
+            user.role === 'student'
+        ) {
+            return 'Student';
+        }
+
+        return 'User';
+    };
+
+    const fullName =
+        getFullName();
+
     return (
         <aside
             className={`
-                min-h-screen
+                h-screen
+                sticky
+                top-0
                 bg-slate-900
                 text-white
                 transition-all
@@ -71,7 +120,9 @@ function Sidebar() {
                 ${open ? 'w-60' : 'w-20'}
             `}
         >
-            <div className="p-4">
+            <div className="h-full flex flex-col p-4">
+
+                {/* Top */}
                 <div className="flex items-center gap-3 mb-6">
                     <button
                         type="button"
@@ -95,7 +146,9 @@ function Sidebar() {
                     )}
                 </div>
 
-                <nav className="space-y-1">
+                {/* Navigation */}
+                <nav className="space-y-1 flex-1 overflow-y-auto">
+
                     {user.role ===
                         'admin' && (
                         <>
@@ -107,9 +160,7 @@ function Sidebar() {
                                 }
                             >
                                 <LayoutDashboard
-                                    size={
-                                        20
-                                    }
+                                    size={20}
                                 />
 
                                 {open && (
@@ -126,9 +177,7 @@ function Sidebar() {
                                 }
                             >
                                 <UserPlus
-                                    size={
-                                        20
-                                    }
+                                    size={20}
                                 />
 
                                 {open && (
@@ -145,9 +194,7 @@ function Sidebar() {
                                 }
                             >
                                 <GraduationCap
-                                    size={
-                                        20
-                                    }
+                                    size={20}
                                 />
 
                                 {open && (
@@ -164,9 +211,7 @@ function Sidebar() {
                                 }
                             >
                                 <Users
-                                    size={
-                                        20
-                                    }
+                                    size={20}
                                 />
 
                                 {open && (
@@ -183,9 +228,7 @@ function Sidebar() {
                                 }
                             >
                                 <Building2
-                                    size={
-                                        20
-                                    }
+                                    size={20}
                                 />
 
                                 {open && (
@@ -202,9 +245,7 @@ function Sidebar() {
                                 }
                             >
                                 <School
-                                    size={
-                                        20
-                                    }
+                                    size={20}
                                 />
 
                                 {open && (
@@ -221,9 +262,7 @@ function Sidebar() {
                                 }
                             >
                                 <BookOpen
-                                    size={
-                                        20
-                                    }
+                                    size={20}
                                 />
 
                                 {open && (
@@ -240,9 +279,7 @@ function Sidebar() {
                                 }
                             >
                                 <ClipboardList
-                                    size={
-                                        20
-                                    }
+                                    size={20}
                                 />
 
                                 {open && (
@@ -259,9 +296,7 @@ function Sidebar() {
                                 }
                             >
                                 <Bell
-                                    size={
-                                        20
-                                    }
+                                    size={20}
                                 />
 
                                 {open && (
@@ -278,9 +313,7 @@ function Sidebar() {
                                 }
                             >
                                 <BarChart3
-                                    size={
-                                        20
-                                    }
+                                    size={20}
                                 />
 
                                 {open && (
@@ -303,9 +336,7 @@ function Sidebar() {
                                 }
                             >
                                 <LayoutDashboard
-                                    size={
-                                        20
-                                    }
+                                    size={20}
                                 />
 
                                 {open && (
@@ -322,9 +353,7 @@ function Sidebar() {
                                 }
                             >
                                 <ClipboardList
-                                    size={
-                                        20
-                                    }
+                                    size={20}
                                 />
 
                                 {open && (
@@ -341,9 +370,7 @@ function Sidebar() {
                                 }
                             >
                                 <BookOpen
-                                    size={
-                                        20
-                                    }
+                                    size={20}
                                 />
 
                                 {open && (
@@ -360,9 +387,7 @@ function Sidebar() {
                                 }
                             >
                                 <FileCheck2
-                                    size={
-                                        20
-                                    }
+                                    size={20}
                                 />
 
                                 {open && (
@@ -379,9 +404,7 @@ function Sidebar() {
                                 }
                             >
                                 <Bell
-                                    size={
-                                        20
-                                    }
+                                    size={20}
                                 />
 
                                 {open && (
@@ -398,9 +421,7 @@ function Sidebar() {
                                 }
                             >
                                 <BarChart3
-                                    size={
-                                        20
-                                    }
+                                    size={20}
                                 />
 
                                 {open && (
@@ -423,9 +444,7 @@ function Sidebar() {
                                 }
                             >
                                 <LayoutDashboard
-                                    size={
-                                        20
-                                    }
+                                    size={20}
                                 />
 
                                 {open && (
@@ -442,9 +461,7 @@ function Sidebar() {
                                 }
                             >
                                 <ClipboardList
-                                    size={
-                                        20
-                                    }
+                                    size={20}
                                 />
 
                                 {open && (
@@ -461,9 +478,7 @@ function Sidebar() {
                                 }
                             >
                                 <BookOpen
-                                    size={
-                                        20
-                                    }
+                                    size={20}
                                 />
 
                                 {open && (
@@ -476,24 +491,73 @@ function Sidebar() {
                     )}
                 </nav>
 
-                <button
-                    type="button"
-                    onClick={
-                        logout
-                    }
-                    className="flex items-center gap-3 w-full px-3 py-2 mt-8 rounded-md hover:bg-red-600 transition"
-                    title="Logout"
-                >
-                    <LogOut
-                        size={20}
-                    />
+                {/* Bottom user section */}
+                <div className="mt-auto pt-4 border-t border-slate-700">
 
-                    {open && (
-                        <span>
-                            Logout
-                        </span>
+                    {open ? (
+                        <div className="px-3 mb-3">
+                            <div className="flex items-start gap-3">
+
+                                <User
+                                    size={20}
+                                    className="mt-1 shrink-0 text-slate-300"
+                                />
+
+                                <div className="min-w-0">
+                                    <p className="font-semibold text-sm truncate">
+                                        {fullName}
+                                    </p>
+
+                                    <p className="text-xs text-slate-400 truncate mt-1">
+                                        {user.email ||
+                                            'No email'}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="flex justify-center mb-3">
+                            <User
+                                size={20}
+                                className="text-slate-300"
+                            />
+                        </div>
                     )}
-                </button>
+
+                    <button
+                        type="button"
+                        onClick={
+                            logout
+                        }
+                        className={`
+                            flex
+                            items-center
+                            gap-3
+                            w-full
+                            px-3
+                            py-2
+                            rounded-md
+                            hover:bg-red-600
+                            transition
+                            ${
+                                !open
+                                    ? 'justify-center'
+                                    : ''
+                            }
+                        `}
+                        title="Logout"
+                    >
+                        <LogOut
+                            size={20}
+                        />
+
+                        {open && (
+                            <span>
+                                Logout
+                            </span>
+                        )}
+                    </button>
+                </div>
             </div>
         </aside>
     );
