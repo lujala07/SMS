@@ -1,7 +1,15 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET as string;
+const getJwtSecret = () => {
+    if (!process.env.JWT_SECRET) {
+        throw new Error(
+            'JWT_SECRET is missing from the .env file'
+        );
+    }
+
+    return process.env.JWT_SECRET;
+};
 
 interface JwtPayload {
     userId: number;
@@ -24,7 +32,7 @@ export const authenticate = (
     const token = authHeader.substring(7);
 
     try {
-        const decoded = jwt.verify(token, JWT_SECRET) as unknown as JwtPayload;
+        const decoded = jwt.verify(token, getJwtSecret()) as unknown as JwtPayload;
         
         req.user = decoded;
 
