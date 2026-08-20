@@ -348,7 +348,7 @@ function TeacherSubjectsPage() {
                         </select>
                     </div>
 
-                    <div className="md:col-span-2">
+                    <div className="md:col-span-2 flex justify-end">
                         <button
                             type="submit"
                             disabled={saving}

@@ -6,7 +6,6 @@ import {
 import axios from 'axios';
 
 import {
-    createTeacher,
     deleteTeacher,
     getTeachers,
     updateTeacher,
@@ -19,8 +18,6 @@ import {
 } from '../../services/departmentService';
 
 const emptyForm = {
-    email: '',
-    password: '',
     departmentId: '',
     firstName: '',
     lastName: '',
@@ -87,8 +84,6 @@ function TeachersPage() {
     ) => {
         setEditingTeacher(teacher);
         setForm({
-            email: teacher.email,
-            password: '',
             departmentId:
                 teacher.department_id
                     ? String(teacher.department_id)
@@ -138,14 +133,7 @@ function TeachersPage() {
             return;
         }
 
-        if (
-            !editingTeacher &&
-            (!form.email.trim() ||
-                !form.password)
-        ) {
-            setError(
-                'Email and password are required for new teachers.'
-            );
+        if (!editingTeacher) {
             return;
         }
 
@@ -169,24 +157,13 @@ function TeachersPage() {
                     undefined
             };
 
-            if (editingTeacher) {
-                await updateTeacher(
-                    editingTeacher.id,
-                    payload
-                );
-                setSuccess(
-                    'Teacher updated successfully.'
-                );
-            } else {
-                await createTeacher({
-                    ...payload,
-                    email: form.email.trim(),
-                    password: form.password
-                });
-                setSuccess(
-                    'Teacher created successfully.'
-                );
-            }
+            await updateTeacher(
+                editingTeacher.id,
+                payload
+            );
+            setSuccess(
+                'Teacher updated successfully.'
+            );
 
             await loadData();
             setForm(emptyForm);
@@ -241,156 +218,112 @@ function TeachersPage() {
                 </h1>
 
                 <p className="text-gray-500 mt-1">
-                    Create and manage teacher records.
+                    View and update teacher records.
                 </p>
             </div>
 
-            <form
-                onSubmit={handleSubmit}
-                className="bg-white rounded shadow p-5 mb-6"
-            >
-                <h2 className="font-semibold mb-4">
-                    {editingTeacher
-                        ? 'Edit Teacher'
-                        : 'Create Teacher'}
-                </h2>
+            {editingTeacher && (
+                <form
+                    onSubmit={handleSubmit}
+                    className="bg-white rounded shadow p-5 mb-6"
+                >
+                    <h2 className="font-semibold mb-4">
+                        Edit Teacher
+                    </h2>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <input
-                        type="email"
-                        value={form.email}
-                        disabled={Boolean(editingTeacher)}
-                        onChange={(event) =>
-                            setForm({
-                                ...form,
-                                email: event.target.value
-                            })
-                        }
-                        placeholder="Email"
-                        className="border rounded p-2 disabled:bg-gray-100"
-                    />
-
-                    {!editingTeacher && (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <input
-                            type="password"
-                            value={form.password}
+                            value={form.firstName}
                             onChange={(event) =>
                                 setForm({
                                     ...form,
-                                    password:
+                                    firstName:
                                         event.target.value
                                 })
                             }
-                            placeholder="Password"
+                            placeholder="First name"
                             className="border rounded p-2"
                         />
+
+                        <input
+                            value={form.lastName}
+                            onChange={(event) =>
+                                setForm({
+                                    ...form,
+                                    lastName:
+                                        event.target.value
+                                })
+                            }
+                            placeholder="Last name"
+                            className="border rounded p-2"
+                        />
+
+                        <input
+                            value={form.phoneNumber}
+                            onChange={(event) =>
+                                setForm({
+                                    ...form,
+                                    phoneNumber:
+                                        event.target.value
+                                })
+                            }
+                            placeholder="Phone number"
+                            className="border rounded p-2"
+                        />
+
+                        <select
+                            value={form.departmentId}
+                            onChange={(event) =>
+                                setForm({
+                                    ...form,
+                                    departmentId:
+                                        event.target.value
+                                })
+                            }
+                            className="border rounded p-2"
+                        >
+                            <option value="">
+                                No department
+                            </option>
+                            {departments.map(
+                                (department) => (
+                                    <option
+                                        key={department.id}
+                                        value={department.id}
+                                    >
+                                        {department.code} - {department.name}
+                                    </option>
+                                )
+                            )}
+                        </select>
+                    </div>
+
+                    <textarea
+                        value={form.address}
+                        onChange={(event) =>
+                            setForm({
+                                ...form,
+                                address: event.target.value
+                            })
+                        }
+                        placeholder="Address"
+                        rows={3}
+                        className="border rounded p-2 w-full mt-4"
+                    />
+
+                    {error && (
+                        <p className="text-red-500 mt-3">
+                            {error}
+                        </p>
                     )}
 
-                    <select
-                        value={form.departmentId}
-                        onChange={(event) =>
-                            setForm({
-                                ...form,
-                                departmentId:
-                                    event.target.value
-                            })
-                        }
-                        className="border rounded p-2"
-                    >
-                        <option value="">
-                            No department
-                        </option>
-                        {departments.map(
-                            (department) => (
-                                <option
-                                    key={department.id}
-                                    value={department.id}
-                                >
-                                    {department.code} - {department.name}
-                                </option>
-                            )
-                        )}
-                    </select>
+                    {success && (
+                        <p className="text-green-600 mt-3">
+                            {success}
+                        </p>
+                    )}
 
-                    <input
-                        value={form.firstName}
-                        onChange={(event) =>
-                            setForm({
-                                ...form,
-                                firstName:
-                                    event.target.value
-                            })
-                        }
-                        placeholder="First name"
-                        className="border rounded p-2"
-                    />
-
-                    <input
-                        value={form.lastName}
-                        onChange={(event) =>
-                            setForm({
-                                ...form,
-                                lastName:
-                                    event.target.value
-                            })
-                        }
-                        placeholder="Last name"
-                        className="border rounded p-2"
-                    />
-
-                    <input
-                        value={form.phoneNumber}
-                        onChange={(event) =>
-                            setForm({
-                                ...form,
-                                phoneNumber:
-                                    event.target.value
-                            })
-                        }
-                        placeholder="Phone number"
-                        className="border rounded p-2"
-                    />
-                </div>
-
-                <textarea
-                    value={form.address}
-                    onChange={(event) =>
-                        setForm({
-                            ...form,
-                            address: event.target.value
-                        })
-                    }
-                    placeholder="Address"
-                    rows={3}
-                    className="border rounded p-2 w-full mt-4"
-                />
-
-                {error && (
-                    <p className="text-red-500 mt-3">
-                        {error}
-                    </p>
-                )}
-
-                {success && (
-                    <p className="text-green-600 mt-3">
-                        {success}
-                    </p>
-                )}
-
-                <div className="flex gap-3 mt-4">
-                    <button
-                        type="submit"
-                        disabled={saving}
-                        className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-4 py-2 rounded"
-                    >
-                        {saving
-                            ? 'Saving...'
-                            : editingTeacher
-                              ? 'Update Teacher'
-                              : 'Create Teacher'}
-                    </button>
-
-                    {editingTeacher && (
+                    <div className="flex justify-end gap-3 mt-4">
                         <button
                             type="button"
                             onClick={resetForm}
@@ -398,9 +331,31 @@ function TeachersPage() {
                         >
                             Cancel
                         </button>
-                    )}
-                </div>
-            </form>
+
+                        <button
+                            type="submit"
+                            disabled={saving}
+                            className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-4 py-2 rounded"
+                        >
+                            {saving
+                                ? 'Saving...'
+                                : 'Update Teacher'}
+                        </button>
+                    </div>
+                </form>
+            )}
+
+            {!editingTeacher && error && (
+                <p className="text-red-500 mb-4">
+                    {error}
+                </p>
+            )}
+
+            {!editingTeacher && success && (
+                <p className="text-green-600 mb-4">
+                    {success}
+                </p>
+            )}
 
             <div className="bg-white rounded shadow overflow-x-auto">
                 <table className="w-full">

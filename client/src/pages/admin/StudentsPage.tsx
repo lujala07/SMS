@@ -364,7 +364,7 @@ function StudentsPage() {
                         </p>
                     )}
 
-                    <div className="flex gap-3 mt-4">
+                    <div className="flex justify-end gap-3 mt-4">
                         <button
                             type="submit"
                             disabled={saving}
