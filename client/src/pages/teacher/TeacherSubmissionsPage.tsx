@@ -5,6 +5,11 @@ import {
 
 import axios from 'axios';
 
+import {
+    ArrowLeft,
+    FileText
+} from 'lucide-react';
+
 import api from '../../services/api';
 
 interface Assignment {
@@ -56,18 +61,21 @@ function TeacherSubmissionsPage() {
     ] = useState<StudentSubmission[]>([]);
 
     const [
+        selectedStudent,
+        setSelectedStudent
+    ] = useState<StudentSubmission | null>(
+        null
+    );
+
+    const [
         marks,
         setMarks
-    ] = useState<
-        Record<number, string>
-    >({});
+    ] = useState('');
 
     const [
         feedback,
         setFeedback
-    ] = useState<
-        Record<number, string>
-    >({});
+    ] = useState('');
 
     const [
         loading,
@@ -80,11 +88,9 @@ function TeacherSubmissionsPage() {
     ] = useState(false);
 
     const [
-        reviewingId,
-        setReviewingId
-    ] = useState<number | null>(
-        null
-    );
+        reviewing,
+        setReviewing
+    ] = useState(false);
 
     const [
         error,
@@ -119,7 +125,9 @@ function TeacherSubmissionsPage() {
                     );
 
                 } finally {
-                    setLoading(false);
+                    setLoading(
+                        false
+                    );
                 }
             };
 
@@ -135,7 +143,10 @@ function TeacherSubmissionsPage() {
                 return;
             }
 
-            setLoadingStudents(true);
+            setLoadingStudents(
+                true
+            );
+
             setError('');
             setSuccess('');
 
@@ -149,52 +160,43 @@ function TeacherSubmissionsPage() {
                     response.data
                 );
 
-                const marksData:
-                    Record<
-                        number,
-                        string
-                    > = {};
+                if (
+                    selectedStudent
+                ) {
+                    const updatedStudent =
+                        response.data.find(
+                            (
+                                student:
+                                    StudentSubmission
+                            ) =>
+                                student.student_id ===
+                                selectedStudent.student_id
+                        );
 
-                const feedbackData:
-                    Record<
-                        number,
-                        string
-                    > = {};
+                    if (
+                        updatedStudent
+                    ) {
+                        setSelectedStudent(
+                            updatedStudent
+                        );
 
-                response.data.forEach(
-                    (
-                        student:
-                            StudentSubmission
-                    ) => {
-                        if (
-                            student.submission_id
-                        ) {
-                            marksData[
-                                student.submission_id
-                            ] =
-                                student.marks_obtained !==
-                                    null &&
-                                student.marks_obtained !==
-                                    undefined
-                                    ? String(
-                                          student.marks_obtained
-                                      )
-                                    : '';
+                        setMarks(
+                            updatedStudent.marks_obtained !==
+                                null &&
+                            updatedStudent.marks_obtained !==
+                                undefined
+                                ? String(
+                                      updatedStudent.marks_obtained
+                                  )
+                                : ''
+                        );
 
-                            feedbackData[
-                                student.submission_id
-                            ] =
-                                student.feedback ||
-                                '';
-                        }
+                        setFeedback(
+                            updatedStudent.feedback ||
+                                ''
+                        );
                     }
-                );
-
-                setMarks(marksData);
-
-                setFeedback(
-                    feedbackData
-                );
+                }
 
             } catch (error) {
                 console.error(
@@ -233,13 +235,70 @@ function TeacherSubmissionsPage() {
                 value
             );
 
+            setSelectedStudent(
+                null
+            );
+
+            setMarks('');
+            setFeedback('');
+
             await loadStudents(
                 value
             );
         };
 
+    const openSubmission = (
+        student: StudentSubmission
+    ) => {
+        if (
+            !student.submission_id
+        ) {
+            return;
+        }
+
+        setSelectedStudent(
+            student
+        );
+
+        setMarks(
+            student.marks_obtained !==
+                null &&
+            student.marks_obtained !==
+                undefined
+                ? String(
+                      student.marks_obtained
+                  )
+                : ''
+        );
+
+        setFeedback(
+            student.feedback ||
+                ''
+        );
+
+        setError('');
+        setSuccess('');
+
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    };
+
+    const closeSubmission =
+        () => {
+            setSelectedStudent(
+                null
+            );
+
+            setMarks('');
+            setFeedback('');
+
+            setError('');
+            setSuccess('');
+        };
+
     const handleMarksChange = (
-        submissionId: number,
         value: string
     ) => {
         if (
@@ -249,22 +308,16 @@ function TeacherSubmissionsPage() {
             )
         ) {
             setMarks(
-                (current) => ({
-                    ...current,
-                    [submissionId]:
-                        value
-                })
+                value
             );
         }
     };
 
     const handleReview =
-        async (
-            student:
-                StudentSubmission
-        ) => {
+        async () => {
             if (
-                !student.submission_id
+                !selectedStudent
+                    ?.submission_id
             ) {
                 return;
             }
@@ -272,23 +325,20 @@ function TeacherSubmissionsPage() {
             setError('');
             setSuccess('');
 
-            const value =
-                marks[
-                    student.submission_id
-                ];
-
             if (
-                value === undefined ||
-                value === ''
+                marks === ''
             ) {
                 setError(
                     'Please enter marks.'
                 );
+
                 return;
             }
 
             const numberValue =
-                Number(value);
+                Number(
+                    marks
+                );
 
             if (
                 Number.isNaN(
@@ -299,37 +349,36 @@ function TeacherSubmissionsPage() {
                 setError(
                     'Please enter valid marks.'
                 );
+
                 return;
             }
 
             if (
                 numberValue >
                 Number(
-                    student.total_marks
+                    selectedStudent.total_marks
                 )
             ) {
                 setError(
-                    `Marks cannot be greater than ${student.total_marks}.`
+                    `Marks cannot be greater than ${selectedStudent.total_marks}.`
                 );
+
                 return;
             }
 
-            setReviewingId(
-                student.submission_id
+            setReviewing(
+                true
             );
 
             try {
                 await api.put(
-                    `/submissions/${student.submission_id}/review`,
+                    `/submissions/${selectedStudent.submission_id}/review`,
                     {
                         marksObtained:
                             numberValue,
 
                         feedback:
-                            feedback[
-                                student
-                                    .submission_id
-                            ] || ''
+                            feedback.trim()
                     }
                 );
 
@@ -364,8 +413,8 @@ function TeacherSubmissionsPage() {
                 }
 
             } finally {
-                setReviewingId(
-                    null
+                setReviewing(
+                    false
                 );
             }
         };
@@ -386,8 +435,73 @@ function TeacherSubmissionsPage() {
             return 'Reviewed';
         }
 
+        if (
+            student.status ===
+            'late'
+        ) {
+            return 'Late';
+        }
+
         return 'Submitted';
     };
+
+    const getStatusClass = (
+        student: StudentSubmission
+    ) => {
+        const status =
+            getStatus(
+                student
+            );
+
+        if (
+            status ===
+            'Reviewed'
+        ) {
+            return 'text-green-600';
+        }
+
+        if (
+            status ===
+            'Submitted'
+        ) {
+            return 'text-blue-600';
+        }
+
+        if (
+            status ===
+            'Late'
+        ) {
+            return 'text-orange-600';
+        }
+
+        return 'text-gray-500';
+    };
+
+    const getFileUrl = (
+        fileUrl: string
+    ) => {
+        if (
+            fileUrl.startsWith(
+                'http://'
+            ) ||
+            fileUrl.startsWith(
+                'https://'
+            )
+        ) {
+            return fileUrl;
+        }
+
+        return `http://localhost:5000${fileUrl}`;
+    };
+
+    const currentAssignment =
+        assignments.find(
+            (assignment) =>
+                String(
+                    assignment.id
+                ) ===
+                selectedAssignment
+        );
 
     if (loading) {
         return (
@@ -398,6 +512,265 @@ function TeacherSubmissionsPage() {
 
                 <div className="bg-white p-4 rounded shadow">
                     Loading...
+                </div>
+            </div>
+        );
+    }
+
+    if (
+        selectedStudent
+    ) {
+        return (
+            <div>
+                <button
+                    type="button"
+                    onClick={
+                        closeSubmission
+                    }
+                    className="inline-flex items-center gap-2 text-blue-600 hover:underline mb-5"
+                >
+                    <ArrowLeft
+                        size={
+                            18
+                        }
+                    />
+
+                    Back to Submissions
+                </button>
+
+                <div className="mb-6">
+                    <h1 className="text-2xl font-bold">
+                        Review Submission
+                    </h1>
+
+                    <p className="text-gray-500 mt-1">
+                        Review the student's work and provide marks and feedback.
+                    </p>
+                </div>
+
+                <div className="bg-white rounded shadow p-6">
+                    <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-5 pb-6 border-b">
+                        <div>
+                            <h2 className="text-xl font-semibold">
+                                {
+                                    selectedStudent.assignment_title
+                                }
+                            </h2>
+
+                            {currentAssignment && (
+                                <p className="text-gray-500 mt-1">
+                                    {
+                                        currentAssignment.subject_code
+                                    }
+                                    {' - '}
+                                    {
+                                        currentAssignment.subject_name
+                                    }
+                                </p>
+                            )}
+                        </div>
+
+                        <span
+                            className={`font-medium ${getStatusClass(
+                                selectedStudent
+                            )}`}
+                        >
+                            {getStatus(
+                                selectedStudent
+                            )}
+                        </span>
+                    </div>
+
+                    <div className="py-6 border-b">
+                        <h3 className="font-semibold mb-4">
+                            Student Information
+                        </h3>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                            <div>
+                                <p className="text-sm text-gray-500">
+                                    Student
+                                </p>
+
+                                <p className="font-medium mt-1">
+                                    {
+                                        selectedStudent.first_name
+                                    }{' '}
+                                    {
+                                        selectedStudent.last_name
+                                    }
+                                </p>
+                            </div>
+
+                            <div>
+                                <p className="text-sm text-gray-500">
+                                    Student Code
+                                </p>
+
+                                <p className="font-medium mt-1">
+                                    {
+                                        selectedStudent.student_code
+                                    }
+                                </p>
+                            </div>
+
+                            <div>
+                                <p className="text-sm text-gray-500">
+                                    Submitted At
+                                </p>
+
+                                <p className="font-medium mt-1">
+                                    {selectedStudent.submitted_at
+                                        ? new Date(
+                                              selectedStudent.submitted_at
+                                          ).toLocaleString()
+                                        : '-'}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="py-6 border-b">
+                        <h3 className="font-semibold mb-4">
+                            Student Submission
+                        </h3>
+
+                        {selectedStudent.file_url ? (
+                            <a
+                                href={getFileUrl(
+                                    selectedStudent.file_url
+                                )}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="inline-flex items-center gap-2 border rounded px-4 py-3 hover:bg-gray-50"
+                            >
+                                <FileText
+                                    size={
+                                        22
+                                    }
+                                    className="text-gray-600"
+                                />
+
+                                <span className="text-blue-600 font-medium">
+                                    View Submitted PDF
+                                </span>
+                            </a>
+                        ) : (
+                            <p className="text-gray-500">
+                                No PDF was submitted.
+                            </p>
+                        )}
+
+                        {selectedStudent.submission_text && (
+                            <div className="mt-5">
+                                <p className="font-medium mb-2">
+                                    Student Message
+                                </p>
+
+                                <div className="bg-gray-50 border rounded p-4 whitespace-pre-wrap">
+                                    {
+                                        selectedStudent.submission_text
+                                    }
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="pt-6">
+                        <h3 className="font-semibold mb-4">
+                            Review
+                        </h3>
+
+                        <div className="max-w-sm mb-5">
+                            <label className="block font-medium mb-2">
+                                Marks
+                            </label>
+
+                            <div className="flex items-center gap-3">
+                                <input
+                                    type="text"
+                                    inputMode="decimal"
+                                    value={
+                                        marks
+                                    }
+                                    onChange={(
+                                        event
+                                    ) =>
+                                        handleMarksChange(
+                                            event.target.value
+                                        )
+                                    }
+                                    className="border rounded p-2 w-28"
+                                    placeholder="0"
+                                />
+
+                                <span className="text-gray-500">
+                                    /{' '}
+                                    {
+                                        selectedStudent.total_marks
+                                    }
+                                </span>
+                            </div>
+                        </div>
+
+                        <div className="mb-5">
+                            <label className="block font-medium mb-2">
+                                Feedback
+                            </label>
+
+                            <textarea
+                                rows={
+                                    5
+                                }
+                                value={
+                                    feedback
+                                }
+                                onChange={(
+                                    event
+                                ) =>
+                                    setFeedback(
+                                        event.target.value
+                                    )
+                                }
+                                placeholder="Write feedback for the student..."
+                                className="w-full border rounded p-3"
+                            />
+                        </div>
+
+                        {error && (
+                            <p className="text-red-500 mb-4">
+                                {
+                                    error
+                                }
+                            </p>
+                        )}
+
+                        {success && (
+                            <p className="text-green-600 mb-4">
+                                {
+                                    success
+                                }
+                            </p>
+                        )}
+
+                        <button
+                            type="button"
+                            onClick={
+                                handleReview
+                            }
+                            disabled={
+                                reviewing
+                            }
+                            className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-5 py-2 rounded"
+                        >
+                            {reviewing
+                                ? 'Saving...'
+                                : selectedStudent.status ===
+                                    'reviewed'
+                                  ? 'Update Review'
+                                  : 'Save Review'}
+                        </button>
+                    </div>
                 </div>
             </div>
         );
@@ -424,7 +797,9 @@ function TeacherSubmissionsPage() {
                     value={
                         selectedAssignment
                     }
-                    onChange={(event) =>
+                    onChange={(
+                        event
+                    ) =>
                         handleAssignmentChange(
                             event.target.value
                         )
@@ -436,7 +811,9 @@ function TeacherSubmissionsPage() {
                     </option>
 
                     {assignments.map(
-                        (assignment) => (
+                        (
+                            assignment
+                        ) => (
                             <option
                                 key={
                                     assignment.id
@@ -468,13 +845,9 @@ function TeacherSubmissionsPage() {
 
             {error && (
                 <p className="text-red-500 mb-4">
-                    {error}
-                </p>
-            )}
-
-            {success && (
-                <p className="text-green-600 mb-4">
-                    {success}
+                    {
+                        error
+                    }
                 </p>
             )}
 
@@ -486,7 +859,8 @@ function TeacherSubmissionsPage() {
                 <div className="bg-white p-6 rounded shadow">
                     Loading students...
                 </div>
-            ) : students.length === 0 ? (
+            ) : students.length ===
+              0 ? (
                 <div className="bg-white p-6 rounded shadow text-gray-500">
                     No students found in this class.
                 </div>
@@ -495,31 +869,27 @@ function TeacherSubmissionsPage() {
                     <table className="w-full">
                         <thead className="bg-gray-100">
                             <tr>
-                                <th className="text-left p-3">
+                                <th className="text-left p-4">
                                     Student
                                 </th>
 
-                                <th className="text-left p-3">
+                                <th className="text-left p-4">
                                     Code
                                 </th>
 
-                                <th className="text-left p-3">
+                                <th className="text-left p-4">
                                     Status
                                 </th>
 
-                                <th className="text-left p-3">
-                                    Submission
+                                <th className="text-left p-4">
+                                    Submitted At
                                 </th>
 
-                                <th className="text-left p-3">
+                                <th className="text-left p-4">
                                     Marks
                                 </th>
 
-                                <th className="text-left p-3">
-                                    Feedback
-                                </th>
-
-                                <th className="text-left p-3">
+                                <th className="text-left p-4">
                                     Action
                                 </th>
                             </tr>
@@ -527,14 +897,16 @@ function TeacherSubmissionsPage() {
 
                         <tbody>
                             {students.map(
-                                (student) => (
+                                (
+                                    student
+                                ) => (
                                     <tr
                                         key={
                                             student.student_id
                                         }
-                                        className="border-t align-top"
+                                        className="border-t"
                                     >
-                                        <td className="p-3 font-medium">
+                                        <td className="p-4 font-medium">
                                             {
                                                 student.first_name
                                             }{' '}
@@ -543,26 +915,18 @@ function TeacherSubmissionsPage() {
                                             }
                                         </td>
 
-                                        <td className="p-3">
+                                        <td className="p-4">
                                             {
                                                 student.student_code
                                             }
                                         </td>
 
-                                        <td className="p-3">
+                                        <td className="p-4">
                                             <span
                                                 className={
-                                                    getStatus(
+                                                    getStatusClass(
                                                         student
-                                                    ) ===
-                                                    'Reviewed'
-                                                        ? 'text-green-600'
-                                                        : getStatus(
-                                                                student
-                                                            ) ===
-                                                            'Submitted'
-                                                          ? 'text-blue-600'
-                                                          : 'text-gray-500'
+                                                    )
                                                 }
                                             >
                                                 {
@@ -573,142 +937,43 @@ function TeacherSubmissionsPage() {
                                             </span>
                                         </td>
 
-                                        <td className="p-3 min-w-48">
-                                            {!student.submission_id ? (
-                                                <span className="text-gray-400">
-                                                    -
-                                                </span>
-                                            ) : (
-                                                <>
-                                                    {student.submission_text && (
-                                                        <p className="text-sm mb-2">
-                                                            {
-                                                                student.submission_text
-                                                            }
-                                                        </p>
-                                                    )}
-
-                                                    {student.file_url && (
-                                                        <a
-                                                            href={
-                                                                student.file_url
-                                                            }
-                                                            target="_blank"
-                                                            rel="noreferrer"
-                                                            className="text-blue-600 hover:underline"
-                                                        >
-                                                            View File
-                                                        </a>
-                                                    )}
-
-                                                    {student.submitted_at && (
-                                                        <p className="text-xs text-gray-500 mt-2">
-                                                            {new Date(
-                                                                student.submitted_at
-                                                            ).toLocaleString()}
-                                                        </p>
-                                                    )}
-                                                </>
-                                            )}
+                                        <td className="p-4">
+                                            {student.submitted_at
+                                                ? new Date(
+                                                      student.submitted_at
+                                                  ).toLocaleString()
+                                                : '-'}
                                         </td>
 
-                                        <td className="p-3">
-                                            {student.submission_id ? (
-                                                <div className="flex items-center gap-2">
-                                                    <input
-                                                        type="text"
-                                                        inputMode="decimal"
-                                                        value={
-                                                            marks[
-                                                                student
-                                                                    .submission_id
-                                                            ] ||
-                                                            ''
-                                                        }
-                                                        onChange={(
-                                                            event
-                                                        ) =>
-                                                            handleMarksChange(
-                                                                student.submission_id!,
-                                                                event.target.value
-                                                            )
-                                                        }
-                                                        className="border p-2 rounded w-20"
-                                                        placeholder="0"
-                                                    />
-
-                                                    <span className="text-gray-500">
-                                                        /{' '}
-                                                        {
-                                                            student.total_marks
-                                                        }
-                                                    </span>
-                                                </div>
-                                            ) : (
-                                                '-'
-                                            )}
+                                        <td className="p-4">
+                                            {student.marks_obtained !==
+                                                null &&
+                                            student.marks_obtained !==
+                                                undefined
+                                                ? `${student.marks_obtained} / ${student.total_marks}`
+                                                : '-'}
                                         </td>
 
-                                        <td className="p-3">
-                                            {student.submission_id ? (
-                                                <textarea
-                                                    value={
-                                                        feedback[
-                                                            student
-                                                                .submission_id
-                                                        ] ||
-                                                        ''
-                                                    }
-                                                    onChange={(
-                                                        event
-                                                    ) =>
-                                                        setFeedback(
-                                                            (
-                                                                current
-                                                            ) => ({
-                                                                ...current,
-
-                                                                [student.submission_id!]:
-                                                                    event.target.value
-                                                            })
-                                                        )
-                                                    }
-                                                    rows={
-                                                        2
-                                                    }
-                                                    placeholder="Feedback"
-                                                    className="border p-2 rounded min-w-48"
-                                                />
-                                            ) : (
-                                                '-'
-                                            )}
-                                        </td>
-
-                                        <td className="p-3">
+                                        <td className="p-4">
                                             {student.submission_id ? (
                                                 <button
                                                     type="button"
                                                     onClick={() =>
-                                                        handleReview(
+                                                        openSubmission(
                                                             student
                                                         )
                                                     }
-                                                    disabled={
-                                                        reviewingId ===
-                                                        student.submission_id
-                                                    }
-                                                    className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-3 py-2 rounded whitespace-nowrap"
+                                                    className="text-blue-600 hover:underline"
                                                 >
-                                                    {reviewingId ===
-                                                    student.submission_id
-                                                        ? 'Saving...'
-                                                        : student.status ===
-                                                            'reviewed'
-                                                          ? 'Update'
-                                                          : 'Review'}
+                                                    {student.status ===
+                                                    'reviewed'
+                                                        ? 'View Review'
+                                                        : 'View Submission'}
                                                 </button>
                                             ) : (
-                                                '-'
+                                                <span className="text-gray-400">
+                                                    -
+                                                </span>
                                             )}
                                         </td>
                                     </tr>

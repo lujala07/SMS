@@ -18,6 +18,8 @@ import {
     authorizeRoles
 } from '../middleware/roleMiddleware.js';
 
+import upload from '../middleware/uploadMiddleware.js';
+
 const router = Router();
 
 router.get(
@@ -64,6 +66,7 @@ router.post(
     '/',
     authenticate,
     authorizeRoles('student'),
+    upload.single('file'),
     addSubmission
 );
 

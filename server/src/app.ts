@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import path from 'path';
 
 import authRoutes from './routes/authRoutes.js';
 import testRoutes from './routes/testRoutes.js';
@@ -18,32 +19,105 @@ import adminRoutes from './routes/adminRoutes.js';
 
 const app = express();
 
-app.use(cors({
-    origin: 'http://localhost:5173'
-}));
+app.use(
+    cors({
+        origin:
+            'http://localhost:5173'
+    })
+);
 
-app.use(express.json());
+app.use(
+    express.json()
+);
 
-app.use('/auth', authRoutes);
-app.use('/test', testRoutes);
-app.use('/departments', departmentRoutes);
-app.use('/classes', classRoutes);
-app.use('/subjects', subjectRoutes);
-app.use('/teachers', teacherRoutes);
-app.use('/students', studentRoutes);
-app.use('/teacher-subjects', teacherSubjectRoutes);
-app.use('/attendance', attendanceRoutes);
-app.use('/assignments', assignmentRoutes);
-app.use('/submissions', submissionRoutes);
-app.use('/notices', noticeRoutes);
-app.use('/reports', reportRoutes);
-app.use('/admins', adminRoutes);
+app.use(
+    '/uploads',
+    express.static(
+        path.resolve(
+            'uploads'
+        )
+    )
+);
 
-app.get('/', (_req, res) => {
-    res.status(200).json({
-        success: true,
-        message: 'Student Academic Management System API is running'
-    });
-});
+app.use(
+    '/auth',
+    authRoutes
+);
+
+app.use(
+    '/test',
+    testRoutes
+);
+
+app.use(
+    '/departments',
+    departmentRoutes
+);
+
+app.use(
+    '/classes',
+    classRoutes
+);
+
+app.use(
+    '/subjects',
+    subjectRoutes
+);
+
+app.use(
+    '/teachers',
+    teacherRoutes
+);
+
+app.use(
+    '/students',
+    studentRoutes
+);
+
+app.use(
+    '/teacher-subjects',
+    teacherSubjectRoutes
+);
+
+app.use(
+    '/attendance',
+    attendanceRoutes
+);
+
+app.use(
+    '/assignments',
+    assignmentRoutes
+);
+
+app.use(
+    '/submissions',
+    submissionRoutes
+);
+
+app.use(
+    '/notices',
+    noticeRoutes
+);
+
+app.use(
+    '/reports',
+    reportRoutes
+);
+
+app.use(
+    '/admins',
+    adminRoutes
+);
+
+app.get(
+    '/',
+    (_req, res) => {
+        res.status(200).json({
+            success: true,
+            message:
+                'Student Academic Management System API is running'
+        });
+    }
+);
 
 export default app;
