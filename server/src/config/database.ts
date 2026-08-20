@@ -1,12 +1,19 @@
 import 'dotenv/config';
 import { Pool } from 'pg';
 
-const DB_PASSWORD = process.env.DB_PASSWORD;
+const requiredVariables = [
+    'DB_NAME',
+    'DB_USER',
+    'DB_PASSWORD',
+    'JWT_SECRET'
+];
 
-if (typeof DB_PASSWORD !== 'string') {
-    throw new Error(
-        'DB_PASSWORD is missing from the .env file'
-    );
+for (const variable of requiredVariables) {
+    if (!process.env[variable]) {
+        throw new Error(
+            `${variable} is missing from the .env file`
+        );
+    }
 }
 
 const pool = new Pool({
@@ -14,7 +21,7 @@ const pool = new Pool({
     port: Number(process.env.DB_PORT) || 5432,
     database: process.env.DB_NAME,
     user: process.env.DB_USER,
-    password: DB_PASSWORD
+    password: process.env.DB_PASSWORD
 });
 
 export default pool;

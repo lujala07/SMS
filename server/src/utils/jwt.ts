@@ -1,11 +1,19 @@
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET as string;
+const getJwtSecret = () => {
+    if (!process.env.JWT_SECRET) {
+        throw new Error(
+            'JWT_SECRET is missing from the .env file'
+        );
+    }
+
+    return process.env.JWT_SECRET;
+};
 
 export const generateToken = (userId: number, role: string): string => {
     return jwt.sign(
         { userId, role },
-        JWT_SECRET,
+        getJwtSecret(),
         { expiresIn: '1d' }
     );
 };

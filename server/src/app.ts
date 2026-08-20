@@ -3,7 +3,6 @@ import cors from 'cors';
 import path from 'path';
 
 import authRoutes from './routes/authRoutes.js';
-import testRoutes from './routes/testRoutes.js';
 import departmentRoutes from './routes/departmentRoutes.js';
 import classRoutes from './routes/classRoutes.js';
 import subjectRoutes from './routes/subjectRoutes.js';
@@ -22,6 +21,7 @@ const app = express();
 app.use(
     cors({
         origin:
+            process.env.CORS_ORIGIN ||
             'http://localhost:5173'
     })
 );
@@ -42,11 +42,6 @@ app.use(
 app.use(
     '/auth',
     authRoutes
-);
-
-app.use(
-    '/test',
-    testRoutes
 );
 
 app.use(
@@ -116,6 +111,14 @@ app.get(
             success: true,
             message:
                 'Student Academic Management System API is running'
+        });
+    }
+);
+
+app.use(
+    (_req, res) => {
+        res.status(404).json({
+            message: 'API route not found'
         });
     }
 );
