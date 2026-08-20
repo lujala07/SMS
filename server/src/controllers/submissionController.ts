@@ -8,7 +8,7 @@ import {
     getTeacherSubmissions,
     getTeacherAssignmentsForSubmissions,
     getAssignmentStudentList,
-    createSubmission,
+    createStudentSubmission,
     reviewSubmission,
     getSubmissionsByAssignment,
     getSubmissionsByStudent
@@ -28,17 +28,17 @@ export const getSubmissions = async (
                     req.user.userId
                 );
 
-            return res.status(200).json(
-                submissions
-            );
+            return res
+                .status(200)
+                .json(submissions);
         }
 
         const submissions =
             await getAllSubmissions();
 
-        return res.status(200).json(
-            submissions
-        );
+        return res
+            .status(200)
+            .json(submissions);
 
     } catch (error) {
         console.error(
@@ -71,9 +71,9 @@ export const getMySubmissionAssignments =
                     req.user.userId
                 );
 
-            return res.status(200).json(
-                assignments
-            );
+            return res
+                .status(200)
+                .json(assignments);
 
         } catch (error) {
             console.error(
@@ -106,22 +106,15 @@ export const getAssignmentStudents =
                     req.params.assignmentId
                 );
 
-            if (!assignmentId) {
-                return res.status(400).json({
-                    message:
-                        'Valid assignment is required'
-                });
-            }
-
             const students =
                 await getAssignmentStudentList(
                     req.user.userId,
                     assignmentId
                 );
 
-            return res.status(200).json(
-                students
-            );
+            return res
+                .status(200)
+                .json(students);
 
         } catch (error: any) {
             console.error(
@@ -142,21 +135,30 @@ export const addSubmission = async (
     res: Response
 ) => {
     try {
-        const {
-            assignmentId,
-            studentId,
-            submissionText,
-            fileUrl,
-            status
-        } = req.body;
+        if (!req.user?.userId) {
+            return res.status(401).json({
+                message:
+                    'Authentication required'
+            });
+        }
 
-        if (
-            !assignmentId ||
-            !studentId
-        ) {
+        const assignmentId =
+            Number(
+                req.body.assignmentId
+            );
+
+        const submissionText =
+            req.body.submissionText?.trim();
+
+        const fileUrl =
+            req.file
+                ? `/uploads/submissions/${req.file.filename}`
+                : undefined;
+
+        if (!assignmentId) {
             return res.status(400).json({
                 message:
-                    'Assignment and student are required'
+                    'Assignment is required'
             });
         }
 
@@ -166,22 +168,23 @@ export const addSubmission = async (
         ) {
             return res.status(400).json({
                 message:
-                    'Submission text or file URL is required'
+                    'Write a response or choose a file to submit'
             });
         }
 
         const submission =
-            await createSubmission(
-                Number(assignmentId),
-                Number(studentId),
+            await createStudentSubmission(
+                req.user.userId,
+                assignmentId,
                 submissionText,
-                fileUrl,
-                status || 'submitted'
+                fileUrl
             );
 
-        return res.status(201).json(
+        return res.status(201).json({
+            message:
+                'Assignment submitted successfully',
             submission
-        );
+        });
 
     } catch (error: any) {
         console.error(
@@ -189,15 +192,19 @@ export const addSubmission = async (
             error
         );
 
-        if (error.code === '23505') {
+        if (
+            error.code ===
+            '23505'
+        ) {
             return res.status(400).json({
                 message:
                     'This assignment has already been submitted'
             });
         }
 
-        return res.status(500).json({
+        return res.status(400).json({
             message:
+                error.message ||
                 'Failed to submit assignment'
         });
     }
@@ -216,7 +223,9 @@ export const gradeSubmission = async (
         }
 
         const id =
-            Number(req.params.id);
+            Number(
+                req.params.id
+            );
 
         const {
             marksObtained,
@@ -234,7 +243,9 @@ export const gradeSubmission = async (
         }
 
         const marks =
-            Number(marksObtained);
+            Number(
+                marksObtained
+            );
 
         if (
             Number.isNaN(marks) ||
@@ -290,11 +301,11 @@ export const getAssignmentSubmissions =
                     assignmentId
                 );
 
-            return res.status(200).json(
-                submissions
-            );
+            return res
+                .status(200)
+                .json(submissions);
 
-        } catch (error) {
+        } catch {
             return res.status(500).json({
                 message:
                     'Failed to fetch assignment submissions'
@@ -318,11 +329,11 @@ export const getStudentSubmissions =
                     studentId
                 );
 
-            return res.status(200).json(
-                submissions
-            );
+            return res
+                .status(200)
+                .json(submissions);
 
-        } catch (error) {
+        } catch {
             return res.status(500).json({
                 message:
                     'Failed to fetch student submissions'

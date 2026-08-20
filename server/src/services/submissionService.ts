@@ -143,8 +143,6 @@ export const getAssignmentStudentList = async (
                 assignments.id,
                 assignments.title,
                 assignments.total_marks,
-                assignments.subject_id,
-
                 subjects.class_id
 
             FROM assignments
@@ -201,8 +199,9 @@ export const getAssignmentStudentList = async (
 
         WHERE students.class_id = $1
 
-        ORDER BY students.first_name,
-                 students.last_name
+        ORDER BY
+            students.first_name,
+            students.last_name
         `,
         [
             assignment.class_id,
@@ -215,13 +214,84 @@ export const getAssignmentStudentList = async (
     return result.rows;
 };
 
-export const createSubmission = async (
+export const createStudentSubmission = async (
+    userId: number,
     assignmentId: number,
-    studentId: number,
     submissionText?: string,
-    fileUrl?: string,
-    status: string = 'submitted'
+    fileUrl?: string
 ) => {
+    const studentResult =
+        await pool.query(
+            `
+            SELECT
+                students.id,
+                students.class_id
+
+            FROM students
+
+            WHERE students.user_id = $1
+            `,
+            [userId]
+        );
+
+    const student =
+        studentResult.rows[0];
+
+    if (!student) {
+        throw new Error(
+            'Student profile not found'
+        );
+    }
+
+    const assignmentResult =
+        await pool.query(
+            `
+            SELECT
+                assignments.id,
+                assignments.due_date,
+                subjects.class_id
+
+            FROM assignments
+
+            JOIN subjects
+                ON assignments.subject_id = subjects.id
+
+            WHERE assignments.id = $1
+            `,
+            [assignmentId]
+        );
+
+    const assignment =
+        assignmentResult.rows[0];
+
+    if (!assignment) {
+        throw new Error(
+            'Assignment not found'
+        );
+    }
+
+    if (
+        Number(assignment.class_id) !==
+        Number(student.class_id)
+    ) {
+        throw new Error(
+            'This assignment does not belong to your class'
+        );
+    }
+
+    const dueDate =
+        new Date(
+            assignment.due_date
+        );
+
+    const now =
+        new Date();
+
+    const status =
+        now > dueDate
+            ? 'late'
+            : 'submitted';
+
     const result = await pool.query(
         `
         INSERT INTO submissions (
@@ -232,13 +302,19 @@ export const createSubmission = async (
             status
         )
 
-        VALUES ($1, $2, $3, $4, $5)
+        VALUES (
+            $1,
+            $2,
+            $3,
+            $4,
+            $5
+        )
 
         RETURNING *
         `,
         [
             assignmentId,
-            studentId,
+            student.id,
             submissionText || null,
             fileUrl || null,
             status
@@ -264,10 +340,12 @@ export const reviewSubmission = async (
             FROM submissions
 
             JOIN assignments
-                ON submissions.assignment_id = assignments.id
+                ON submissions.assignment_id =
+                   assignments.id
 
             JOIN teachers
-                ON assignments.teacher_id = teachers.id
+                ON assignments.teacher_id =
+                   teachers.id
 
             WHERE submissions.id = $1
             AND teachers.user_id = $2
@@ -299,25 +377,26 @@ export const reviewSubmission = async (
         );
     }
 
-    const result = await pool.query(
-        `
-        UPDATE submissions
+    const result =
+        await pool.query(
+            `
+            UPDATE submissions
 
-        SET
-            marks_obtained = $1,
-            feedback = $2,
-            status = 'reviewed'
+            SET
+                marks_obtained = $1,
+                feedback = $2,
+                status = 'reviewed'
 
-        WHERE id = $3
+            WHERE id = $3
 
-        RETURNING *
-        `,
-        [
-            marksObtained,
-            feedback || null,
-            id
-        ]
-    );
+            RETURNING *
+            `,
+            [
+                marksObtained,
+                feedback || null,
+                id
+            ]
+        );
 
     return result.rows[0];
 };
@@ -326,63 +405,75 @@ export const getSubmissionsByAssignment =
     async (
         assignmentId: number
     ) => {
-        const result = await pool.query(
-            `
-            SELECT
-                submissions.*,
+        const result =
+            await pool.query(
+                `
+                SELECT
+                    submissions.*,
 
-                students.first_name,
-                students.last_name,
-                students.student_code,
+                    students.first_name,
+                    students.last_name,
+                    students.student_code,
 
-                assignments.total_marks
+                    assignments.total_marks
 
-            FROM submissions
+                FROM submissions
 
-            JOIN students
-                ON submissions.student_id = students.id
+                JOIN students
+                    ON submissions.student_id =
+                       students.id
 
-            JOIN assignments
-                ON submissions.assignment_id = assignments.id
+                JOIN assignments
+                    ON submissions.assignment_id =
+                       assignments.id
 
-            WHERE submissions.assignment_id = $1
+                WHERE submissions.assignment_id = $1
 
-            ORDER BY submissions.submitted_at DESC
-            `,
-            [assignmentId]
-        );
+                ORDER BY submissions.submitted_at DESC
+                `,
+                [assignmentId]
+            );
 
         return result.rows;
     };
 
-export const getSubmissionsByStudent = async (
-    studentId: number
-) => {
-    const result = await pool.query(
-        `
-        SELECT
-            submissions.*,
+export const getSubmissionsByStudent =
+    async (
+        studentId: number
+    ) => {
+        const result =
+            await pool.query(
+                `
+                SELECT
+                    submissions.*,
 
-            assignments.title AS assignment_title,
-            assignments.total_marks,
+                    assignments.title
+                        AS assignment_title,
 
-            subjects.name AS subject_name,
-            subjects.code AS subject_code
+                    assignments.total_marks,
 
-        FROM submissions
+                    subjects.name
+                        AS subject_name,
 
-        JOIN assignments
-            ON submissions.assignment_id = assignments.id
+                    subjects.code
+                        AS subject_code
 
-        JOIN subjects
-            ON assignments.subject_id = subjects.id
+                FROM submissions
 
-        WHERE submissions.student_id = $1
+                JOIN assignments
+                    ON submissions.assignment_id =
+                       assignments.id
 
-        ORDER BY submissions.submitted_at DESC
-        `,
-        [studentId]
-    );
+                JOIN subjects
+                    ON assignments.subject_id =
+                       subjects.id
 
-    return result.rows;
-};
+                WHERE submissions.student_id = $1
+
+                ORDER BY submissions.submitted_at DESC
+                `,
+                [studentId]
+            );
+
+        return result.rows;
+    };
