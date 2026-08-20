@@ -265,15 +265,18 @@ function ClassesPage() {
                     />
 
                     <input
-                        type="number"
-                        min="1"
-                        max="12"
+                        type="text"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
                         value={form.semester}
                         onChange={(event) =>
                             setForm({
                                 ...form,
                                 semester:
-                                    event.target.value
+                                    event.target.value.replace(
+                                        /\D/g,
+                                        ''
+                                    )
                             })
                         }
                         placeholder="Semester"
