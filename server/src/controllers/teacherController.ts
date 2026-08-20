@@ -195,7 +195,7 @@ export const removeTeacher = async (
         );
 
         if (error.code === '23503') {
-            return res.status(400).json({
+            return res.status(409).json({
                 message:
                     'Teacher cannot be deleted because related records exist'
             });

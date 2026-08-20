@@ -23,6 +23,14 @@ export interface CreateTeacherData {
     address?: string;
 }
 
+export interface UpdateTeacherData {
+    departmentId?: number | '';
+    firstName: string;
+    lastName: string;
+    phoneNumber?: string;
+    address?: string;
+}
+
 export const getTeachers = async () => {
     const response = await api.get('/teachers');
     return response.data;
@@ -44,6 +52,18 @@ export const deleteTeacher = async (
 ) => {
     const response = await api.delete(
         `/teachers/${id}`
+    );
+
+    return response.data;
+};
+
+export const updateTeacher = async (
+    id: number,
+    data: UpdateTeacherData
+) => {
+    const response = await api.put(
+        `/teachers/${id}`,
+        data
     );
 
     return response.data;

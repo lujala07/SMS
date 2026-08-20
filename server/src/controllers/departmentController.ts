@@ -80,7 +80,14 @@ export const removeDepartment = async (req: Request, res: Response) => {
         return res.status(200).json({
             message: 'Department deleted successfully'
         });
-    } catch {
+    } catch (error: any) {
+        if (error.code === '23503') {
+            return res.status(409).json({
+                message:
+                    'Department cannot be deleted because related records exist'
+            });
+        }
+
         return res.status(500).json({
             message: 'Failed to delete department'
         });

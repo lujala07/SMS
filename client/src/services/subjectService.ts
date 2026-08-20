@@ -1,49 +1,52 @@
 import api from './api';
 
-export interface Department {
+export interface Subject {
     id: number;
+    class_id: number;
+    name: string;
+    code: string;
+    class_name?: string;
+}
+
+export interface SubjectData {
+    classId: number;
     name: string;
     code: string;
 }
 
-export interface DepartmentData {
-    name: string;
-    code: string;
-}
-
-export const getDepartments = async () => {
-    const response = await api.get('/departments');
+export const getSubjects = async () => {
+    const response = await api.get('/subjects');
     return response.data;
 };
 
-export const createDepartment = async (
-    data: DepartmentData
+export const createSubject = async (
+    data: SubjectData
 ) => {
     const response = await api.post(
-        '/departments',
+        '/subjects',
         data
     );
 
     return response.data;
 };
 
-export const updateDepartment = async (
+export const updateSubject = async (
     id: number,
-    data: DepartmentData
+    data: SubjectData
 ) => {
     const response = await api.put(
-        `/departments/${id}`,
+        `/subjects/${id}`,
         data
     );
 
     return response.data;
 };
 
-export const deleteDepartment = async (
+export const deleteSubject = async (
     id: number
 ) => {
     const response = await api.delete(
-        `/departments/${id}`
+        `/subjects/${id}`
     );
 
     return response.data;
