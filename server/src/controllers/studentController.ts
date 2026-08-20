@@ -122,7 +122,6 @@ export const addStudent = async (
             email,
             password,
             classId,
-            studentCode,
             firstName,
             lastName,
             dateOfBirth,
@@ -135,7 +134,6 @@ export const addStudent = async (
             !String(email || '').trim() ||
             !String(password || '').trim() ||
             !classId ||
-            !String(studentCode || '').trim() ||
             !String(firstName || '').trim() ||
             !String(lastName || '').trim() ||
             !String(phoneNumber || '').trim() ||
@@ -144,7 +142,7 @@ export const addStudent = async (
         ) {
             return res.status(400).json({
                 message:
-                    'Email, password, class, student code, first name, last name, phone number, address and gender are required'
+                    'Email, password, class, first name, last name, phone number, address and gender are required'
             });
         }
 
@@ -153,7 +151,6 @@ export const addStudent = async (
                 String(email).trim(),
                 String(password),
                 Number(classId),
-                String(studentCode).trim(),
                 String(firstName).trim(),
                 String(lastName).trim(),
                 dateOfBirth,
@@ -223,7 +220,6 @@ export const editStudent = async (
 
         const {
             classId,
-            studentCode,
             firstName,
             lastName,
             dateOfBirth,
@@ -234,13 +230,12 @@ export const editStudent = async (
 
         if (
             !classId ||
-            !studentCode ||
             !firstName ||
             !lastName
         ) {
             return res.status(400).json({
                 message:
-                    'Class, student code, first name and last name are required'
+                    'Class, first name and last name are required'
             });
         }
 
@@ -248,7 +243,6 @@ export const editStudent = async (
             await updateStudent(
                 id,
                 Number(classId),
-                studentCode,
                 firstName,
                 lastName,
                 dateOfBirth,

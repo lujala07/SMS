@@ -49,9 +49,6 @@ function CreateUserForm({ onSuccess }: Props) {
     const [address, setAddress] =
         useState('');
 
-    const [studentCode, setStudentCode] =
-        useState('');
-
     const [classId, setClassId] =
         useState('');
 
@@ -108,7 +105,6 @@ function CreateUserForm({ onSuccess }: Props) {
         setPhoneNumber('');
         setAddress('');
 
-        setStudentCode('');
         setClassId('');
         setGender('');
 
@@ -143,9 +139,6 @@ function CreateUserForm({ onSuccess }: Props) {
             phoneNumber.trim();
         const trimmedAddress =
             address.trim();
-        const trimmedStudentCode =
-            studentCode.trim();
-
         if (
             !trimmedEmail ||
             !password.trim()
@@ -181,14 +174,13 @@ function CreateUserForm({ onSuccess }: Props) {
 
         if (
             role === 'student' &&
-            (!trimmedStudentCode ||
-                !classId ||
+            (!classId ||
                 !trimmedPhoneNumber ||
                 !trimmedAddress ||
                 !gender)
         ) {
             setError(
-                'Student code, class, phone number, address and gender are required for students.'
+                'Class, phone number, address and gender are required for students.'
             );
             return;
         }
@@ -232,8 +224,6 @@ function CreateUserForm({ onSuccess }: Props) {
                         trimmedFirstName,
                     lastName:
                         trimmedLastName,
-                    studentCode:
-                        trimmedStudentCode,
                     classId: Number(classId),
                     phoneNumber:
                         trimmedPhoneNumber,
@@ -253,7 +243,6 @@ function CreateUserForm({ onSuccess }: Props) {
             setLastName('');
             setPhoneNumber('');
             setAddress('');
-            setStudentCode('');
             setClassId('');
             setGender('');
             setDepartmentId('');
@@ -469,25 +458,6 @@ function CreateUserForm({ onSuccess }: Props) {
 
                 {role === 'student' && (
                     <>
-                        <div>
-                            <label className="block mb-1 font-medium">
-                                Student Code
-                                {requiredMark}
-                            </label>
-
-                            <input
-                                type="text"
-                                value={studentCode}
-                                onChange={(event) =>
-                                    setStudentCode(
-                                        event.target.value
-                                    )
-                                }
-                                placeholder="e.g. STU001"
-                                className="w-full border p-2 rounded"
-                            />
-                        </div>
-
                         <div>
                             <label className="block mb-1 font-medium">
                                 Class
