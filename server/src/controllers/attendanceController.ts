@@ -8,8 +8,16 @@ import {
     createAttendance,
     updateAttendance,
     deleteAttendance,
-    getAttendanceByStudent
+    getAttendanceByStudent,
+    getMyAttendanceSummary,
+    isStudentOwner
 } from '../services/attendanceService.js';
+
+const validStatuses = [
+    'present',
+    'absent',
+    'late'
+];
 
 export const getAttendance = async (
     req: Request,
@@ -151,13 +159,6 @@ export const addAttendance = async (
             });
         }
 
-        const validStatuses = [
-            'present',
-            'absent',
-            'late',
-            'excused'
-        ];
-
         if (!validStatuses.includes(status)) {
             return res.status(400).json({
                 message:
@@ -197,17 +198,17 @@ export const editAttendance = async (
     res: Response
 ) => {
     try {
+        if (!req.user?.userId) {
+            return res.status(401).json({
+                message:
+                    'Authentication required'
+            });
+        }
+
         const id =
             Number(req.params.id);
 
         const { status } = req.body;
-
-        const validStatuses = [
-            'present',
-            'absent',
-            'late',
-            'excused'
-        ];
 
         if (
             !status ||
@@ -221,6 +222,7 @@ export const editAttendance = async (
 
         const attendance =
             await updateAttendance(
+                req.user.userId,
                 id,
                 status
             );
@@ -254,11 +256,21 @@ export const removeAttendance = async (
     res: Response
 ) => {
     try {
+        if (!req.user?.userId) {
+            return res.status(401).json({
+                message:
+                    'Authentication required'
+            });
+        }
+
         const id =
             Number(req.params.id);
 
         const attendance =
-            await deleteAttendance(id);
+            await deleteAttendance(
+                req.user.userId,
+                id
+            );
 
         if (!attendance) {
             return res.status(404).json({
@@ -293,6 +305,31 @@ export const getStudentAttendance = async (
         const studentId =
             Number(req.params.studentId);
 
+        if (!studentId) {
+            return res.status(400).json({
+                message:
+                    'Valid student is required'
+            });
+        }
+
+        if (
+            req.user?.role === 'student' &&
+            req.user.userId
+        ) {
+            const ownsStudent =
+                await isStudentOwner(
+                    req.user.userId,
+                    studentId
+                );
+
+            if (!ownsStudent) {
+                return res.status(403).json({
+                    message:
+                        'Access denied'
+                });
+            }
+        }
+
         const attendance =
             await getAttendanceByStudent(
                 studentId
@@ -311,6 +348,41 @@ export const getStudentAttendance = async (
         return res.status(500).json({
             message:
                 'Failed to fetch student attendance'
+        });
+    }
+};
+
+export const getMyAttendance = async (
+    req: Request,
+    res: Response
+) => {
+    try {
+        if (!req.user?.userId) {
+            return res.status(401).json({
+                message:
+                    'Authentication required'
+            });
+        }
+
+        const attendance =
+            await getMyAttendanceSummary(
+                req.user.userId
+            );
+
+        return res.status(200).json(
+            attendance
+        );
+
+    } catch (error: any) {
+        console.error(
+            'GET MY ATTENDANCE ERROR:',
+            error
+        );
+
+        return res.status(500).json({
+            message:
+                error.message ||
+                'Failed to fetch attendance'
         });
     }
 };

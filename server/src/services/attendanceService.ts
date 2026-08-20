@@ -232,31 +232,54 @@ export const createAttendance = async (
 };
 
 export const updateAttendance = async (
+    userId: number,
     id: number,
     status: string
 ) => {
     const result = await pool.query(
         `UPDATE attendance
          SET status = $1
-         WHERE id = $2
+         FROM teachers
+         WHERE attendance.id = $2
+         AND attendance.marked_by = teachers.id
+         AND teachers.user_id = $3
          RETURNING *`,
-        [status, id]
+        [status, id, userId]
     );
 
     return result.rows[0];
 };
 
 export const deleteAttendance = async (
+    userId: number,
     id: number
 ) => {
     const result = await pool.query(
         `DELETE FROM attendance
-         WHERE id = $1
-         RETURNING *`,
-        [id]
+         USING teachers
+         WHERE attendance.id = $1
+         AND attendance.marked_by = teachers.id
+         AND teachers.user_id = $2
+         RETURNING attendance.*`,
+        [id, userId]
     );
 
     return result.rows[0];
+};
+
+export const isStudentOwner = async (
+    userId: number,
+    studentId: number
+) => {
+    const result = await pool.query(
+        `SELECT id
+         FROM students
+         WHERE id = $1
+         AND user_id = $2`,
+        [studentId, userId]
+    );
+
+    return Boolean(result.rows[0]);
 };
 
 export const getAttendanceByStudent = async (
@@ -282,4 +305,105 @@ export const getAttendanceByStudent = async (
     );
 
     return result.rows;
+};
+
+export const getMyAttendanceSummary = async (
+    userId: number
+) => {
+    const studentResult = await pool.query(
+        `SELECT id
+         FROM students
+         WHERE user_id = $1`,
+        [userId]
+    );
+
+    const student = studentResult.rows[0];
+
+    if (!student) {
+        throw new Error(
+            'Student profile not found'
+        );
+    }
+
+    const records = await getAttendanceByStudent(
+        student.id
+    );
+
+    const summaryResult = await pool.query(
+        `SELECT
+            subjects.id AS subject_id,
+            subjects.name AS subject_name,
+            subjects.code AS subject_code,
+            COUNT(attendance.id) AS total,
+            COUNT(attendance.id) FILTER (WHERE attendance.status = 'present') AS present,
+            COUNT(attendance.id) FILTER (WHERE attendance.status = 'absent') AS absent,
+            COUNT(attendance.id) FILTER (WHERE attendance.status = 'late') AS late
+
+         FROM subjects
+
+         JOIN students
+            ON students.class_id = subjects.class_id
+
+         LEFT JOIN attendance
+            ON attendance.subject_id = subjects.id
+            AND attendance.student_id = students.id
+
+         WHERE students.id = $1
+
+         GROUP BY
+            subjects.id,
+            subjects.name,
+            subjects.code
+
+         ORDER BY subjects.name`,
+        [student.id]
+    );
+
+    const subjects = summaryResult.rows.map((row) => {
+        const total = Number(row.total);
+        const present = Number(row.present);
+
+        return {
+            ...row,
+            total,
+            present,
+            absent: Number(row.absent),
+            late: Number(row.late),
+            percentage:
+                total === 0
+                    ? 0
+                    : Math.round((present / total) * 100)
+        };
+    });
+
+    const overallTotal = subjects.reduce(
+        (total, subject) => total + subject.total,
+        0
+    );
+
+    const overallPresent = subjects.reduce(
+        (total, subject) => total + subject.present,
+        0
+    );
+
+    return {
+        records,
+        summary: {
+            total: overallTotal,
+            present: overallPresent,
+            absent: subjects.reduce(
+                (total, subject) => total + subject.absent,
+                0
+            ),
+            late: subjects.reduce(
+                (total, subject) => total + subject.late,
+                0
+            ),
+            percentage:
+                overallTotal === 0
+                    ? 0
+                    : Math.round((overallPresent / overallTotal) * 100),
+            subjects
+        }
+    };
 };
