@@ -198,7 +198,6 @@ export const createStudent = async (
     email: string,
     password: string,
     classId: number,
-    studentCode: string,
     firstName: string,
     lastName: string,
     dateOfBirth?: string,
@@ -252,7 +251,6 @@ export const createStudent = async (
                 `INSERT INTO students (
                     user_id,
                     class_id,
-                    student_code,
                     first_name,
                     last_name,
                     date_of_birth,
@@ -269,15 +267,13 @@ export const createStudent = async (
                     $5,
                     $6,
                     $7,
-                    $8,
-                    $9
+                    $8
                 )
 
                 RETURNING *`,
                 [
                     user.id,
                     classId,
-                    studentCode,
                     firstName,
                     lastName,
                     dateOfBirth || null,
@@ -312,7 +308,6 @@ export const createStudent = async (
 export const updateStudent = async (
     id: number,
     classId: number,
-    studentCode: string,
     firstName: string,
     lastName: string,
     dateOfBirth?: string,
@@ -325,20 +320,18 @@ export const updateStudent = async (
 
          SET
             class_id = $1,
-            student_code = $2,
-            first_name = $3,
-            last_name = $4,
-            date_of_birth = $5,
-            phone_number = $6,
-            address = $7,
-            gender = $8
+            first_name = $2,
+            last_name = $3,
+            date_of_birth = $4,
+            phone_number = $5,
+            address = $6,
+            gender = $7
 
-         WHERE id = $9
+         WHERE id = $8
 
          RETURNING *`,
         [
             classId,
-            studentCode,
             firstName,
             lastName,
             dateOfBirth || null,

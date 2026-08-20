@@ -17,7 +17,6 @@ export interface CreateStudentData {
     email: string;
     password: string;
     classId: number;
-    studentCode: string;
     firstName: string;
     lastName: string;
     phoneNumber?: string;
@@ -27,7 +26,6 @@ export interface CreateStudentData {
 
 export interface UpdateStudentData {
     classId: number;
-    studentCode: string;
     firstName: string;
     lastName: string;
     phoneNumber?: string;

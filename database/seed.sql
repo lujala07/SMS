@@ -31,7 +31,6 @@ ON CONFLICT (user_id) DO NOTHING;
 INSERT INTO students (
     user_id,
     class_id,
-    student_code,
     first_name,
     last_name,
     date_of_birth,
@@ -42,7 +41,6 @@ INSERT INTO students (
 SELECT
     users.id,
     classes.id,
-    'BCA-DEMO-001',
     'Demo',
     'Student',
     '2003-01-15',
@@ -54,7 +52,7 @@ CROSS JOIN classes
 WHERE users.email = 'student@sms.local'
 AND classes.name = 'BCA 4th Semester'
 AND classes.academic_year = '2081/82'
-ON CONFLICT (student_code) DO NOTHING;
+ON CONFLICT (user_id) DO NOTHING;
 
 INSERT INTO subjects (class_id, name, code)
 SELECT classes.id, 'Database Management System', 'BCA401'
@@ -87,7 +85,9 @@ CROSS JOIN subjects
 CROSS JOIN teachers
 JOIN users
     ON teachers.user_id = users.id
-WHERE students.student_code = 'BCA-DEMO-001'
+JOIN users student_users
+    ON students.user_id = student_users.id
+WHERE student_users.email = 'student@sms.local'
 AND subjects.code = 'BCA401'
 AND users.email = 'teacher@sms.local'
 ON CONFLICT (student_id, subject_id, attendance_date)
@@ -100,7 +100,9 @@ CROSS JOIN subjects
 CROSS JOIN teachers
 JOIN users
     ON teachers.user_id = users.id
-WHERE students.student_code = 'BCA-DEMO-001'
+JOIN users student_users
+    ON students.user_id = student_users.id
+WHERE student_users.email = 'student@sms.local'
 AND subjects.code = 'BCA402'
 AND users.email = 'teacher@sms.local'
 ON CONFLICT (student_id, subject_id, attendance_date)
@@ -163,8 +165,10 @@ SELECT
     'reviewed'
 FROM assignments
 CROSS JOIN students
+JOIN users student_users
+    ON students.user_id = student_users.id
 WHERE assignments.title = 'ER Diagram Practice'
-AND students.student_code = 'BCA-DEMO-001'
+AND student_users.email = 'student@sms.local'
 ON CONFLICT (assignment_id, student_id)
 DO UPDATE SET
     submission_text = EXCLUDED.submission_text,

@@ -19,7 +19,6 @@ import {
 
 const emptyForm = {
     classId: '',
-    studentCode: '',
     firstName: '',
     lastName: '',
     phoneNumber: '',
@@ -99,7 +98,6 @@ function StudentsPage() {
         setEditingStudent(student);
         setForm({
             classId: String(student.class_id),
-            studentCode: student.student_code,
             firstName: student.first_name,
             lastName: student.last_name,
             phoneNumber:
@@ -129,12 +127,11 @@ function StudentsPage() {
 
         if (
             !form.classId ||
-            !form.studentCode.trim() ||
             !form.firstName.trim() ||
             !form.lastName.trim()
         ) {
             setError(
-                'Class, student code, first name and last name are required.'
+                'Class, first name and last name are required.'
             );
             return;
         }
@@ -146,8 +143,6 @@ function StudentsPage() {
                 editingStudent.id,
                 {
                     classId: Number(form.classId),
-                    studentCode:
-                        form.studentCode.trim(),
                     firstName:
                         form.firstName.trim(),
                     lastName:
@@ -233,6 +228,15 @@ function StudentsPage() {
                     </h2>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <input
+                            value={
+                                editingStudent.student_code
+                            }
+                            readOnly
+                            placeholder="Student code"
+                            className="border rounded p-2 bg-gray-100 text-gray-600"
+                        />
+
                         <select
                             value={form.classId}
                             onChange={(event) =>
@@ -259,19 +263,6 @@ function StudentsPage() {
                                 </option>
                             ))}
                         </select>
-
-                        <input
-                            value={form.studentCode}
-                            onChange={(event) =>
-                                setForm({
-                                    ...form,
-                                    studentCode:
-                                        event.target.value
-                                })
-                            }
-                            placeholder="Student code"
-                            className="border rounded p-2"
-                        />
 
                         <input
                             value={form.firstName}

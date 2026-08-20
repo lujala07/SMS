@@ -43,11 +43,14 @@ CREATE TABLE teachers (
         REFERENCES departments(id)
 );
 
+CREATE SEQUENCE student_code_seq;
+
 CREATE TABLE students (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL UNIQUE,
     class_id INTEGER NOT NULL,
-    student_code VARCHAR(50) UNIQUE NOT NULL,
+    student_code VARCHAR(50) UNIQUE NOT NULL
+        DEFAULT ('STU' || LPAD(nextval('student_code_seq')::TEXT, 3, '0')),
     first_name VARCHAR(100) NOT NULL,
     last_name VARCHAR(100) NOT NULL,
     date_of_birth DATE,
