@@ -67,9 +67,7 @@ const fileFilter: multer.Options['fileFilter'] =
         callback
     ) => {
         const allowedTypes = [
-            'application/pdf',
-            'image/jpeg',
-            'image/png'
+            'application/pdf'
         ];
 
         if (
@@ -84,7 +82,7 @@ const fileFilter: multer.Options['fileFilter'] =
         } else {
             callback(
                 new Error(
-                    'Only PDF, JPG, JPEG and PNG files are allowed'
+                    'Only PDF files are allowed'
                 )
             );
         }
