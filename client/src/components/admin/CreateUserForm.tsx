@@ -21,6 +21,12 @@ interface Props {
     onSuccess?: () => void;
 }
 
+const requiredMark = (
+    <span className="text-red-600 ml-1">
+        *
+    </span>
+);
+
 function CreateUserForm({ onSuccess }: Props) {
     const [role, setRole] =
         useState<Role>('student');
@@ -127,7 +133,23 @@ function CreateUserForm({ onSuccess }: Props) {
         setError('');
         setSuccess('');
 
-        if (!email || !password) {
+        const trimmedEmail =
+            email.trim();
+        const trimmedFirstName =
+            firstName.trim();
+        const trimmedLastName =
+            lastName.trim();
+        const trimmedPhoneNumber =
+            phoneNumber.trim();
+        const trimmedAddress =
+            address.trim();
+        const trimmedStudentCode =
+            studentCode.trim();
+
+        if (
+            !trimmedEmail ||
+            !password.trim()
+        ) {
             setError(
                 'Email and password are required.'
             );
@@ -136,7 +158,8 @@ function CreateUserForm({ onSuccess }: Props) {
 
         if (
             role !== 'admin' &&
-            (!firstName || !lastName)
+            (!trimmedFirstName ||
+                !trimmedLastName)
         ) {
             setError(
                 'First name and last name are required.'
@@ -145,11 +168,27 @@ function CreateUserForm({ onSuccess }: Props) {
         }
 
         if (
-            role === 'student' &&
-            (!studentCode || !classId)
+            role === 'teacher' &&
+            (!trimmedPhoneNumber ||
+                !trimmedAddress ||
+                !departmentId)
         ) {
             setError(
-                'Student code and class are required.'
+                'Phone number, address and department are required for teachers.'
+            );
+            return;
+        }
+
+        if (
+            role === 'student' &&
+            (!trimmedStudentCode ||
+                !classId ||
+                !trimmedPhoneNumber ||
+                !trimmedAddress ||
+                !gender)
+        ) {
+            setError(
+                'Student code, class, phone number, address and gender are required for students.'
             );
             return;
         }
@@ -159,38 +198,47 @@ function CreateUserForm({ onSuccess }: Props) {
         try {
             if (role === 'admin') {
                 await createAdmin(
-                    email,
+                    trimmedEmail,
                     password
                 );
             }
 
             if (role === 'teacher') {
                 await createTeacher({
-                    email,
+                    email: trimmedEmail,
                     password,
-                    firstName,
-                    lastName,
+                    firstName:
+                        trimmedFirstName,
+                    lastName:
+                        trimmedLastName,
 
                     departmentId:
                         departmentId
                             ? Number(departmentId)
                             : undefined,
 
-                    phoneNumber,
-                    address
+                    phoneNumber:
+                        trimmedPhoneNumber,
+                    address:
+                        trimmedAddress
                 });
             }
 
             if (role === 'student') {
                 await createStudent({
-                    email,
+                    email: trimmedEmail,
                     password,
-                    firstName,
-                    lastName,
-                    studentCode,
+                    firstName:
+                        trimmedFirstName,
+                    lastName:
+                        trimmedLastName,
+                    studentCode:
+                        trimmedStudentCode,
                     classId: Number(classId),
-                    phoneNumber,
-                    address,
+                    phoneNumber:
+                        trimmedPhoneNumber,
+                    address:
+                        trimmedAddress,
                     gender
                 });
             }
@@ -243,6 +291,7 @@ function CreateUserForm({ onSuccess }: Props) {
                 <div className="md:col-span-2">
                     <label className="block mb-1 font-medium">
                         Role
+                        {requiredMark}
                     </label>
 
                     <select
@@ -271,6 +320,7 @@ function CreateUserForm({ onSuccess }: Props) {
                 <div>
                     <label className="block mb-1 font-medium">
                         Email
+                        {requiredMark}
                     </label>
 
                     <input
@@ -287,6 +337,7 @@ function CreateUserForm({ onSuccess }: Props) {
                 <div>
                     <label className="block mb-1 font-medium">
                         Password
+                        {requiredMark}
                     </label>
 
                     <input
@@ -305,6 +356,7 @@ function CreateUserForm({ onSuccess }: Props) {
                         <div>
                             <label className="block mb-1 font-medium">
                                 First Name
+                                {requiredMark}
                             </label>
 
                             <input
@@ -323,6 +375,7 @@ function CreateUserForm({ onSuccess }: Props) {
                         <div>
                             <label className="block mb-1 font-medium">
                                 Last Name
+                                {requiredMark}
                             </label>
 
                             <input
@@ -341,6 +394,7 @@ function CreateUserForm({ onSuccess }: Props) {
                         <div>
                             <label className="block mb-1 font-medium">
                                 Phone Number
+                                {requiredMark}
                             </label>
 
                             <input
@@ -359,6 +413,7 @@ function CreateUserForm({ onSuccess }: Props) {
                         <div>
                             <label className="block mb-1 font-medium">
                                 Address
+                                {requiredMark}
                             </label>
 
                             <input
@@ -380,6 +435,7 @@ function CreateUserForm({ onSuccess }: Props) {
                     <div className="md:col-span-2">
                         <label className="block mb-1 font-medium">
                             Department
+                            {requiredMark}
                         </label>
 
                         <select
@@ -416,6 +472,7 @@ function CreateUserForm({ onSuccess }: Props) {
                         <div>
                             <label className="block mb-1 font-medium">
                                 Student Code
+                                {requiredMark}
                             </label>
 
                             <input
@@ -434,6 +491,7 @@ function CreateUserForm({ onSuccess }: Props) {
                         <div>
                             <label className="block mb-1 font-medium">
                                 Class
+                                {requiredMark}
                             </label>
 
                             <select
@@ -468,6 +526,7 @@ function CreateUserForm({ onSuccess }: Props) {
                         <div>
                             <label className="block mb-1 font-medium">
                                 Gender
+                                {requiredMark}
                             </label>
 
                             <select
