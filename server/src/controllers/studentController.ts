@@ -132,31 +132,34 @@ export const addStudent = async (
         } = req.body;
 
         if (
-            !email ||
-            !password ||
+            !String(email || '').trim() ||
+            !String(password || '').trim() ||
             !classId ||
-            !studentCode ||
-            !firstName ||
-            !lastName
+            !String(studentCode || '').trim() ||
+            !String(firstName || '').trim() ||
+            !String(lastName || '').trim() ||
+            !String(phoneNumber || '').trim() ||
+            !String(address || '').trim() ||
+            !String(gender || '').trim()
         ) {
             return res.status(400).json({
                 message:
-                    'Email, password, class, student code, first name and last name are required'
+                    'Email, password, class, student code, first name, last name, phone number, address and gender are required'
             });
         }
 
         const student =
             await createStudent(
-                email,
-                password,
+                String(email).trim(),
+                String(password),
                 Number(classId),
-                studentCode,
-                firstName,
-                lastName,
+                String(studentCode).trim(),
+                String(firstName).trim(),
+                String(lastName).trim(),
                 dateOfBirth,
-                phoneNumber,
-                address,
-                gender
+                String(phoneNumber).trim(),
+                String(address).trim(),
+                String(gender).trim()
             );
 
         return res.status(201).json(

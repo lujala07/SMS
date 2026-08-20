@@ -43,27 +43,28 @@ export const addTeacher = async (
         } = req.body;
 
         if (
-            !email ||
-            !password ||
-            !firstName ||
-            !lastName
+            !String(email || '').trim() ||
+            !String(password || '').trim() ||
+            !departmentId ||
+            !String(firstName || '').trim() ||
+            !String(lastName || '').trim() ||
+            !String(phoneNumber || '').trim() ||
+            !String(address || '').trim()
         ) {
             return res.status(400).json({
                 message:
-                    'Email, password, first name and last name are required'
+                    'Email, password, first name, last name, phone number, address and department are required'
             });
         }
 
         const teacher = await createTeacher(
-            email,
-            password,
-            departmentId
-                ? Number(departmentId)
-                : null,
-            firstName,
-            lastName,
-            phoneNumber,
-            address
+            String(email).trim(),
+            String(password),
+            Number(departmentId),
+            String(firstName).trim(),
+            String(lastName).trim(),
+            String(phoneNumber).trim(),
+            String(address).trim()
         );
 
         return res.status(201).json({
