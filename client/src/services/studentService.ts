@@ -25,6 +25,16 @@ export interface CreateStudentData {
     gender?: string;
 }
 
+export interface UpdateStudentData {
+    classId: number;
+    studentCode: string;
+    firstName: string;
+    lastName: string;
+    phoneNumber?: string;
+    address?: string;
+    gender?: string;
+}
+
 export const getStudents = async () => {
     const response = await api.get('/students');
     return response.data;
@@ -42,6 +52,18 @@ export const deleteStudent = async (
 ) => {
     const response = await api.delete(
         `/students/${id}`
+    );
+
+    return response.data;
+};
+
+export const updateStudent = async (
+    id: number,
+    data: UpdateStudentData
+) => {
+    const response = await api.put(
+        `/students/${id}`,
+        data
     );
 
     return response.data;
