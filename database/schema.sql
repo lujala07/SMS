@@ -156,3 +156,27 @@ CREATE TABLE notices(
     FOREIGN KEY (author_id)
         REFERENCES users(id)
 );
+
+CREATE INDEX idx_classes_department_id
+    ON classes(department_id);
+
+CREATE INDEX idx_students_class_id
+    ON students(class_id);
+
+CREATE INDEX idx_subjects_class_id
+    ON subjects(class_id);
+
+CREATE INDEX idx_teacher_subjects_subject_id
+    ON teacher_subjects(subject_id);
+
+CREATE INDEX idx_attendance_student_id
+    ON attendance(student_id);
+
+CREATE INDEX idx_attendance_subject_id
+    ON attendance(subject_id);
+
+CREATE INDEX idx_assignments_subject_id
+    ON assignments(subject_id);
+
+CREATE INDEX idx_submissions_student_id
+    ON submissions(student_id);
