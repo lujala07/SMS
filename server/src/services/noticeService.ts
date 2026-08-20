@@ -20,6 +20,43 @@ export const getAllNotices = async () => {
     return result.rows;
 };
 
+export const getTeacherRelevantNotices = async (
+    userId: number
+) => {
+    const result = await pool.query(
+        `SELECT
+            notices.id,
+            notices.author_id,
+            notices.title,
+            notices.content,
+            notices.audience,
+            notices.created_at,
+            users.email AS author_email,
+            users.role AS author_role,
+
+            CASE
+                WHEN notices.author_id = $1
+                THEN TRUE
+                ELSE FALSE
+            END AS is_own
+
+         FROM notices
+
+         JOIN users
+            ON notices.author_id = users.id
+
+         WHERE
+            notices.audience = 'all'
+            OR notices.audience = 'teachers'
+            OR notices.author_id = $1
+
+         ORDER BY notices.created_at DESC`,
+        [userId]
+    );
+
+    return result.rows;
+};
+
 export const createNotice = async (
     authorId: number,
     title: string,
@@ -48,34 +85,76 @@ export const createNotice = async (
 
 export const updateNotice = async (
     id: number,
+    userId: number,
+    userRole: string,
     title: string,
     content: string,
     audience: string
 ) => {
+    if (userRole === 'admin') {
+        const result = await pool.query(
+            `UPDATE notices
+             SET title = $1,
+                 content = $2,
+                 audience = $3
+             WHERE id = $4
+             RETURNING *`,
+            [
+                title,
+                content,
+                audience,
+                id
+            ]
+        );
+
+        return result.rows[0];
+    }
+
     const result = await pool.query(
         `UPDATE notices
          SET title = $1,
              content = $2,
              audience = $3
          WHERE id = $4
+         AND author_id = $5
          RETURNING *`,
         [
             title,
             content,
             audience,
-            id
+            id,
+            userId
         ]
     );
 
     return result.rows[0];
 };
 
-export const deleteNotice = async (id: number) => {
+export const deleteNotice = async (
+    id: number,
+    userId: number,
+    userRole: string
+) => {
+    if (userRole === 'admin') {
+        const result = await pool.query(
+            `DELETE FROM notices
+             WHERE id = $1
+             RETURNING *`,
+            [id]
+        );
+
+        return result.rows[0];
+    }
+
     const result = await pool.query(
         `DELETE FROM notices
          WHERE id = $1
+         AND author_id = $2
          RETURNING *`,
-        [id]
+        [
+            id,
+            userId
+        ]
     );
 
     return result.rows[0];
@@ -87,7 +166,8 @@ export const getNoticesByAudience = async (
     const result = await pool.query(
         `SELECT
             notices.*,
-            users.email AS author_email
+            users.email AS author_email,
+            users.role AS author_role
          FROM notices
          JOIN users
             ON notices.author_id = users.id

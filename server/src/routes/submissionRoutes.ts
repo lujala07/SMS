@@ -5,25 +5,52 @@ import {
     addSubmission,
     gradeSubmission,
     getAssignmentSubmissions,
-    getStudentSubmissions
+    getStudentSubmissions,
+    getMySubmissionAssignments,
+    getAssignmentStudents
 } from '../controllers/submissionController.js';
 
-import { authenticate } from '../middleware/authMiddleware.js';
-import { authorizeRoles } from '../middleware/roleMiddleware.js';
+import {
+    authenticate
+} from '../middleware/authMiddleware.js';
+
+import {
+    authorizeRoles
+} from '../middleware/roleMiddleware.js';
 
 const router = Router();
 
 router.get(
     '/',
     authenticate,
-    authorizeRoles('admin', 'teacher'),
+    authorizeRoles(
+        'admin',
+        'teacher'
+    ),
     getSubmissions
+);
+
+router.get(
+    '/teacher/assignments',
+    authenticate,
+    authorizeRoles('teacher'),
+    getMySubmissionAssignments
+);
+
+router.get(
+    '/teacher/assignments/:assignmentId/students',
+    authenticate,
+    authorizeRoles('teacher'),
+    getAssignmentStudents
 );
 
 router.get(
     '/assignment/:assignmentId',
     authenticate,
-    authorizeRoles('admin', 'teacher'),
+    authorizeRoles(
+        'admin',
+        'teacher'
+    ),
     getAssignmentSubmissions
 );
 
