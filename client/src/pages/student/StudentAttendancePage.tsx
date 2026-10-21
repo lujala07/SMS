@@ -1,3 +1,8 @@
+import StatusBadge from '../../components/StatusBadge';
+import Alert from '../../components/Alert';
+import PageHeader from '../../components/PageHeader';
+import LoadingState from '../../components/LoadingState';
+import EmptyState from '../../components/EmptyState';
 import TableToolbar from '../../components/TableToolbar';
 import SortableHeader from '../../components/SortableHeader';
 import Pagination from '../../components/Pagination';
@@ -87,9 +92,7 @@ function StudentAttendancePage() {
                     Attendance
                 </h1>
 
-                <div className="bg-white rounded shadow p-6">
-                    Loading...
-                </div>
+                <div className="bg-white rounded shadow p-6"><LoadingState /></div>
             </div>
         );
     }
@@ -97,28 +100,19 @@ function StudentAttendancePage() {
     if (error || !data) {
         return (
             <div>
-                <h1 className="text-2xl font-bold mb-6">
-                    Attendance
-                </h1>
-
-                <p className="text-red-500">
-                    {error || 'Could not load attendance.'}
-                </p>
+                <PageHeader title="Attendance" />
+                <Alert tone="error">{error || 'Could not load attendance.'}</Alert>
             </div>
         );
     }
 
     return (
         <div>
-            <div className="mb-6">
-                <h1 className="text-2xl font-bold">
+            <PageHeader title={<>
                     Attendance
-                </h1>
-
-                <p className="text-gray-500 mt-1">
+                </>} description={<>
                     Your class attendance records by subject.
-                </p>
-            </div>
+                </>} />
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
                 <div className="bg-white rounded shadow p-5">
@@ -240,9 +234,7 @@ function StudentAttendancePage() {
                                 <td
                                     colSpan={3}
                                     className="p-4 text-center text-gray-500"
-                                >
-                                    No attendance records available.
-                                </td>
+                                ><EmptyState title="No attendance records available." description="Records will appear here when they are available." /></td>
                             </tr>
                         ) : (
                             attendanceHistoryPagination.items.map((record) => (
@@ -260,9 +252,7 @@ function StudentAttendancePage() {
                                         {' - '}
                                         {record.subject_name}
                                     </td>
-                                    <td className="p-4 capitalize">
-                                        {record.status}
-                                    </td>
+                                    <td className="p-4 capitalize"><StatusBadge status={record.status} /></td>
                                 </tr>
                             ))
                         )}

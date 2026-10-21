@@ -18,9 +18,12 @@ function EditModal({ open, title, busy, onClose, children }: Props) {
         const element = dialog.current;
         if (!open || !element) return;
         const previousFocus = document.activeElement;
+        const previousOverflow = document.body.style.overflow;
         element.showModal();
+        document.body.style.overflow = 'hidden';
         return () => {
             element.close();
+            document.body.style.overflow = previousOverflow;
             if (previousFocus instanceof HTMLElement && previousFocus.isConnected) previousFocus.focus();
         };
     }, [open]);

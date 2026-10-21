@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import {
     NavLink,
@@ -19,10 +19,13 @@ import {
     BarChart3,
     LogOut,
     FileCheck2,
-    User
+    User,
+    X
 } from 'lucide-react';
 
-function Sidebar() {
+function Sidebar({ mobileOpen, onMobileClose }: { mobileOpen: boolean; onMobileClose: () => void }) {
+    const dialog = useRef<HTMLDialogElement>(null);
+    const [isMobile, setIsMobile] = useState(() => !window.matchMedia('(min-width: 768px)').matches);
     const navigate =
         useNavigate();
 
@@ -30,6 +33,28 @@ function Sidebar() {
         open,
         setOpen
     ] = useState(() => window.matchMedia('(min-width: 768px)').matches);
+
+    const expanded = isMobile || open;
+    useEffect(() => {
+        const media = window.matchMedia('(min-width: 768px)');
+        const update = () => { setIsMobile(!media.matches); onMobileClose(); };
+        media.addEventListener('change', update);
+        return () => media.removeEventListener('change', update);
+    }, [onMobileClose]);
+
+    useEffect(() => {
+        const element = dialog.current;
+        if (!isMobile || !mobileOpen || !element) return;
+        const previousFocus = document.activeElement;
+        const overflow = document.body.style.overflow;
+        element.showModal();
+        document.body.style.overflow = 'hidden';
+        return () => {
+            element.close();
+            document.body.style.overflow = overflow;
+            if (previousFocus instanceof HTMLElement && previousFocus.isConnected) previousFocus.focus();
+        };
+    }, [isMobile, mobileOpen]);
 
     const user = JSON.parse(
         localStorage.getItem(
@@ -106,40 +131,25 @@ function Sidebar() {
     const fullName =
         getFullName();
 
-    return (
-        <aside
-            className={`
-                h-screen
-                sticky
-                top-0
-                bg-slate-900
-                text-white
-                transition-all
-                duration-300
-                shrink-0
-                ${open ? 'w-60' : 'w-20'}
-            `}
-        >
+    const content = (
             <div className="h-full flex flex-col p-4">
 
                 {/* Top */}
                 <div className="flex items-center gap-3 mb-6">
                     <button
                         type="button"
-                        onClick={() =>
-                            setOpen(
-                                !open
-                            )
-                        }
+                        onClick={() => isMobile ? onMobileClose() : setOpen(!open)}
                         className="p-2 rounded-md hover:bg-slate-800"
-                        title="Toggle sidebar"
+                        title={isMobile ? 'Close navigation' : 'Toggle sidebar'}
+                        aria-label={isMobile ? 'Close navigation' : 'Toggle sidebar'}
+                        aria-expanded={expanded}
                     >
-                        <Menu
+                        {isMobile ? <X size={22} /> : <Menu
                             size={22}
-                        />
+                        />}
                     </button>
 
-                    {open && (
+                    {expanded && (
                         <h2 className="text-xl font-bold">
                             SMS
                         </h2>
@@ -147,13 +157,17 @@ function Sidebar() {
                 </div>
 
                 {/* Navigation */}
-                <nav className="space-y-1 flex-1 overflow-y-auto">
+                <nav aria-label="Main navigation" className="space-y-1 flex-1 overflow-y-auto" onClick={event => {
+                    if (isMobile && event.target instanceof Element && event.target.closest('a')) onMobileClose();
+                }}>
 
                     {user.role ===
                         'admin' && (
                         <>
                             <NavLink
                                 to="/admin"
+                                aria-label="Dashboard"
+                                title="Dashboard"
                                 end
                                 className={
                                     linkStyle
@@ -163,7 +177,7 @@ function Sidebar() {
                                     size={20}
                                 />
 
-                                {open && (
+                                {expanded && (
                                     <span>
                                         Dashboard
                                     </span>
@@ -172,6 +186,8 @@ function Sidebar() {
 
                             <NavLink
                                 to="/admin/users"
+                                aria-label="Users"
+                                title="Users"
                                 className={
                                     linkStyle
                                 }
@@ -180,7 +196,7 @@ function Sidebar() {
                                     size={20}
                                 />
 
-                                {open && (
+                                {expanded && (
                                     <span>
                                         Users
                                     </span>
@@ -189,6 +205,8 @@ function Sidebar() {
 
                             <NavLink
                                 to="/admin/students"
+                                aria-label="Students"
+                                title="Students"
                                 className={
                                     linkStyle
                                 }
@@ -197,7 +215,7 @@ function Sidebar() {
                                     size={20}
                                 />
 
-                                {open && (
+                                {expanded && (
                                     <span>
                                         Students
                                     </span>
@@ -206,6 +224,8 @@ function Sidebar() {
 
                             <NavLink
                                 to="/admin/teachers"
+                                aria-label="Teachers"
+                                title="Teachers"
                                 className={
                                     linkStyle
                                 }
@@ -214,7 +234,7 @@ function Sidebar() {
                                     size={20}
                                 />
 
-                                {open && (
+                                {expanded && (
                                     <span>
                                         Teachers
                                     </span>
@@ -223,6 +243,8 @@ function Sidebar() {
 
                             <NavLink
                                 to="/admin/departments"
+                                aria-label="Departments"
+                                title="Departments"
                                 className={
                                     linkStyle
                                 }
@@ -231,7 +253,7 @@ function Sidebar() {
                                     size={20}
                                 />
 
-                                {open && (
+                                {expanded && (
                                     <span>
                                         Departments
                                     </span>
@@ -240,6 +262,8 @@ function Sidebar() {
 
                             <NavLink
                                 to="/admin/classes"
+                                aria-label="Classes"
+                                title="Classes"
                                 className={
                                     linkStyle
                                 }
@@ -248,7 +272,7 @@ function Sidebar() {
                                     size={20}
                                 />
 
-                                {open && (
+                                {expanded && (
                                     <span>
                                         Classes
                                     </span>
@@ -257,6 +281,8 @@ function Sidebar() {
 
                             <NavLink
                                 to="/admin/subjects"
+                                aria-label="Subjects"
+                                title="Subjects"
                                 className={
                                     linkStyle
                                 }
@@ -265,7 +291,7 @@ function Sidebar() {
                                     size={20}
                                 />
 
-                                {open && (
+                                {expanded && (
                                     <span>
                                         Subjects
                                     </span>
@@ -274,6 +300,8 @@ function Sidebar() {
 
                             <NavLink
                                 to="/admin/teacher-subjects"
+                                aria-label="Teacher subjects"
+                                title="Teacher subjects"
                                 className={
                                     linkStyle
                                 }
@@ -282,7 +310,7 @@ function Sidebar() {
                                     size={20}
                                 />
 
-                                {open && (
+                                {expanded && (
                                     <span>
                                         Teacher Subjects
                                     </span>
@@ -291,6 +319,8 @@ function Sidebar() {
 
                             <NavLink
                                 to="/admin/notices"
+                                aria-label="Notices"
+                                title="Notices"
                                 className={
                                     linkStyle
                                 }
@@ -299,7 +329,7 @@ function Sidebar() {
                                     size={20}
                                 />
 
-                                {open && (
+                                {expanded && (
                                     <span>
                                         Notices
                                     </span>
@@ -308,6 +338,8 @@ function Sidebar() {
 
                             <NavLink
                                 to="/admin/reports"
+                                aria-label="Reports"
+                                title="Reports"
                                 className={
                                     linkStyle
                                 }
@@ -316,7 +348,7 @@ function Sidebar() {
                                     size={20}
                                 />
 
-                                {open && (
+                                {expanded && (
                                     <span>
                                         Reports
                                     </span>
@@ -330,6 +362,8 @@ function Sidebar() {
                         <>
                             <NavLink
                                 to="/teacher"
+                                aria-label="Dashboard"
+                                title="Dashboard"
                                 end
                                 className={
                                     linkStyle
@@ -339,7 +373,7 @@ function Sidebar() {
                                     size={20}
                                 />
 
-                                {open && (
+                                {expanded && (
                                     <span>
                                         Dashboard
                                     </span>
@@ -348,6 +382,8 @@ function Sidebar() {
 
                             <NavLink
                                 to="/teacher/attendance"
+                                aria-label="Attendance"
+                                title="Attendance"
                                 className={
                                     linkStyle
                                 }
@@ -356,7 +392,7 @@ function Sidebar() {
                                     size={20}
                                 />
 
-                                {open && (
+                                {expanded && (
                                     <span>
                                         Attendance
                                     </span>
@@ -365,6 +401,8 @@ function Sidebar() {
 
                             <NavLink
                                 to="/teacher/assignments"
+                                aria-label="Assignments"
+                                title="Assignments"
                                 className={
                                     linkStyle
                                 }
@@ -373,7 +411,7 @@ function Sidebar() {
                                     size={20}
                                 />
 
-                                {open && (
+                                {expanded && (
                                     <span>
                                         Assignments
                                     </span>
@@ -382,6 +420,8 @@ function Sidebar() {
 
                             <NavLink
                                 to="/teacher/submissions"
+                                aria-label="Submissions"
+                                title="Submissions"
                                 className={
                                     linkStyle
                                 }
@@ -390,7 +430,7 @@ function Sidebar() {
                                     size={20}
                                 />
 
-                                {open && (
+                                {expanded && (
                                     <span>
                                         Submissions
                                     </span>
@@ -399,6 +439,8 @@ function Sidebar() {
 
                             <NavLink
                                 to="/teacher/notices"
+                                aria-label="Notices"
+                                title="Notices"
                                 className={
                                     linkStyle
                                 }
@@ -407,7 +449,7 @@ function Sidebar() {
                                     size={20}
                                 />
 
-                                {open && (
+                                {expanded && (
                                     <span>
                                         Notices
                                     </span>
@@ -416,6 +458,8 @@ function Sidebar() {
 
                             <NavLink
                                 to="/teacher/reports"
+                                aria-label="Reports"
+                                title="Reports"
                                 className={
                                     linkStyle
                                 }
@@ -424,7 +468,7 @@ function Sidebar() {
                                     size={20}
                                 />
 
-                                {open && (
+                                {expanded && (
                                     <span>
                                         Reports
                                     </span>
@@ -438,6 +482,8 @@ function Sidebar() {
                         <>
                             <NavLink
                                 to="/student"
+                                aria-label="Dashboard"
+                                title="Dashboard"
                                 end
                                 className={
                                     linkStyle
@@ -447,7 +493,7 @@ function Sidebar() {
                                     size={20}
                                 />
 
-                                {open && (
+                                {expanded && (
                                     <span>
                                         Dashboard
                                     </span>
@@ -456,6 +502,8 @@ function Sidebar() {
 
                             <NavLink
                                 to="/student/attendance"
+                                aria-label="Attendance"
+                                title="Attendance"
                                 className={
                                     linkStyle
                                 }
@@ -464,7 +512,7 @@ function Sidebar() {
                                     size={20}
                                 />
 
-                                {open && (
+                                {expanded && (
                                     <span>
                                         Attendance
                                     </span>
@@ -473,6 +521,8 @@ function Sidebar() {
 
                             <NavLink
                                 to="/student/assignments"
+                                aria-label="Assignments"
+                                title="Assignments"
                                 className={
                                     linkStyle
                                 }
@@ -481,7 +531,7 @@ function Sidebar() {
                                     size={20}
                                 />
 
-                                {open && (
+                                {expanded && (
                                     <span>
                                         Assignments
                                     </span>
@@ -494,7 +544,7 @@ function Sidebar() {
                 {/* Bottom user section */}
                 <div className="mt-auto pt-4 border-t border-slate-700">
 
-                    {open ? (
+                    {expanded ? (
                         <div className="px-3 mb-3">
                             <div className="flex items-start gap-3">
 
@@ -540,7 +590,7 @@ function Sidebar() {
                             hover:bg-red-600
                             transition
                             ${
-                                !open
+                                !expanded
                                     ? 'justify-center'
                                     : ''
                             }
@@ -551,7 +601,7 @@ function Sidebar() {
                             size={20}
                         />
 
-                        {open && (
+                        {expanded && (
                             <span>
                                 Logout
                             </span>
@@ -559,7 +609,18 @@ function Sidebar() {
                     </button>
                 </div>
             </div>
-        </aside>
+    );
+
+    return isMobile ? (
+        <dialog ref={dialog} aria-label="Navigation" onCancel={event => { event.preventDefault(); onMobileClose(); }} onClick={event => {
+            if (event.target !== event.currentTarget) return;
+            const bounds = event.currentTarget.getBoundingClientRect();
+            if (event.clientX < bounds.left || event.clientX > bounds.right) onMobileClose();
+        }} className="fixed inset-y-0 left-0 m-0 h-dvh max-h-none w-64 max-w-[85vw] border-0 bg-slate-900 p-0 text-white shadow-xl backdrop:bg-slate-950/50">
+            {content}
+        </dialog>
+    ) : (
+        <aside className={`sticky top-0 h-screen shrink-0 bg-slate-900 text-white transition-all duration-300 ${open ? 'w-60' : 'w-20'}`}>{content}</aside>
     );
 }
 

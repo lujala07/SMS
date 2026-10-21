@@ -1,3 +1,8 @@
+import StatusBadge from '../../components/StatusBadge';
+import Alert from '../../components/Alert';
+import PageHeader from '../../components/PageHeader';
+import LoadingState from '../../components/LoadingState';
+import EmptyState from '../../components/EmptyState';
 import Pagination from '../../components/Pagination';
 import TableToolbar from '../../components/TableToolbar';
 import SortableHeader from '../../components/SortableHeader';
@@ -135,9 +140,7 @@ function StudentDashboard() {
                     Student Dashboard
                 </h1>
 
-                <div className="bg-white p-6 rounded shadow">
-                    Loading...
-                </div>
+                <div className="bg-white p-6 rounded shadow"><LoadingState /></div>
             </div>
         );
     }
@@ -148,14 +151,8 @@ function StudentDashboard() {
     ) {
         return (
             <div>
-                <h1 className="text-2xl font-bold mb-6">
-                    Student Dashboard
-                </h1>
-
-                <p className="text-red-500">
-                    {error ||
-                        'Could not load dashboard.'}
-                </p>
+                <PageHeader title="Student Dashboard" />
+                <Alert tone="error">{error || 'Could not load dashboard.'}</Alert>
             </div>
         );
     }
@@ -191,19 +188,15 @@ function StudentDashboard() {
 
     return (
         <div>
-            <div className="mb-6">
-                <h1 className="text-2xl font-bold">
+            <PageHeader title={<>
                     Student Dashboard
-                </h1>
-
-                <p className="text-gray-500 mt-1">
+                </>} description={<>
                     Welcome,{' '}
                     {
                         data.student
                             .first_name
                     }.
-                </p>
-            </div>
+                </>} />
 
             <div className="bg-white rounded shadow p-6 mb-6">
                 <h2 className="text-lg font-semibold mb-4">
@@ -383,9 +376,7 @@ function StudentDashboard() {
                                             4
                                         }
                                         className="p-4 text-center text-gray-500"
-                                    >
-                                        No assignments available.
-                                    </td>
+                                    ><EmptyState title="No assignments available." description="Records will appear here when they are available." /></td>
                                 </tr>
                             ) : (
                                 assignmentsPagination.items
@@ -421,10 +412,8 @@ function StudentDashboard() {
                                                     ).toLocaleDateString()}
                                                 </td>
 
-                                                <td className="p-3 capitalize">
-                                                    {assignment.submission_status ||
-                                                        'Not Submitted'}
-                                                </td>
+                                                <td className="p-3 capitalize"><StatusBadge status={assignment.submission_status ||
+                                                        'Not Submitted'} /></td>
                                             </tr>
                                         )
                                     )

@@ -1,3 +1,7 @@
+import Alert from '../../components/Alert';
+import StatusBadge from '../../components/StatusBadge';
+import PageHeader from '../../components/PageHeader';
+import LoadingState from '../../components/LoadingState';
 import TableToolbar from '../../components/TableToolbar';
 import SortableHeader from '../../components/SortableHeader';
 import Pagination from '../../components/Pagination';
@@ -522,9 +526,7 @@ function TeacherSubmissionsPage() {
                     Submissions
                 </h1>
 
-                <div className="bg-white p-4 rounded shadow">
-                    Loading...
-                </div>
+                <div className="bg-white p-4 rounded shadow"><LoadingState /></div>
             </div>
         );
     }
@@ -550,15 +552,11 @@ function TeacherSubmissionsPage() {
                     Back to Submissions
                 </button>
 
-                <div className="mb-6">
-                    <h1 className="text-2xl font-bold">
+                <PageHeader title={<>
                         Review Submission
-                    </h1>
-
-                    <p className="text-gray-500 mt-1">
+                    </>} description={<>
                         Review the student's work and provide marks and feedback.
-                    </p>
-                </div>
+                    </>} />
 
                 <div className="bg-white rounded shadow p-6">
                     <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-5 pb-6 border-b">
@@ -586,11 +584,9 @@ function TeacherSubmissionsPage() {
                             className={`font-medium ${getStatusClass(
                                 selectedStudent
                             )}`}
-                        >
-                            {getStatus(
+                        ><StatusBadge status={getStatus(
                                 selectedStudent
-                            )}
-                        </span>
+                            )} /></span>
                     </div>
 
                     <div className="py-6 border-b">
@@ -726,11 +722,11 @@ function TeacherSubmissionsPage() {
                         </div>
 
                         <div className="mb-5">
-                            <label className="block font-medium mb-2">
+                            <label htmlFor="teachersubmissionspage-field-0" className="block font-medium mb-2">
                                 Feedback
                             </label>
 
-                            <textarea
+                            <textarea id="teachersubmissionspage-field-0"
                                 rows={
                                     5
                                 }
@@ -750,19 +746,11 @@ function TeacherSubmissionsPage() {
                         </div>
 
                         {error && (
-                            <p className="text-red-500 mb-4">
-                                {
-                                    error
-                                }
-                            </p>
+                            <Alert tone="error">{error}</Alert>
                         )}
 
                         {success && (
-                            <p className="text-green-600 mb-4">
-                                {
-                                    success
-                                }
-                            </p>
+                            <Alert tone="success">{success}</Alert>
                         )}
 
                         <button
@@ -790,22 +778,18 @@ function TeacherSubmissionsPage() {
 
     return (
         <div>
-            <div className="mb-6">
-                <h1 className="text-2xl font-bold">
+            <PageHeader title={<>
                     Submissions
-                </h1>
-
-                <p className="text-gray-500 mt-1">
+                </>} description={<>
                     View and review student assignment submissions.
-                </p>
-            </div>
+                </>} />
 
             <div className="bg-white p-6 rounded shadow mb-6">
-                <label className="block font-medium mb-2">
+                <label htmlFor="teachersubmissionspage-field-1" className="block font-medium mb-2">
                     Assignment
                 </label>
 
-                <select
+                <select id="teachersubmissionspage-field-1"
                     value={
                         selectedAssignment
                     }
@@ -856,11 +840,7 @@ function TeacherSubmissionsPage() {
             </div>
 
             {error && (
-                <p className="text-red-500 mb-4">
-                    {
-                        error
-                    }
-                </p>
+                <Alert tone="error">{error}</Alert>
             )}
 
             {!selectedAssignment ? (
@@ -868,9 +848,7 @@ function TeacherSubmissionsPage() {
                     Select an assignment to view students.
                 </div>
             ) : loadingStudents ? (
-                <div className="bg-white p-6 rounded shadow">
-                    Loading students...
-                </div>
+                <div className="bg-white p-6 rounded shadow"><LoadingState /></div>
             ) : students.length ===
               0 ? (
                 <div className="bg-white p-6 rounded shadow text-gray-500">
@@ -941,13 +919,9 @@ function TeacherSubmissionsPage() {
                                                         student
                                                     )
                                                 }
-                                            >
-                                                {
-                                                    getStatus(
+                                            ><StatusBadge status={getStatus(
                                                         student
-                                                    )
-                                                }
-                                            </span>
+                                                    )} /></span>
                                         </td>
 
                                         <td className="p-4">
@@ -967,8 +941,7 @@ function TeacherSubmissionsPage() {
                                                 : '-'}
                                         </td>
 
-                                        <td className="p-4">
-                                            {student.submission_id ? (
+                                        <td className="p-4">{student.submission_id ? (
                                                 <button
                                                     type="button"
                                                     onClick={() =>
@@ -987,8 +960,7 @@ function TeacherSubmissionsPage() {
                                                 <span className="text-gray-400">
                                                     -
                                                 </span>
-                                            )}
-                                        </td>
+                                            )}</td>
                                     </tr>
                                 )
                             )}

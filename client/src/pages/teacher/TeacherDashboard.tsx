@@ -1,3 +1,7 @@
+import PageHeader from '../../components/PageHeader';
+import Alert from '../../components/Alert';
+import LoadingState from '../../components/LoadingState';
+import EmptyState from '../../components/EmptyState';
 import { useEffect, useState } from 'react';
 import api from '../../services/api';
 
@@ -58,29 +62,21 @@ function TeacherDashboard() {
                     Teacher Dashboard
                 </h1>
 
-                <div className="bg-white p-4 rounded shadow">
-                    Loading...
-                </div>
+                <div className="bg-white p-4 rounded shadow"><LoadingState /></div>
             </div>
         );
     }
 
     return (
         <div>
-            <div className="mb-6">
-                <h1 className="text-2xl font-bold">
+            <PageHeader title={<>
                     Teacher Dashboard
-                </h1>
-
-                <p className="text-gray-500 mt-1">
+                </>} description={<>
                     View assignments, notices and teaching activities.
-                </p>
-            </div>
+                </>} />
 
             {error && (
-                <p className="text-red-500 mb-4">
-                    {error}
-                </p>
+                <Alert tone="error">{error}</Alert>
             )}
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -122,9 +118,7 @@ function TeacherDashboard() {
                     </h2>
 
                     {assignments.length === 0 ? (
-                        <p className="text-gray-500">
-                            No assignments available.
-                        </p>
+                        <div className="text-gray-500"><EmptyState title="No assignments available." description="Records will appear here when they are available." /></div>
                     ) : (
                         <div className="space-y-3">
                             {assignments.map(
@@ -164,9 +158,7 @@ function TeacherDashboard() {
                     </h2>
 
                     {notices.length === 0 ? (
-                        <p className="text-gray-500">
-                            No notices available.
-                        </p>
+                        <div className="text-gray-500"><EmptyState title="No notices available." description="Records will appear here when they are available." /></div>
                     ) : (
                         <div className="space-y-3">
                             {notices.map(

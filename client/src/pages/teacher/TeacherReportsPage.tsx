@@ -1,3 +1,7 @@
+import PageHeader from '../../components/PageHeader';
+import Alert from '../../components/Alert';
+import LoadingState from '../../components/LoadingState';
+import EmptyState from '../../components/EmptyState';
 import TableToolbar from '../../components/TableToolbar';
 import SortableHeader from '../../components/SortableHeader';
 import Pagination from '../../components/Pagination';
@@ -184,29 +188,21 @@ function TeacherReportsPage() {
                     Reports
                 </h1>
 
-                <div className="bg-white rounded shadow p-6">
-                    Loading...
-                </div>
+                <div className="bg-white rounded shadow p-6"><LoadingState /></div>
             </div>
         );
     }
 
     return (
         <div>
-            <div className="mb-6">
-                <h1 className="text-2xl font-bold">
+            <PageHeader title={<>
                     Reports
-                </h1>
-
-                <p className="text-gray-500 mt-1">
+                </>} description={<>
                     View attendance and assignment summaries.
-                </p>
-            </div>
+                </>} />
 
             {error && (
-                <p className="text-red-500 mb-4">
-                    {error}
-                </p>
+                <Alert tone="error">{error}</Alert>
             )}
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
@@ -340,9 +336,7 @@ function TeacherReportsPage() {
                                             5
                                         }
                                         className="p-4 text-center text-gray-500"
-                                    >
-                                        No assignment reports available.
-                                    </td>
+                                    ><EmptyState title="No assignment reports available." description="Records will appear here when they are available." /></td>
                                 </tr>
                             ) : (
                                 assignmentSummaryPagination.items.map(

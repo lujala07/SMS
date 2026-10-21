@@ -1,3 +1,8 @@
+import StatusBadge from '../../components/StatusBadge';
+import PageHeader from '../../components/PageHeader';
+import Alert from '../../components/Alert';
+import LoadingState from '../../components/LoadingState';
+import EmptyState from '../../components/EmptyState';
 import TableToolbar from '../../components/TableToolbar';
 import SortableHeader from '../../components/SortableHeader';
 import Pagination from '../../components/Pagination';
@@ -288,24 +293,18 @@ function TeacherAttendancePage() {
                     Attendance
                 </h1>
 
-                <div className="bg-white p-4 rounded shadow">
-                    Loading...
-                </div>
+                <div className="bg-white p-4 rounded shadow"><LoadingState /></div>
             </div>
         );
     }
 
     return (
         <div>
-            <div className="mb-6">
-                <h1 className="text-2xl font-bold">
+            <PageHeader title={<>
                     Attendance
-                </h1>
-
-                <p className="text-gray-500 mt-1">
+                </>} description={<>
                     Mark and view student attendance.
-                </p>
-            </div>
+                </>} />
 
             <div className="bg-white p-6 rounded shadow mb-6">
                 <h2 className="text-lg font-semibold mb-4">
@@ -314,11 +313,11 @@ function TeacherAttendancePage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                     <div>
-                        <label className="block mb-1 font-medium">
+                        <label htmlFor="teacherattendancepage-field-0" className="block mb-1 font-medium">
                             Subject / Class
                         </label>
 
-                        <select
+                        <select id="teacherattendancepage-field-0"
                             value={
                                 selectedSubject
                             }
@@ -365,11 +364,11 @@ function TeacherAttendancePage() {
                     </div>
 
                     <div>
-                        <label className="block mb-1 font-medium">
+                        <label htmlFor="teacherattendancepage-field-1" className="block mb-1 font-medium">
                             Date
                         </label>
 
-                        <input
+                        <input id="teacherattendancepage-field-1"
                             type="date"
                             value={
                                 attendanceDate
@@ -496,15 +495,11 @@ function TeacherAttendancePage() {
                 )}
 
                 {error && (
-                    <p className="text-red-500 mt-4">
-                        {error}
-                    </p>
+                    <Alert tone="error">{error}</Alert>
                 )}
 
                 {success && (
-                    <p className="text-green-600 mt-4">
-                        {success}
-                    </p>
+                    <Alert tone="success">{success}</Alert>
                 )}
             </div>
 
@@ -542,9 +537,7 @@ function TeacherAttendancePage() {
                                     <td
                                         colSpan={4}
                                         className="p-4 text-center text-gray-500"
-                                    >
-                                        No attendance records available.
-                                    </td>
+                                    ><EmptyState title="No attendance records available." description="Records will appear here when they are available." /></td>
                                 </tr>
                             ) : (
                                 attendanceHistoryPagination.items.map(
@@ -576,11 +569,7 @@ function TeacherAttendancePage() {
                                                 ).toLocaleDateString()}
                                             </td>
 
-                                            <td className="p-3 capitalize">
-                                                {
-                                                    record.status
-                                                }
-                                            </td>
+                                            <td className="p-3 capitalize"><StatusBadge status={record.status} /></td>
                                         </tr>
                                     )
                                 )

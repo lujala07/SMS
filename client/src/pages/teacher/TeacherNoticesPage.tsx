@@ -1,3 +1,8 @@
+import StatusBadge from '../../components/StatusBadge';
+import PageHeader from '../../components/PageHeader';
+import Alert from '../../components/Alert';
+import LoadingState from '../../components/LoadingState';
+import EmptyState from '../../components/EmptyState';
 import Pagination from '../../components/Pagination';
 import { usePagination } from '../../hooks/usePagination';
 import {
@@ -321,34 +326,27 @@ function TeacherNoticesPage() {
                     Notices
                 </h1>
 
-                <div className="bg-white rounded shadow p-6">
-                    Loading...
-                </div>
+                <div className="bg-white rounded shadow p-6"><LoadingState /></div>
             </div>
         );
     }
 
     return (
         <div>
-            <div className="mb-6">
-                <h1 className="text-2xl font-bold">
+            <PageHeader title={<>
                     Notices
-                </h1>
-
-                <p className="text-gray-500 mt-1">
+                </>} description={<>
                     Submit notices for approval and view announcements.
-                </p>
-                <button type="button" onClick={() => { clearForm(); setError(''); setSuccess(''); setFormOpen(true); }} className="mt-4 rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">
+                </>} action={<button type="button" onClick={() => { clearForm(); setError(''); setSuccess(''); setFormOpen(true); }} className="mt-4 rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">
                     Create Notice
-                </button>
-            </div>
+                </button>} />
 
-            {!formOpen && error && <p role="alert" className="mb-4 text-red-500">{error}</p>}
-            {!formOpen && success && <p role="status" className="mb-4 text-green-600">{success}</p>}
+            {!formOpen && error && <Alert tone="error">{error}</Alert>}
+            {!formOpen && success && <Alert tone="success">{success}</Alert>}
 
             {formOpen && <EditModal open={formOpen} title={editingId !== null ? 'Edit notice' : 'Create notice'} busy={saving} onClose={handleCancelEdit}>
                 <div className="bg-white rounded shadow p-6 mb-6">
-                    <div className="flex justify-between items-center mb-4">
+                    <div className="modal-legacy-heading flex justify-between items-center mb-4">
                         <h2 className="text-lg font-semibold">
                             {editingId
                                 ? 'Edit Notice'
@@ -375,11 +373,11 @@ function TeacherNoticesPage() {
                         className="space-y-4"
                     >
                         <div>
-                            <label className="block font-medium mb-1">
+                            <label htmlFor="teachernoticespage-field-0" className="block font-medium mb-1">
                                 Title
                             </label>
 
-                            <input
+                            <input id="teachernoticespage-field-0"
                                 type="text"
                                 aria-label="Title"
                                 maxLength={255}
@@ -401,11 +399,11 @@ function TeacherNoticesPage() {
                         </div>
 
                         <div>
-                            <label className="block font-medium mb-1">
+                            <label htmlFor="teachernoticespage-field-1" className="block font-medium mb-1">
                                 Audience
                             </label>
 
-                            <select
+                            <select id="teachernoticespage-field-1"
                                 aria-label="Audience"
                                 value={
                                     audience
@@ -434,11 +432,11 @@ function TeacherNoticesPage() {
                         </div>
 
                         <div>
-                            <label className="block font-medium mb-1">
+                            <label htmlFor="teachernoticespage-field-2" className="block font-medium mb-1">
                                 Content
                             </label>
 
-                            <textarea
+                            <textarea id="teachernoticespage-field-2"
                                 aria-label="Content"
                                 value={
                                     content
@@ -459,35 +457,31 @@ function TeacherNoticesPage() {
                         </div>
 
                         <div className="flex justify-end gap-3">
-                        <button type="button" disabled={saving} onClick={handleCancelEdit} className="rounded border px-4 py-2">
-                            Cancel
-                        </button>
-                        <button
-                            type="submit"
-                            disabled={
-                                saving
-                            }
-                            className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-5 py-2 rounded"
-                        >
-                            {saving
-                                ? 'Saving...'
-                                : editingId
-                                  ? 'Update Notice'
-                                  : 'Submit for approval'}
-                        </button>
+                            <button type="button" disabled={saving} onClick={handleCancelEdit} className="rounded border px-4 py-2">
+                                Cancel
+                            </button>
+                            <button
+                                type="submit"
+                                disabled={
+                                    saving
+                                }
+                                className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-5 py-2 rounded"
+                            >
+                                {saving
+                                    ? 'Saving...'
+                                    : editingId
+                                      ? 'Update Notice'
+                                      : 'Submit for approval'}
+                            </button>
                         </div>
                     </form>
 
                     {error && (
-                        <p className="text-red-500 mt-4">
-                            {error}
-                        </p>
+                        <Alert tone="error">{error}</Alert>
                     )}
 
                     {success && (
-                        <p className="text-green-600 mt-4">
-                            {success}
-                        </p>
+                        <Alert tone="success">{success}</Alert>
                     )}
                 </div>
             </EditModal>}
@@ -499,9 +493,7 @@ function TeacherNoticesPage() {
 
                 {notices.length ===
                 0 ? (
-                    <div className="bg-white rounded shadow p-6 text-gray-500">
-                        No notices available.
-                    </div>
+                    <div className="bg-white rounded shadow p-6 text-gray-500"><EmptyState title="No notices available." description="Use the button above to add the first record." /></div>
                 ) : (
                     <div className="space-y-4">
                         {noticesPagination.items.map(
@@ -553,7 +545,7 @@ function TeacherNoticesPage() {
                                     </p>
 
                                     {notice.is_own && (
-                                        <p className="mt-2 text-sm text-gray-600">{notice.status === 'pending' ? <span style={{ color: '#92400e', fontWeight: 500 }}>Pending approval</span> : notice.status === 'rejected' ? 'Rejected' : 'Published'}</p>
+                                        <p className="mt-2 text-sm text-gray-600"><StatusBadge status={notice.status === 'pending' ? 'Pending approval' : notice.status === 'rejected' ? 'Rejected' : 'Published'} /></p>
                                     )}
 
                                     {notice.is_own && (

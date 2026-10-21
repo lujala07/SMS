@@ -1,17 +1,14 @@
+import PageHeader from '../../components/PageHeader';
 import CreateUserForm from '../../components/admin/CreateUserForm';
 
 function UserPage() {
     return (
         <div>
-            <div className="mb-6">
-                <h1 className="text-2xl font-bold">
+            <PageHeader title={<>
                     Users
-                </h1>
-
-                <p className="text-gray-500 mt-1">
+                </>} description={<>
                     Create student, teacher, or admin accounts.
-                </p>
-            </div>
+                </>} />
 
             <CreateUserForm />
         </div>

@@ -1,3 +1,7 @@
+import PageHeader from '../../components/PageHeader';
+import Alert from '../../components/Alert';
+import LoadingState from '../../components/LoadingState';
+import EmptyState from '../../components/EmptyState';
 import TableToolbar from '../../components/TableToolbar';
 import SortableHeader from '../../components/SortableHeader';
 import Pagination from '../../components/Pagination';
@@ -348,32 +352,26 @@ function TeacherAssignmentsPage() {
                     Assignments
                 </h1>
 
-                <div className="bg-white p-4 rounded shadow">
-                    Loading...
-                </div>
+                <div className="bg-white p-4 rounded shadow"><LoadingState /></div>
             </div>
         );
     }
 
     return (
         <div>
-            <div className="mb-6">
-                <h1 className="text-2xl font-bold">
+            <PageHeader title={<>
                     Assignments
-                </h1>
-
-                <p className="text-gray-500 mt-1">
+                </>} description={<>
                     Create and manage assignments for your subjects.
-                </p>
-            </div>
+                </>} action={<button type="button" onClick={() => { clearForm(); setError(''); setSuccess(''); setFormOpen(true); }} className="mb-6 rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">Create Assignment</button>} />
 
-            <button type="button" onClick={() => { clearForm(); setError(''); setSuccess(''); setFormOpen(true); }} className="mb-6 rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">Create Assignment</button>
-            {!formOpen && error && <p role="alert" className="mb-4 text-red-500">{error}</p>}
-            {!formOpen && success && <p role="status" className="mb-4 text-green-600">{success}</p>}
+
+            {!formOpen && error && <Alert tone="error">{error}</Alert>}
+            {!formOpen && success && <Alert tone="success">{success}</Alert>}
 
             {formOpen && <EditModal open={formOpen} title={editingId !== null ? 'Edit assignment' : 'Create assignment'} busy={saving} onClose={handleCancelEdit}>
                 <div className="bg-white p-6 rounded shadow mb-6">
-                    <div className="flex items-center justify-between mb-4">
+                    <div className="modal-legacy-heading flex items-center justify-between mb-4">
                         <h2 className="text-lg font-semibold">
                             {editingId
                                 ? 'Edit Assignment'
@@ -398,11 +396,11 @@ function TeacherAssignmentsPage() {
                         className="grid grid-cols-1 md:grid-cols-2 gap-4"
                     >
                         <div className="md:col-span-2">
-                            <label className="block mb-1 font-medium">
+                            <label htmlFor="teacherassignmentspage-field-0" className="block mb-1 font-medium">
                                 Subject
                             </label>
 
-                            <select
+                            <select id="teacherassignmentspage-field-0"
                                 value={subjectId}
                                 onChange={(event) =>
                                     setSubjectId(
@@ -447,11 +445,11 @@ function TeacherAssignmentsPage() {
                         </div>
 
                         <div className="md:col-span-2">
-                            <label className="block mb-1 font-medium">
+                            <label htmlFor="teacherassignmentspage-field-1" className="block mb-1 font-medium">
                                 Title
                             </label>
 
-                            <input
+                            <input id="teacherassignmentspage-field-1"
                                 type="text"
                                 value={title}
                                 onChange={(event) =>
@@ -465,11 +463,11 @@ function TeacherAssignmentsPage() {
                         </div>
 
                         <div className="md:col-span-2">
-                            <label className="block mb-1 font-medium">
+                            <label htmlFor="teacherassignmentspage-field-2" className="block mb-1 font-medium">
                                 Description
                             </label>
 
-                            <textarea
+                            <textarea id="teacherassignmentspage-field-2"
                                 value={description}
                                 onChange={(event) =>
                                     setDescription(
@@ -483,11 +481,11 @@ function TeacherAssignmentsPage() {
                         </div>
 
                         <div>
-                            <label className="block mb-1 font-medium">
+                            <label htmlFor="teacherassignmentspage-field-3" className="block mb-1 font-medium">
                                 Due Date
                             </label>
 
-                            <input
+                            <input id="teacherassignmentspage-field-3"
                                 type="date"
                                 value={dueDate}
                                 onChange={(event) =>
@@ -500,11 +498,11 @@ function TeacherAssignmentsPage() {
                         </div>
 
                         <div>
-                            <label className="block mb-1 font-medium">
+                            <label htmlFor="teacherassignmentspage-field-4" className="block mb-1 font-medium">
                                 Total Marks
                             </label>
 
-                            <input
+                            <input id="teacherassignmentspage-field-4"
                                 type="text"
                                 inputMode="decimal"
                                 value={totalMarks}
@@ -537,15 +535,11 @@ function TeacherAssignmentsPage() {
                     </form>
 
                     {error && (
-                        <p className="text-red-500 mt-4">
-                            {error}
-                        </p>
+                        <Alert tone="error">{error}</Alert>
                     )}
 
                     {success && (
-                        <p className="text-green-600 mt-4">
-                            {success}
-                        </p>
+                        <Alert tone="success">{success}</Alert>
                     )}
                 </div>
             </EditModal>}
@@ -588,9 +582,7 @@ function TeacherAssignmentsPage() {
                                     <td
                                         colSpan={5}
                                         className="p-4 text-center text-gray-500"
-                                    >
-                                        No assignments available.
-                                    </td>
+                                    ><EmptyState title="No assignments available." description="Use the button above to add the first record." /></td>
                                 </tr>
                             ) : (
                                 assignmentsPagination.items.map(

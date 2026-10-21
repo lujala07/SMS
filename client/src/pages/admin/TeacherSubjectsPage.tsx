@@ -1,3 +1,7 @@
+import PageHeader from '../../components/PageHeader';
+import Alert from '../../components/Alert';
+import LoadingState from '../../components/LoadingState';
+import EmptyState from '../../components/EmptyState';
 import TableToolbar from '../../components/TableToolbar';
 import SortableHeader from '../../components/SortableHeader';
 import Pagination from '../../components/Pagination';
@@ -256,28 +260,22 @@ function TeacherSubjectsPage() {
                     Teacher Subjects
                 </h1>
 
-                <div className="bg-white p-4 rounded shadow">
-                    Loading...
-                </div>
+                <div className="bg-white p-4 rounded shadow"><LoadingState /></div>
             </div>
         );
     }
 
     return (
         <div>
-            <div className="mb-6">
-                <h1 className="text-2xl font-bold">
+            <PageHeader title={<>
                     Teacher Subjects
-                </h1>
-
-                <p className="text-gray-500 mt-1">
+                </>} description={<>
                     Assign teachers to subjects.
-                </p>
-            </div>
+                </>} action={<button type="button" onClick={() => { closeForm(); setFormOpen(true); }} className="mb-6 rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">Assign Teacher</button>} />
 
-            <button type="button" onClick={() => { closeForm(); setFormOpen(true); }} className="mb-6 rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">Assign Teacher</button>
-            {!formOpen && error && <p role="alert" className="mb-4 text-red-500">{error}</p>}
-            {!formOpen && success && <p role="status" className="mb-4 text-green-600">{success}</p>}
+
+            {!formOpen && error && <Alert tone="error">{error}</Alert>}
+            {!formOpen && success && <Alert tone="success">{success}</Alert>}
 
             {formOpen && <EditModal open={formOpen} title="Assign teacher" busy={saving} onClose={closeForm}>
             <div className="bg-white p-6 rounded shadow mb-6">
@@ -290,11 +288,11 @@ function TeacherSubjectsPage() {
                     className="grid grid-cols-1 md:grid-cols-2 gap-4"
                 >
                     <div>
-                        <label className="block mb-1 font-medium">
+                        <label htmlFor="teachersubjectspage-field-0" className="block mb-1 font-medium">
                             Teacher
                         </label>
 
-                        <select
+                        <select id="teachersubjectspage-field-0"
                             aria-label="Teacher"
                             value={teacherId}
                             onChange={(event) =>
@@ -335,11 +333,11 @@ function TeacherSubjectsPage() {
                     </div>
 
                     <div>
-                        <label className="block mb-1 font-medium">
+                        <label htmlFor="teachersubjectspage-field-1" className="block mb-1 font-medium">
                             Subject
                         </label>
 
-                        <select
+                        <select id="teachersubjectspage-field-1"
                             aria-label="Subject"
                             value={subjectId}
                             onChange={(event) =>
@@ -395,15 +393,11 @@ function TeacherSubjectsPage() {
                 </form>
 
                 {error && (
-                    <p className="text-red-500 mt-4">
-                        {error}
-                    </p>
+                    <Alert tone="error">{error}</Alert>
                 )}
 
                 {success && (
-                    <p className="text-green-600 mt-4">
-                        {success}
-                    </p>
+                    <Alert tone="success">{success}</Alert>
                 )}
             </div>
             </EditModal>}
@@ -446,9 +440,7 @@ function TeacherSubjectsPage() {
                                     <td
                                         colSpan={5}
                                         className="p-4 text-center text-gray-500"
-                                    >
-                                        No teacher-subject assignments available.
-                                    </td>
+                                    ><EmptyState title="No teacher-subject assignments available." description="Assign a teacher to a subject to get started." /></td>
                                 </tr>
                             ) : (
                                 teacherSubjectsPagination.items.map(

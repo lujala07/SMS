@@ -1,3 +1,8 @@
+import PageHeader from '../../components/PageHeader';
+import Alert from '../../components/Alert';
+import LoadingState from '../../components/LoadingState';
+import EmptyState from '../../components/EmptyState';
+import FormField from '../../components/FormField';
 import TableToolbar from '../../components/TableToolbar';
 import SortableHeader from '../../components/SortableHeader';
 import Pagination from '../../components/Pagination';
@@ -224,19 +229,15 @@ function ClassesPage() {
 
     return (
         <div>
-            <div className="mb-6">
-                <h1 className="text-2xl font-bold">
+            <PageHeader title={<>
                     Classes
-                </h1>
-
-                <p className="text-gray-500 mt-1">
+                </>} description={<>
                     Create and manage class records.
-                </p>
-            </div>
+                </>} action={<button type="button" onClick={() => { resetForm(); setFormOpen(true); }} className="mb-6 rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">Create Class</button>} />
 
-            <button type="button" onClick={() => { resetForm(); setFormOpen(true); }} className="mb-6 rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">Create Class</button>
-            {!formOpen && error && <p role="alert" className="mb-4 text-red-500">{error}</p>}
-            {!formOpen && success && <p role="status" className="mb-4 text-green-600">{success}</p>}
+
+            {!formOpen && error && <Alert tone="error">{error}</Alert>}
+            {!formOpen && success && <Alert tone="success">{success}</Alert>}
 
             {formOpen && <EditModal open={formOpen} title={editingClass ? 'Edit class' : 'Create class'} busy={saving} onClose={resetForm}>
                 <form noValidate
@@ -250,7 +251,7 @@ function ClassesPage() {
                     </h2>
 
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <select
+                        <FormField label="Department"><select
                             value={form.departmentId}
                             onChange={(event) =>
                                 setForm({
@@ -274,9 +275,9 @@ function ClassesPage() {
                                     </option>
                                 )
                             )}
-                        </select>
+                        </select></FormField>
 
-                        <input
+                        <FormField label="Name"><input
                             value={form.name}
                             onChange={(event) =>
                                 setForm({
@@ -286,9 +287,9 @@ function ClassesPage() {
                             }
                             placeholder="Class name"
                             className="border rounded p-2"
-                        />
+                        /></FormField>
 
-                        <input
+                        <FormField label="Semester"><input
                             type="text"
                             inputMode="numeric"
                             value={form.semester}
@@ -304,9 +305,9 @@ function ClassesPage() {
                             }
                             placeholder="Semester"
                             className="border rounded p-2"
-                        />
+                        /></FormField>
 
-                        <input
+                        <FormField label="Academic year"><input
                             value={form.academicYear}
                             onChange={(event) =>
                                 setForm({
@@ -317,22 +318,26 @@ function ClassesPage() {
                             }
                             placeholder="Academic year"
                             className="border rounded p-2"
-                        />
+                        /></FormField>
                     </div>
 
                     {error && (
-                        <p className="text-red-500 mt-3">
-                            {error}
-                        </p>
+                        <Alert tone="error">{error}</Alert>
                     )}
 
                     {success && (
-                        <p className="text-green-600 mt-3">
-                            {success}
-                        </p>
+                        <Alert tone="success">{success}</Alert>
                     )}
 
                     <div className="flex justify-end gap-3 mt-4">
+                        <button
+                            type="button"
+                            onClick={resetForm}
+                            disabled={saving}
+                            className="border px-4 py-2 rounded"
+                        >
+                            Cancel
+                        </button>
                         <button
                             type="submit"
                             disabled={saving}
@@ -344,15 +349,6 @@ function ClassesPage() {
                                   ? 'Update Class'
                                   : 'Create Class'}
                         </button>
-
-                            <button
-                                type="button"
-                                onClick={resetForm}
-                                disabled={saving}
-                                className="border px-4 py-2 rounded"
-                            >
-                                Cancel
-                            </button>
                     </div>
                 </form>
             </EditModal>}
@@ -386,18 +382,14 @@ function ClassesPage() {
                                 <td
                                     colSpan={5}
                                     className="p-4 text-center"
-                                >
-                                    Loading...
-                                </td>
+                                ><LoadingState /></td>
                             </tr>
                         ) : classes.length === 0 ? (
                             <tr>
                                 <td
                                     colSpan={5}
                                     className="p-4 text-center text-gray-500"
-                                >
-                                    No classes available.
-                                </td>
+                                ><EmptyState title="No classes available." description="Use the button above to add the first record." /></td>
                             </tr>
                         ) : (
                             classesPagination.items.map((classItem) => (

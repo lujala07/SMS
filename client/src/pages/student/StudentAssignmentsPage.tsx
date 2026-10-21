@@ -1,3 +1,8 @@
+import StatusBadge from '../../components/StatusBadge';
+import PageHeader from '../../components/PageHeader';
+import Alert from '../../components/Alert';
+import LoadingState from '../../components/LoadingState';
+import EmptyState from '../../components/EmptyState';
 import TableToolbar from '../../components/TableToolbar';
 import SortableHeader from '../../components/SortableHeader';
 import Pagination from '../../components/Pagination';
@@ -455,9 +460,7 @@ function StudentAssignmentsPage() {
                     Assignments
                 </h1>
 
-                <div className="bg-white rounded shadow p-6">
-                    Loading...
-                </div>
+                <div className="bg-white rounded shadow p-6"><LoadingState /></div>
             </div>
         );
     }
@@ -546,11 +549,9 @@ function StudentAssignmentsPage() {
                             <div className="space-y-4">
                                 <p>
                                     Status:{' '}
-                                    <span className="font-medium text-blue-600">
-                                        {getStatus(
+                                    <span className="font-medium text-blue-600"><StatusBadge status={getStatus(
                                             selectedAssignment
-                                        )}
-                                    </span>
+                                        )} /></span>
                                 </p>
 
                                 {selectedAssignment.submission_text && (
@@ -625,11 +626,7 @@ function StudentAssignmentsPage() {
                                 )}
 
                                 {success && (
-                                    <p className="text-green-600">
-                                        {
-                                            success
-                                        }
-                                    </p>
+                                    <Alert tone="success">{success}</Alert>
                                 )}
                             </div>
                         ) : (
@@ -703,11 +700,11 @@ function StudentAssignmentsPage() {
                                 </div>
 
                                 <div>
-                                    <label className="block font-medium mb-2">
+                                    <label htmlFor="studentassignmentspage-field-0" className="block font-medium mb-2">
                                         Message
                                     </label>
 
-                                    <textarea
+                                    <textarea id="studentassignmentspage-field-0"
                                         rows={
                                             5
                                         }
@@ -727,11 +724,7 @@ function StudentAssignmentsPage() {
                                 </div>
 
                                 {error && (
-                                    <p className="text-red-500 mt-3">
-                                        {
-                                            error
-                                        }
-                                    </p>
+                                    <Alert tone="error">{error}</Alert>
                                 )}
 
                                 <button
@@ -758,27 +751,19 @@ function StudentAssignmentsPage() {
 
     return (
         <div>
-            <div className="mb-6">
-                <h1 className="text-2xl font-bold">
+            <PageHeader title={<>
                     Assignments
-                </h1>
-
-                <p className="text-gray-500 mt-1">
+                </>} description={<>
                     View assignments for your class.
-                </p>
-            </div>
+                </>} />
 
             {error && (
-                <p className="text-red-500 mb-4">
-                    {error}
-                </p>
+                <Alert tone="error">{error}</Alert>
             )}
 
             {assignments.length ===
             0 ? (
-                <div className="bg-white rounded shadow p-6 text-gray-500">
-                    No assignments available.
-                </div>
+                <div className="bg-white rounded shadow p-6 text-gray-500"><EmptyState title="No assignments available." description="Records will appear here when they are available." /></div>
             ) : (
                 <div className="bg-white rounded shadow overflow-x-auto">
                     <TableToolbar {...assignmentsPagination} label="Assignments" />
@@ -861,13 +846,9 @@ function StudentAssignmentsPage() {
                                             }
                                         </td>
 
-                                        <td className="p-4">
-                                            {
-                                                getStatus(
+                                        <td className="p-4"><StatusBadge status={getStatus(
                                                     assignment
-                                                )
-                                            }
-                                        </td>
+                                                )} /></td>
 
                                         <td className="p-4">
                                             <button

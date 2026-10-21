@@ -1,3 +1,9 @@
+import StatusBadge from '../../components/StatusBadge';
+import PageHeader from '../../components/PageHeader';
+import Alert from '../../components/Alert';
+import LoadingState from '../../components/LoadingState';
+import EmptyState from '../../components/EmptyState';
+import FormField from '../../components/FormField';
 import TableToolbar from '../../components/TableToolbar';
 import SortableHeader from '../../components/SortableHeader';
 import Pagination from '../../components/Pagination';
@@ -229,15 +235,11 @@ function TeachersPage() {
 
     return (
         <div>
-            <div className="mb-6">
-                <h1 className="text-2xl font-bold">
+            <PageHeader title={<>
                     Teachers
-                </h1>
-
-                <p className="text-gray-500 mt-1">
+                </>} description={<>
                     View and update teacher records.
-                </p>
-            </div>
+                </>} />
 
             {editingTeacher && (
                 <EditModal open={Boolean(editingTeacher)} title="Edit teacher" busy={saving} onClose={resetForm}>
@@ -250,7 +252,7 @@ function TeachersPage() {
                         </h2>
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <input
+                            <FormField label="First name"><input
                                 value={form.firstName}
                                 onChange={(event) =>
                                     setForm({
@@ -261,9 +263,9 @@ function TeachersPage() {
                                 }
                                 placeholder="First name"
                                 className="border rounded p-2"
-                            />
+                            /></FormField>
 
-                            <input
+                            <FormField label="Last name"><input
                                 value={form.lastName}
                                 onChange={(event) =>
                                     setForm({
@@ -274,9 +276,9 @@ function TeachersPage() {
                                 }
                                 placeholder="Last name"
                                 className="border rounded p-2"
-                            />
+                            /></FormField>
 
-                            <input
+                            <FormField label="Phone number"><input
                                 value={form.phoneNumber}
                                 onChange={(event) =>
                                     setForm({
@@ -287,9 +289,9 @@ function TeachersPage() {
                                 }
                                 placeholder="Phone number"
                                 className="border rounded p-2"
-                            />
+                            /></FormField>
 
-                            <select
+                            <FormField label="Department"><select
                                 value={form.departmentId}
                                 onChange={(event) =>
                                     setForm({
@@ -313,10 +315,10 @@ function TeachersPage() {
                                         </option>
                                     )
                                 )}
-                            </select>
+                            </select></FormField>
                         </div>
 
-                        <textarea
+                        <FormField label="Address"><textarea
                             value={form.address}
                             onChange={(event) =>
                                 setForm({
@@ -327,18 +329,14 @@ function TeachersPage() {
                             placeholder="Address"
                             rows={3}
                             className="border rounded p-2 w-full mt-4"
-                        />
+                        /></FormField>
 
                         {error && (
-                            <p className="text-red-500 mt-3">
-                                {error}
-                            </p>
+                            <Alert tone="error">{error}</Alert>
                         )}
 
                         {success && (
-                            <p className="text-green-600 mt-3">
-                                {success}
-                            </p>
+                            <Alert tone="success">{success}</Alert>
                         )}
 
                         <div className="flex justify-end gap-3 mt-4">
@@ -349,7 +347,6 @@ function TeachersPage() {
                             >
                                 Cancel
                             </button>
-
                             <button
                                 type="submit"
                                 disabled={saving}
@@ -365,15 +362,11 @@ function TeachersPage() {
             )}
 
             {!editingTeacher && error && (
-                <p className="text-red-500 mb-4">
-                    {error}
-                </p>
+                <Alert tone="error">{error}</Alert>
             )}
 
             {!editingTeacher && success && (
-                <p className="text-green-600 mb-4">
-                    {success}
-                </p>
+                <Alert tone="success">{success}</Alert>
             )}
 
             <div className="bg-white rounded shadow overflow-x-auto">
@@ -408,18 +401,14 @@ function TeachersPage() {
                                 <td
                                     colSpan={6}
                                     className="p-4 text-center"
-                                >
-                                    Loading...
-                                </td>
+                                ><LoadingState /></td>
                             </tr>
                         ) : teachers.length === 0 ? (
                             <tr>
                                 <td
                                     colSpan={6}
                                     className="p-4 text-center text-gray-500"
-                                >
-                                    No teachers available.
-                                </td>
+                                ><EmptyState title="No teachers available." description="Create an account from the Users page to get started." /></td>
                             </tr>
                         ) : (
                             teachersPagination.items.map((teacher) => (
@@ -442,11 +431,9 @@ function TeachersPage() {
                                         {teacher.phone_number ||
                                             '-'}
                                     </td>
-                                    <td className="p-3">
-                                        {teacher.is_active
+                                    <td className="p-3"><StatusBadge status={teacher.is_active
                                             ? 'Active'
-                                            : 'Inactive'}
-                                    </td>
+                                            : 'Inactive'} /></td>
                                     <td className="p-3">
                                         <div className="flex gap-3">
                                             <button

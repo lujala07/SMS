@@ -23,7 +23,7 @@
 .edit-modal-content > form,
 .edit-modal-content > div { margin: 0; padding: 0; border: 0; border-radius: 0; box-shadow: none; }
 .edit-modal-content h2,
-.edit-modal-content > div > div:first-child { display: none; }
+.edit-modal-content .modal-legacy-heading { display: none; }
 .edit-modal-content form > .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 20px; }
 .edit-modal-content form.grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 20px; }
 .edit-modal-content label { display: block; margin-bottom: 7px; font-size: 13px; font-weight: 500; color: #374151; }

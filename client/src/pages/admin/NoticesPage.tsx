@@ -1,3 +1,9 @@
+import StatusBadge from '../../components/StatusBadge';
+import PageHeader from '../../components/PageHeader';
+import Alert from '../../components/Alert';
+import LoadingState from '../../components/LoadingState';
+import EmptyState from '../../components/EmptyState';
+import FormField from '../../components/FormField';
 import Pagination from '../../components/Pagination';
 import { usePagination } from '../../hooks/usePagination';
 import {
@@ -209,21 +215,16 @@ function NoticesPage() {
 
     return (
         <div>
-            <div className="mb-6">
-                <h1 className="text-2xl font-bold">
+            <PageHeader title={<>
                     Notices
-                </h1>
-
-                <p className="text-gray-500 mt-1">
+                </>} description={<>
                     Create and manage notices.
-                </p>
-                <button type="button" onClick={() => { resetForm(); setFormOpen(true); }} className="mt-4 rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">
+                </>} action={<button type="button" onClick={() => { resetForm(); setFormOpen(true); }} className="mt-4 rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">
                     Create Notice
-                </button>
-            </div>
+                </button>} />
 
-            {!formOpen && error && <p role="alert" className="mb-4 text-red-500">{error}</p>}
-            {!formOpen && success && <p role="status" className="mb-4 text-green-600">{success}</p>}
+            {!formOpen && error && <Alert tone="error">{error}</Alert>}
+            {!formOpen && success && <Alert tone="success">{success}</Alert>}
 
             {formOpen && <EditModal open={formOpen} title={editingNotice ? 'Edit notice' : 'Create notice'} busy={saving} onClose={resetForm}>
                 <form noValidate
@@ -237,7 +238,7 @@ function NoticesPage() {
                     </h2>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <input
+                        <FormField label="Title" className="md:col-span-2"><input
                             aria-label="Title"
                             maxLength={255}
                             value={form.title}
@@ -249,9 +250,9 @@ function NoticesPage() {
                             }
                             placeholder="Title"
                             className="border rounded p-2 md:col-span-2"
-                        />
+                        /></FormField>
 
-                        <select
+                        <FormField label="Audience"><select
                             aria-label="Audience"
                             value={form.audience}
                             onChange={(event) =>
@@ -272,10 +273,10 @@ function NoticesPage() {
                             <option value="students">
                                 Students
                             </option>
-                        </select>
+                        </select></FormField>
                     </div>
 
-                    <textarea
+                    <FormField label="Content"><textarea
                         aria-label="Notice content"
                         value={form.content}
                         onChange={(event) =>
@@ -287,21 +288,25 @@ function NoticesPage() {
                         placeholder="Notice content"
                         rows={4}
                         className="border rounded p-2 w-full mt-4"
-                    />
+                    /></FormField>
 
                     {error && (
-                        <p className="text-red-500 mt-3">
-                            {error}
-                        </p>
+                        <Alert tone="error">{error}</Alert>
                     )}
 
                     {success && (
-                        <p className="text-green-600 mt-3">
-                            {success}
-                        </p>
+                        <Alert tone="success">{success}</Alert>
                     )}
 
                     <div className="flex justify-end gap-3 mt-4">
+                        <button
+                            type="button"
+                            onClick={resetForm}
+                            disabled={saving}
+                            className="border px-4 py-2 rounded"
+                        >
+                            Cancel
+                        </button>
                         <button
                             type="submit"
                             disabled={saving}
@@ -313,27 +318,14 @@ function NoticesPage() {
                                   ? 'Update Notice'
                                   : 'Create Notice'}
                         </button>
-
-                            <button
-                                type="button"
-                                onClick={resetForm}
-                                disabled={saving}
-                                className="border px-4 py-2 rounded"
-                            >
-                                Cancel
-                            </button>
                     </div>
                 </form>
             </EditModal>}
 
             {loading ? (
-                <div className="bg-white p-4 rounded shadow">
-                    Loading...
-                </div>
+                <div className="bg-white p-4 rounded shadow"><LoadingState /></div>
             ) : notices.length === 0 ? (
-                <div className="bg-white p-4 rounded shadow text-gray-500">
-                    No notices available.
-                </div>
+                <div className="bg-white p-4 rounded shadow text-gray-500"><EmptyState title="No notices available." description="Use the button above to add the first record." /></div>
             ) : (
                 <div className="space-y-4">
                     {noticesPagination.items.map((notice) => (
@@ -350,7 +342,7 @@ function NoticesPage() {
                                     <p className="text-sm text-gray-500 capitalize mt-1">
                                         {notice.audience}
                                     </p>
-                                    <p className="mt-1 text-sm text-gray-600">{notice.status === 'pending' ? <span style={{ color: '#92400e', fontWeight: 500 }}>Pending approval</span> : notice.status === 'rejected' ? 'Rejected' : 'Published'}</p>
+                                    <p className="mt-1 text-sm text-gray-600"><StatusBadge status={notice.status === 'pending' ? 'Pending approval' : notice.status === 'rejected' ? 'Rejected' : 'Published'} /></p>
                                 </div>
 
                                 <div className="flex gap-3">

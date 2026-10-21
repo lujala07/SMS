@@ -1,3 +1,6 @@
+import PageHeader from '../../components/PageHeader';
+import LoadingState from '../../components/LoadingState';
+import EmptyState from '../../components/EmptyState';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../../services/api';
@@ -62,13 +65,7 @@ function AdminDashboard() {
 
     return (
         <div className="mx-auto max-w-6xl space-y-6">
-            <header className="flex flex-wrap items-start justify-between gap-4">
-                <div>
-                    <h1 className="text-2xl font-semibold text-gray-900">Admin Dashboard</h1>
-                    <p className="mt-1 text-sm text-gray-600">Accounts and academic overview</p>
-                </div>
-                <Link to="/admin/users" className="rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">Create account</Link>
-            </header>
+            <PageHeader title="Admin Dashboard" description="Accounts and academic overview" action={<Link to="/admin/users" className="inline-flex min-h-10 items-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">Create account</Link>} />
 
             {!loading && (error || noticeError) && (
                 <div className="flex flex-wrap items-center justify-between gap-3 rounded border border-red-200 bg-red-50 p-4 text-sm text-red-700" role="alert">
@@ -99,11 +96,11 @@ function AdminDashboard() {
                     <h2 className="font-semibold text-gray-900">Recent notices</h2>
                     <Link to="/admin/notices" className="text-sm text-blue-700 hover:underline">View all notices</Link>
                 </div>
-                {loading ? <p className="p-5 text-sm text-gray-500" role="status">Loading notices...</p> : noticeError ? (
+                {loading ? <div className="p-5 text-sm text-gray-500" role="status"><LoadingState /></div> : noticeError ? (
                     <p className="p-5 text-sm text-gray-600">Notices are currently unavailable.</p>
                 ) : notices.length === 0 ? (
                     <div className="p-5">
-                        <p className="text-sm text-gray-600">No notices have been posted yet.</p>
+                        <div className="text-sm text-gray-600"><EmptyState title="No notices have been posted yet." description="Records will appear here when they are available." /></div>
                         <Link to="/admin/notices" className="mt-2 inline-block text-sm text-blue-700 hover:underline">Create a notice</Link>
                     </div>
                 ) : (

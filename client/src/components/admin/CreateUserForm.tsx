@@ -1,3 +1,4 @@
+import Alert from '../Alert';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { mobileError, normalizeNepalMobile } from '../../utils/phone';
@@ -283,12 +284,12 @@ function CreateUserForm({ onSuccess }: Props) {
                 className="grid grid-cols-1 md:grid-cols-2 gap-4"
             >
                 <div>
-                    <label className="block mb-1 font-medium">
+                    <label htmlFor="createuserform-field-0" className="block mb-1 font-medium">
                         Role
                         {requiredMark}
                     </label>
 
-                    <select
+                    <select id="createuserform-field-0"
                         value={role}
                         onChange={(event) =>
                             handleRoleChange(
@@ -312,12 +313,12 @@ function CreateUserForm({ onSuccess }: Props) {
                 </div>
 
                 <div>
-                    <label className="block mb-1 font-medium">
+                    <label htmlFor="createuserform-field-1" className="block mb-1 font-medium">
                         Email
                         {requiredMark}
                     </label>
 
-                    <input
+                    <input id="createuserform-field-1"
                         type="email"
                         value={email}
                         onChange={(event) =>
@@ -329,12 +330,12 @@ function CreateUserForm({ onSuccess }: Props) {
                 </div>
 
                 {role === 'admin' && <div>
-                    <label className="block mb-1 font-medium">
+                    <label htmlFor="createuserform-field-2" className="block mb-1 font-medium">
                         Password
                         {requiredMark}
                     </label>
 
-                    <input
+                    <input id="createuserform-field-2"
                         type="password"
                         value={password}
                         onChange={(event) =>
@@ -348,12 +349,12 @@ function CreateUserForm({ onSuccess }: Props) {
                 {role !== 'admin' && (
                     <>
                         <div>
-                            <label className="block mb-1 font-medium">
+                            <label htmlFor="createuserform-field-3" className="block mb-1 font-medium">
                                 First Name
                                 {requiredMark}
                             </label>
 
-                            <input
+                            <input id="createuserform-field-3"
                                 type="text"
                                 value={firstName}
                                 onChange={(event) =>
@@ -367,12 +368,12 @@ function CreateUserForm({ onSuccess }: Props) {
                         </div>
 
                         <div>
-                            <label className="block mb-1 font-medium">
+                            <label htmlFor="createuserform-field-4" className="block mb-1 font-medium">
                                 Last Name
                                 {requiredMark}
                             </label>
 
-                            <input
+                            <input id="createuserform-field-4"
                                 type="text"
                                 value={lastName}
                                 onChange={(event) =>
@@ -386,12 +387,12 @@ function CreateUserForm({ onSuccess }: Props) {
                         </div>
 
                         <div>
-                            <label className="block mb-1 font-medium">
+                            <label htmlFor="createuserform-field-5" className="block mb-1 font-medium">
                                 Phone Number
                                 {requiredMark}
                             </label>
 
-                            <input
+                            <input id="createuserform-field-5"
                                 type="text"
                                 value={phoneNumber}
                                 onChange={(event) =>
@@ -405,12 +406,12 @@ function CreateUserForm({ onSuccess }: Props) {
                         </div>
 
                         <div>
-                            <label className="block mb-1 font-medium">
+                            <label htmlFor="createuserform-field-6" className="block mb-1 font-medium">
                                 Address
                                 {requiredMark}
                             </label>
 
-                            <input
+                            <input id="createuserform-field-6"
                                 type="text"
                                 value={address}
                                 onChange={(event) =>
@@ -427,12 +428,12 @@ function CreateUserForm({ onSuccess }: Props) {
 
                 {role === 'teacher' && (
                     <div className="md:col-span-2">
-                        <label className="block mb-1 font-medium">
+                        <label htmlFor="createuserform-field-7" className="block mb-1 font-medium">
                             Department
                             {requiredMark}
                         </label>
 
-                        <select
+                        <select id="createuserform-field-7"
                             value={departmentId}
                             onChange={(event) =>
                                 setDepartmentId(
@@ -464,12 +465,12 @@ function CreateUserForm({ onSuccess }: Props) {
                 {role === 'student' && (
                     <>
                         <div>
-                            <label className="block mb-1 font-medium">
+                            <label htmlFor="createuserform-field-8" className="block mb-1 font-medium">
                                 Class
                                 {requiredMark}
                             </label>
 
-                            <select
+                            <select id="createuserform-field-8"
                                 value={classId}
                                 onChange={(event) =>
                                     setClassId(
@@ -499,12 +500,12 @@ function CreateUserForm({ onSuccess }: Props) {
                         </div>
 
                         <div>
-                            <label className="block mb-1 font-medium">
+                            <label htmlFor="createuserform-field-9" className="block mb-1 font-medium">
                                 Gender
                                 {requiredMark}
                             </label>
 
-                            <select
+                            <select id="createuserform-field-9"
                                 value={gender}
                                 onChange={(event) =>
                                     setGender(
@@ -534,15 +535,11 @@ function CreateUserForm({ onSuccess }: Props) {
                 )}
 
                 {error && (
-                    <p className="text-red-500 text-sm md:col-span-2">
-                        {error}
-                    </p>
+                    <Alert tone="error">{error}</Alert>
                 )}
 
                 {success && (
-                    <p className="text-green-600 text-sm md:col-span-2">
-                        {success}
-                    </p>
+                    <Alert tone="success">{success}</Alert>
                 )}
 
                 <div className="md:col-span-2 flex justify-end">

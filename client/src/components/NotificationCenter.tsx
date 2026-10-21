@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Bell, X } from 'lucide-react';
+import LoadingState from './LoadingState';
+import EmptyState from './EmptyState';
 import { io } from 'socket.io-client';
 import api, { API_BASE_URL } from '../services/api';
 
@@ -162,7 +164,7 @@ function NotificationCenter() {
                     </div>
                     <div className="flex-1 overflow-y-auto" aria-busy={loading}>
                         {error && <div className="m-4 rounded bg-red-50 p-3 text-sm text-red-700" role="alert">{error} <button type="button" onClick={() => void load()} className="underline">Retry</button></div>}
-                        {loading && !notifications.length ? <p className="p-5 text-sm text-gray-500" role="status">Loading notifications...</p> : !notifications.length && !error ? <p className="p-5 text-sm text-gray-500">No notifications yet.</p> : (
+                        {loading && !notifications.length ? <div className="p-5"><LoadingState label="Loading notifications" /></div> : !notifications.length && !error ? <EmptyState title="You're all caught up" description="New announcements and updates will appear here." /> : (
                             <ul className="divide-y divide-gray-100">
                                 {notifications.map(notification => (
                                     <li key={notification.id}>

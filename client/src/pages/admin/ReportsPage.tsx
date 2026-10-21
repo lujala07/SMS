@@ -1,3 +1,8 @@
+import StatusBadge from '../../components/StatusBadge';
+import PageHeader from '../../components/PageHeader';
+import Alert from '../../components/Alert';
+import LoadingState from '../../components/LoadingState';
+import EmptyState from '../../components/EmptyState';
 import Pagination from '../../components/Pagination';
 import { usePagination } from '../../hooks/usePagination';
 import { useEffect, useState } from 'react';
@@ -86,29 +91,21 @@ function ReportsPage() {
                     Reports
                 </h1>
 
-                <div className="bg-white p-4 rounded shadow">
-                    Loading...
-                </div>
+                <div className="bg-white p-4 rounded shadow"><LoadingState /></div>
             </div>
         );
     }
 
     return (
         <div>
-            <div className="mb-6">
-                <h1 className="text-2xl font-bold">
+            <PageHeader title={<>
                     Reports
-                </h1>
-
-                <p className="text-gray-500 mt-1">
+                </>} description={<>
                     System summary and academic reports.
-                </p>
-            </div>
+                </>} />
 
             {error && (
-                <p className="text-red-500 mb-4">
-                    {error}
-                </p>
+                <Alert tone="error">{error}</Alert>
             )}
 
             {dashboard && (
@@ -152,9 +149,7 @@ function ReportsPage() {
                     </h2>
 
                     {attendance.length === 0 ? (
-                        <p className="text-gray-500">
-                            No attendance data available.
-                        </p>
+                        <div className="text-gray-500"><EmptyState title="No attendance data available." description="Records will appear here when they are available." /></div>
                     ) : (
                         <div className="space-y-3">
                             {attendance.map((item) => (
@@ -162,9 +157,7 @@ function ReportsPage() {
                                     key={item.status}
                                     className="flex justify-between border-b pb-2"
                                 >
-                                    <span className="capitalize">
-                                        {item.status}
-                                    </span>
+                                    <span className="capitalize"><StatusBadge status={item.status} /></span>
 
                                     <span className="font-semibold">
                                         {item.count}
@@ -181,9 +174,7 @@ function ReportsPage() {
                     </h2>
 
                     {assignments.length === 0 ? (
-                        <p className="text-gray-500">
-                            No assignment data available.
-                        </p>
+                        <div className="text-gray-500"><EmptyState title="No assignment data available." description="Records will appear here when they are available." /></div>
                     ) : (
                         <div className="space-y-3">
                             {assignmentSummaryPagination.items.map(

@@ -1,3 +1,7 @@
+import PageHeader from '../../components/PageHeader';
+import Alert from '../../components/Alert';
+import LoadingState from '../../components/LoadingState';
+import EmptyState from '../../components/EmptyState';
 import TableToolbar from '../../components/TableToolbar';
 import SortableHeader from '../../components/SortableHeader';
 import Pagination from '../../components/Pagination';
@@ -235,15 +239,11 @@ function StudentsPage() {
 
     return (
         <div>
-            <div className="mb-6">
-                <h1 className="text-2xl font-bold">
+            <PageHeader title={<>
                     Students
-                </h1>
-
-                <p className="text-gray-500 mt-1">
+                </>} description={<>
                     View and manage student accounts.
-                </p>
-            </div>
+                </>} />
 
             <dialog
                 ref={editDialog}
@@ -313,7 +313,7 @@ function StudentsPage() {
                                     <input id="student-address" type="text" value={form.address} onChange={event => setForm({ ...form, address: event.target.value })} className={inputClassName} />
                                 </div>
                             </div>
-                            {error && <p role="alert" className="student-edit-error">{error}</p>}
+                            {error && <Alert tone="error">{error}</Alert>}
                         </div>
 
                         <footer className="student-edit-actions">
@@ -325,15 +325,11 @@ function StudentsPage() {
             </dialog>
 
             {!editingStudent && error && (
-                <p className="text-red-500 mb-4">
-                    {error}
-                </p>
+                <Alert tone="error">{error}</Alert>
             )}
 
             {!editingStudent && success && (
-                <p className="text-green-600 mb-4">
-                    {success}
-                </p>
+                <Alert tone="success">{success}</Alert>
             )}
 
             <div className="bg-white rounded shadow overflow-x-auto">
@@ -368,18 +364,14 @@ function StudentsPage() {
                                 <td
                                     colSpan={6}
                                     className="p-4 text-center"
-                                >
-                                    Loading...
-                                </td>
+                                ><LoadingState /></td>
                             </tr>
                         ) : students.length === 0 ? (
                             <tr>
                                 <td
                                     colSpan={6}
                                     className="p-4 text-center text-gray-500"
-                                >
-                                    No students available.
-                                </td>
+                                ><EmptyState title="No students available." description="Create an account from the Users page to get started." /></td>
                             </tr>
                         ) : (
                             studentsPagination.items.map((student) => (
