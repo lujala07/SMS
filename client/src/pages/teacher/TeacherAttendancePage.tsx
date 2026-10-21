@@ -1,3 +1,5 @@
+import Pagination from '../../components/Pagination';
+import { usePagination } from '../../hooks/usePagination';
 import {
     useEffect,
     useState
@@ -91,6 +93,9 @@ function TeacherAttendancePage() {
 
         setRecords(response.data);
     };
+
+    const studentsPagination = usePagination(students, selectedSubject);
+    const attendanceHistoryPagination = usePagination(records);
 
     useEffect(() => {
         const loadInitialData = async () => {
@@ -395,7 +400,7 @@ function TeacherAttendancePage() {
                             </thead>
 
                             <tbody>
-                                {students.map(
+                                {studentsPagination.items.map(
                                     (student) => (
                                         <tr
                                             key={
@@ -461,6 +466,7 @@ function TeacherAttendancePage() {
                                 )}
                             </tbody>
                         </table>
+                        <Pagination {...studentsPagination} label="Students" />
 
                         <button
                             type="button"
@@ -528,7 +534,7 @@ function TeacherAttendancePage() {
                                     </td>
                                 </tr>
                             ) : (
-                                records.map(
+                                attendanceHistoryPagination.items.map(
                                     (record) => (
                                         <tr
                                             key={
@@ -568,6 +574,7 @@ function TeacherAttendancePage() {
                             )}
                         </tbody>
                     </table>
+                    <Pagination {...attendanceHistoryPagination} label="Attendance history" />
                 </div>
             </div>
         </div>

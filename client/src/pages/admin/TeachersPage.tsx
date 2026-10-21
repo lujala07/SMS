@@ -1,3 +1,5 @@
+import Pagination from '../../components/Pagination';
+import { usePagination } from '../../hooks/usePagination';
 import {
     useEffect,
     useState
@@ -58,6 +60,8 @@ function TeachersPage() {
         setTeachers(teacherData);
         setDepartments(departmentData);
     };
+
+    const teachersPagination = usePagination(teachers);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -409,7 +413,7 @@ function TeachersPage() {
                                 </td>
                             </tr>
                         ) : (
-                            teachers.map((teacher) => (
+                            teachersPagination.items.map((teacher) => (
                                 <tr
                                     key={teacher.id}
                                     className="border-t"
@@ -465,6 +469,7 @@ function TeachersPage() {
                         )}
                     </tbody>
                 </table>
+                <Pagination {...teachersPagination} label="Teachers" />
             </div>
         </div>
     );

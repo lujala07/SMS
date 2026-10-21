@@ -1,3 +1,5 @@
+import Pagination from '../../components/Pagination';
+import { usePagination } from '../../hooks/usePagination';
 import {
     useEffect,
     useState
@@ -43,6 +45,8 @@ function NoticesPage() {
         const data = await getNotices();
         setNotices([...data].sort((first, second) => Number(second.status === 'pending') - Number(first.status === 'pending')));
     };
+
+    const noticesPagination = usePagination(notices);
 
     useEffect(() => {
         const fetchNotices = async () => {
@@ -318,7 +322,7 @@ function NoticesPage() {
                 </div>
             ) : (
                 <div className="space-y-4">
-                    {notices.map((notice) => (
+                    {noticesPagination.items.map((notice) => (
                         <div
                             key={notice.id}
                             className="bg-white p-5 rounded shadow"
@@ -387,6 +391,8 @@ function NoticesPage() {
                     ))}
                 </div>
             )}
+
+            <Pagination {...noticesPagination} label="Notices" />
         </div>
     );
 }

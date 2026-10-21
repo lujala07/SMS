@@ -1,3 +1,5 @@
+import Pagination from '../../components/Pagination';
+import { usePagination } from '../../hooks/usePagination';
 import { useEffect, useState } from 'react';
 import api from '../../services/api';
 
@@ -38,6 +40,8 @@ function ReportsPage() {
 
     const [error, setError] =
         useState('');
+
+    const assignmentSummaryPagination = usePagination(assignments);
 
     useEffect(() => {
         const fetchReports = async () => {
@@ -182,7 +186,7 @@ function ReportsPage() {
                         </p>
                     ) : (
                         <div className="space-y-3">
-                            {assignments.map(
+                            {assignmentSummaryPagination.items.map(
                                 (assignment, index) => (
                                     <div
                                         key={
@@ -211,6 +215,7 @@ function ReportsPage() {
                             )}
                         </div>
                     )}
+                    <Pagination {...assignmentSummaryPagination} label="Assignment summary" />
                 </div>
             </div>
         </div>

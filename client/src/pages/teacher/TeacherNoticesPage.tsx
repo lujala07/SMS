@@ -1,3 +1,5 @@
+import Pagination from '../../components/Pagination';
+import { usePagination } from '../../hooks/usePagination';
 import {
     useEffect,
     useState
@@ -88,6 +90,8 @@ function TeacherNoticesPage() {
             response.data
         );
     };
+
+    const noticesPagination = usePagination(notices);
 
     useEffect(() => {
         const loadData =
@@ -481,7 +485,7 @@ function TeacherNoticesPage() {
                     </div>
                 ) : (
                     <div className="space-y-4">
-                        {notices.map(
+                        {noticesPagination.items.map(
                             (
                                 notice
                             ) => (
@@ -566,6 +570,8 @@ function TeacherNoticesPage() {
                     </div>
                 )}
             </div>
+
+            <Pagination {...noticesPagination} label="Notices" />
         </div>
     );
 }

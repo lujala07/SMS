@@ -1,3 +1,5 @@
+import Pagination from '../../components/Pagination';
+import { usePagination } from '../../hooks/usePagination';
 import {
     useEffect,
     useState
@@ -41,6 +43,9 @@ function StudentAttendancePage() {
         useState<AttendanceResponse | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+
+    const subjectSummaryPagination = usePagination(data?.summary.subjects ?? []);
+    const attendanceHistoryPagination = usePagination(data?.records ?? []);
 
     useEffect(() => {
         const loadAttendance = async () => {
@@ -168,7 +173,7 @@ function StudentAttendancePage() {
                     </thead>
 
                     <tbody>
-                        {data.summary.subjects.map(
+                        {subjectSummaryPagination.items.map(
                             (subject) => (
                                 <tr
                                     key={subject.subject_id}
@@ -196,6 +201,7 @@ function StudentAttendancePage() {
                         )}
                     </tbody>
                 </table>
+                <Pagination {...subjectSummaryPagination} label="Subject summary" />
             </div>
 
             <div className="bg-white rounded shadow overflow-x-auto">
@@ -225,7 +231,7 @@ function StudentAttendancePage() {
                                 </td>
                             </tr>
                         ) : (
-                            data.records.map((record) => (
+                            attendanceHistoryPagination.items.map((record) => (
                                 <tr
                                     key={record.id}
                                     className="border-t"
@@ -248,6 +254,7 @@ function StudentAttendancePage() {
                         )}
                     </tbody>
                 </table>
+                <Pagination {...attendanceHistoryPagination} label="Attendance history" />
             </div>
         </div>
     );

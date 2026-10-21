@@ -1,3 +1,5 @@
+import Pagination from '../../components/Pagination';
+import { usePagination } from '../../hooks/usePagination';
 import {
     useEffect,
     useRef,
@@ -116,6 +118,8 @@ function StudentAssignmentsPage() {
                 }
             }
         };
+
+    const assignmentsPagination = usePagination(assignments);
 
     useEffect(() => {
         const loadData =
@@ -802,7 +806,7 @@ function StudentAssignmentsPage() {
                         </thead>
 
                         <tbody>
-                            {assignments.map(
+                            {assignmentsPagination.items.map(
                                 (
                                     assignment
                                 ) => (
@@ -873,6 +877,7 @@ function StudentAssignmentsPage() {
                             )}
                         </tbody>
                     </table>
+                    <Pagination {...assignmentsPagination} label="Assignments" />
                 </div>
             )}
         </div>

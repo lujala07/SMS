@@ -1,3 +1,5 @@
+import Pagination from '../../components/Pagination';
+import { usePagination } from '../../hooks/usePagination';
 import {
     useEffect,
     useState
@@ -40,6 +42,8 @@ function DepartmentsPage() {
         const data = await getDepartments();
         setDepartments(data);
     };
+
+    const departmentsPagination = usePagination(departments);
 
     useEffect(() => {
         const fetchDepartments = async () => {
@@ -301,7 +305,7 @@ function DepartmentsPage() {
                                 </td>
                             </tr>
                         ) : (
-                            departments.map(
+                            departmentsPagination.items.map(
                                 (department) => (
                                     <tr
                                         key={department.id}
@@ -345,6 +349,7 @@ function DepartmentsPage() {
                         )}
                     </tbody>
                 </table>
+                <Pagination {...departmentsPagination} label="Departments" />
             </div>
         </div>
     );

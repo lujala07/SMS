@@ -1,3 +1,5 @@
+import Pagination from '../../components/Pagination';
+import { usePagination } from '../../hooks/usePagination';
 import {
     useEffect,
     useRef,
@@ -51,6 +53,8 @@ function StudentsPage() {
         useState('');
     const [success, setSuccess] =
         useState('');
+
+    const studentsPagination = usePagination(students);
 
     useEffect(() => {
         if (editingStudent) editDialog.current?.showModal();
@@ -367,7 +371,7 @@ function StudentsPage() {
                                 </td>
                             </tr>
                         ) : (
-                            students.map((student) => (
+                            studentsPagination.items.map((student) => (
                                 <tr
                                     key={student.id}
                                     className="border-t"
@@ -421,6 +425,7 @@ function StudentsPage() {
                         )}
                     </tbody>
                 </table>
+                <Pagination {...studentsPagination} label="Students" />
             </div>
         </div>
     );

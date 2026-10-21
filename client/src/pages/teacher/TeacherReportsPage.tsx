@@ -1,3 +1,5 @@
+import Pagination from '../../components/Pagination';
+import { usePagination } from '../../hooks/usePagination';
 import {
     useEffect,
     useState
@@ -52,6 +54,8 @@ function TeacherReportsPage() {
         error,
         setError
     ] = useState('');
+
+    const assignmentSummaryPagination = usePagination(assignments);
 
     useEffect(() => {
         const loadReports =
@@ -332,7 +336,7 @@ function TeacherReportsPage() {
                                     </td>
                                 </tr>
                             ) : (
-                                assignments.map(
+                                assignmentSummaryPagination.items.map(
                                     (
                                         assignment
                                     ) => (
@@ -384,6 +388,7 @@ function TeacherReportsPage() {
                             )}
                         </tbody>
                     </table>
+                    <Pagination {...assignmentSummaryPagination} label="Assignment summary" />
                 </div>
             </div>
         </div>

@@ -1,3 +1,5 @@
+import Pagination from '../../components/Pagination';
+import { usePagination } from '../../hooks/usePagination';
 import {
     useEffect,
     useState
@@ -55,6 +57,8 @@ function ClassesPage() {
         setClasses(classData);
         setDepartments(departmentData);
     };
+
+    const classesPagination = usePagination(classes);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -380,7 +384,7 @@ function ClassesPage() {
                                 </td>
                             </tr>
                         ) : (
-                            classes.map((classItem) => (
+                            classesPagination.items.map((classItem) => (
                                 <tr
                                     key={classItem.id}
                                     className="border-t"
@@ -430,6 +434,7 @@ function ClassesPage() {
                         )}
                     </tbody>
                 </table>
+                <Pagination {...classesPagination} label="Classes" />
             </div>
         </div>
     );
