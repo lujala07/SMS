@@ -141,10 +141,10 @@ function CreateUserForm({ onSuccess }: Props) {
             address.trim();
         if (
             !trimmedEmail ||
-            !password.trim()
+            (role === 'admin' && !password.trim())
         ) {
             setError(
-                'Email and password are required.'
+                role === 'admin' ? 'Email and password are required.' : 'Email is required.'
             );
             return;
         }
@@ -198,7 +198,6 @@ function CreateUserForm({ onSuccess }: Props) {
             if (role === 'teacher') {
                 await createTeacher({
                     email: trimmedEmail,
-                    password,
                     firstName:
                         trimmedFirstName,
                     lastName:
@@ -219,7 +218,6 @@ function CreateUserForm({ onSuccess }: Props) {
             if (role === 'student') {
                 await createStudent({
                     email: trimmedEmail,
-                    password,
                     firstName:
                         trimmedFirstName,
                     lastName:
@@ -234,7 +232,7 @@ function CreateUserForm({ onSuccess }: Props) {
             }
 
             setSuccess(
-                `${role.charAt(0).toUpperCase() + role.slice(1)} created successfully.`
+                role === 'admin' ? 'Admin created successfully.' : `${role.charAt(0).toUpperCase() + role.slice(1)} created. An invitation email has been sent so they can set their password.`
             );
 
             setEmail('');
@@ -273,11 +271,11 @@ function CreateUserForm({ onSuccess }: Props) {
                 Add User
             </h2>
 
-            <form
+            <form noValidate
                 onSubmit={handleSubmit}
                 className="grid grid-cols-1 md:grid-cols-2 gap-4"
             >
-                <div className="md:col-span-2">
+                <div>
                     <label className="block mb-1 font-medium">
                         Role
                         {requiredMark}
@@ -323,7 +321,7 @@ function CreateUserForm({ onSuccess }: Props) {
                     />
                 </div>
 
-                <div>
+                {role === 'admin' && <div>
                     <label className="block mb-1 font-medium">
                         Password
                         {requiredMark}
@@ -338,7 +336,7 @@ function CreateUserForm({ onSuccess }: Props) {
                         placeholder="Enter password"
                         className="w-full border p-2 rounded"
                     />
-                </div>
+                </div>}
 
                 {role !== 'admin' && (
                     <>

@@ -4,6 +4,7 @@ import {
 } from 'react';
 
 import axios from 'axios';
+import { confirmDelete } from '../../components/confirmDelete';
 
 import api from '../../services/api';
 
@@ -182,7 +183,7 @@ function TeacherSubjectsPage() {
         id: number
     ) => {
         const confirmed =
-            window.confirm(
+            await confirmDelete(
                 'Remove this teacher-subject assignment?'
             );
 
@@ -255,7 +256,7 @@ function TeacherSubjectsPage() {
                     Assign Teacher
                 </h2>
 
-                <form
+                <form noValidate
                     onSubmit={handleAssign}
                     className="grid grid-cols-1 md:grid-cols-2 gap-4"
                 >

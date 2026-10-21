@@ -15,7 +15,6 @@ export interface Teacher {
 
 export interface CreateTeacherData {
     email: string;
-    password: string;
     departmentId?: number;
     firstName: string;
     lastName: string;

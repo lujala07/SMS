@@ -2,6 +2,7 @@ import {
     Request,
     Response
 } from 'express';
+import { validateDate } from '../utils/dateValidation.js';
 
 import {
     getAllAssignments,
@@ -125,6 +126,9 @@ export const addAssignment = async (
             });
         }
 
+        const dateError = validateDate(dueDate, 'Due date', 'future');
+        if (dateError) return res.status(400).json({ message: dateError });
+
         const assignment =
             await createAssignment(
                 req.user.userId,
@@ -189,6 +193,9 @@ export const editAssignment = async (
                     'Subject, title, due date and total marks are required'
             });
         }
+
+        const dateError = validateDate(dueDate, 'Due date', 'future');
+        if (dateError) return res.status(400).json({ message: dateError });
 
         const assignment =
             await updateAssignment(

@@ -1,5 +1,5 @@
 import pool from '../config/database.js';
-import { hashPassword } from '../utils/password.js';
+import { sendInvitation } from './invitationService.js';
 
 export const getAllStudents = async () => {
     const result = await pool.query(
@@ -196,7 +196,6 @@ export const getStudentDashboardData = async (
 
 export const createStudent = async (
     email: string,
-    password: string,
     classId: number,
     firstName: string,
     lastName: string,
@@ -212,11 +211,6 @@ export const createStudent = async (
         await client.query(
             'BEGIN'
         );
-
-        const passwordHash =
-            await hashPassword(
-                password
-            );
 
         const userResult =
             await client.query(
@@ -239,7 +233,7 @@ export const createStudent = async (
                     is_active`,
                 [
                     email,
-                    passwordHash
+                    null
                 ]
             );
 
@@ -283,6 +277,7 @@ export const createStudent = async (
                 ]
             );
 
+        await sendInvitation(client, user.id, email);
         await client.query(
             'COMMIT'
         );

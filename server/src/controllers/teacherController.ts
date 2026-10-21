@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { InvitationError } from '../services/invitationService.js';
 
 import {
     getAllTeachers,
@@ -34,17 +35,29 @@ export const addTeacher = async (
     try {
         const {
             email,
-            password,
             departmentId,
             firstName,
             lastName,
             phoneNumber,
             address
-        } = req.body;
+        } = req.body ?? {};
+
+        const requiredStrings = [email, firstName, lastName, phoneNumber, address];
+        if (requiredStrings.some(value => typeof value !== 'string' || !value.trim())) {
+            return res.status(400).json({ message: 'All required fields must be non-empty strings' });
+        }
+        if (email.trim().length > 255 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+            return res.status(400).json({ message: 'A valid email address is required' });
+        }
+        if (typeof departmentId !== 'number' || !Number.isInteger(departmentId) || departmentId <= 0 || departmentId > 2147483647) {
+            return res.status(400).json({ message: 'A valid department is required' });
+        }
+        if (firstName.trim().length > 100 || lastName.trim().length > 100 || phoneNumber.trim().length > 20) {
+            return res.status(400).json({ message: 'Names must be at most 100 characters and phone number at most 20 characters' });
+        }
 
         if (
             !String(email || '').trim() ||
-            !String(password || '').trim() ||
             !departmentId ||
             !String(firstName || '').trim() ||
             !String(lastName || '').trim() ||
@@ -53,13 +66,12 @@ export const addTeacher = async (
         ) {
             return res.status(400).json({
                 message:
-                    'Email, password, first name, last name, phone number, address and department are required'
+                    'Email, first name, last name, phone number, address and department are required'
             });
         }
 
         const teacher = await createTeacher(
             String(email).trim(),
-            String(password),
             Number(departmentId),
             String(firstName).trim(),
             String(lastName).trim(),
@@ -68,11 +80,14 @@ export const addTeacher = async (
         );
 
         return res.status(201).json({
-            message: 'Teacher created successfully',
+            message: 'Teacher created and invitation email sent',
             teacher
         });
 
     } catch (error: any) {
+        if (error instanceof InvitationError) {
+            return res.status(error.status).json({ message: error.message });
+        }
         console.error(
             'CREATE TEACHER ERROR:',
             error

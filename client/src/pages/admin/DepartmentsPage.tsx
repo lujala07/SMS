@@ -4,6 +4,7 @@ import {
 } from 'react';
 
 import axios from 'axios';
+import { confirmDelete } from '../../components/confirmDelete';
 
 import {
     createDepartment,
@@ -146,7 +147,7 @@ function DepartmentsPage() {
     const handleDelete = async (
         department: Department
     ) => {
-        const confirmed = window.confirm(
+        const confirmed = await confirmDelete(
             `Delete ${department.name}?`
         );
 
@@ -187,7 +188,7 @@ function DepartmentsPage() {
                 </p>
             </div>
 
-            <form
+            <form noValidate
                 onSubmit={handleSubmit}
                 className="bg-white rounded shadow p-5 mb-6"
             >

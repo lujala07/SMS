@@ -1,11 +1,17 @@
 CREATE TABLE users(
     id SERIAL PRIMARY KEY,
     email VARCHAR(255) UNIQUE NOT NULL,
-    password_hash VARCHAR(255) NOT NULL,
+    password_hash VARCHAR(255),
     role VARCHAR(50) NOT NULL
         CHECK (role IN ('admin', 'teacher', 'student')),
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE user_invitations (
+    user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+    token_hash VARCHAR(64) UNIQUE NOT NULL,
+    expires_at TIMESTAMPTZ NOT NULL
 );
 
 CREATE TABLE departments (
@@ -45,12 +51,18 @@ CREATE TABLE teachers (
 
 CREATE SEQUENCE student_code_seq;
 
+CREATE FUNCTION next_student_code() RETURNS TEXT
+LANGUAGE SQL VOLATILE AS $$
+    SELECT 'STU' || LPAD(code, GREATEST(3, LENGTH(code)), '0')
+    FROM (SELECT nextval('student_code_seq')::TEXT AS code) generated;
+$$;
+
 CREATE TABLE students (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL UNIQUE,
     class_id INTEGER NOT NULL,
     student_code VARCHAR(50) UNIQUE NOT NULL
-        DEFAULT ('STU' || LPAD(nextval('student_code_seq')::TEXT, 3, '0')),
+        DEFAULT next_student_code(),
     first_name VARCHAR(100) NOT NULL,
     last_name VARCHAR(100) NOT NULL,
     date_of_birth DATE,

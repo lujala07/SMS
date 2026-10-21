@@ -4,6 +4,7 @@ import {
 } from 'react';
 
 import axios from 'axios';
+import { confirmDelete } from '../../components/confirmDelete';
 
 import {
     getClasses,
@@ -163,7 +164,7 @@ function SubjectsPage() {
     const handleDelete = async (
         subject: Subject
     ) => {
-        const confirmed = window.confirm(
+        const confirmed = await confirmDelete(
             `Delete ${subject.name}?`
         );
 
@@ -202,7 +203,7 @@ function SubjectsPage() {
                 </p>
             </div>
 
-            <form
+            <form noValidate
                 onSubmit={handleSubmit}
                 className="bg-white rounded shadow p-5 mb-6"
             >

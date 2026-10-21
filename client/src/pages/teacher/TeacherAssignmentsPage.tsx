@@ -4,6 +4,8 @@ import {
 } from 'react';
 
 import axios from 'axios';
+import { confirmDelete } from '../../components/confirmDelete';
+import { today } from '../../utils/date';
 
 import api from '../../services/api';
 
@@ -156,6 +158,11 @@ function TeacherAssignmentsPage() {
             return;
         }
 
+        if (dueDate < today()) {
+            setError('Due date cannot be in the past.');
+            return;
+        }
+
         setSaving(true);
 
         const data = {
@@ -275,7 +282,7 @@ function TeacherAssignmentsPage() {
         id: number
     ) => {
         const confirmed =
-            window.confirm(
+            await confirmDelete(
                 'Delete this assignment?'
             );
 
@@ -368,7 +375,7 @@ function TeacherAssignmentsPage() {
                     )}
                 </div>
 
-                <form
+                <form noValidate
                     onSubmit={handleSubmit}
                     className="grid grid-cols-1 md:grid-cols-2 gap-4"
                 >

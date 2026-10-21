@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
+import pool from '../config/database.js';
 
 const getJwtSecret = () => {
     if (!process.env.JWT_SECRET) {
@@ -16,7 +17,7 @@ interface JwtPayload {
     role: string;
 }
 
-export const authenticate = (
+export const authenticate = async (
     req: Request,
     res: Response,
     next: NextFunction
@@ -31,15 +32,32 @@ export const authenticate = (
 
     const token = authHeader.substring(7);
 
+    let decoded: JwtPayload;
     try {
-        const decoded = jwt.verify(token, getJwtSecret()) as unknown as JwtPayload;
-        
-        req.user = decoded;
-
-        next();
+        const payload = jwt.verify(token, getJwtSecret());
+        if (typeof payload === 'string' || !Number.isSafeInteger(payload.userId) || payload.userId <= 0) {
+            throw new Error('Invalid user ID');
+        }
+        decoded = payload as JwtPayload;
     } catch {
         return res.status(401).json({
             message: 'Invalid or expired token'
         });
     }
+
+    try {
+        const result = await pool.query(
+            'SELECT id, role FROM users WHERE id = $1 AND is_active = true AND password_hash IS NOT NULL',
+            [decoded.userId]
+        );
+        const user = result.rows[0];
+        if (!user) {
+            return res.status(401).json({ message: 'Invalid or inactive account' });
+        }
+        req.user = { userId: user.id, role: user.role };
+    } catch (error) {
+        return next(error);
+    }
+
+    next();
 };

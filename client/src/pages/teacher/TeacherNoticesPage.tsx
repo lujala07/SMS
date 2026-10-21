@@ -4,6 +4,7 @@ import {
 } from 'react';
 
 import axios from 'axios';
+import { confirmDelete } from '../../components/confirmDelete';
 
 import api from '../../services/api';
 
@@ -254,7 +255,7 @@ function TeacherNoticesPage() {
         id: number
     ) => {
         const confirmed =
-            window.confirm(
+            await confirmDelete(
                 'Delete this notice?'
             );
 
@@ -353,7 +354,7 @@ function TeacherNoticesPage() {
                     )}
                 </div>
 
-                <form
+                <form noValidate
                     onSubmit={
                         handleSubmit
                     }

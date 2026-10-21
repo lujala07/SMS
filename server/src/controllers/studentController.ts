@@ -2,6 +2,8 @@ import {
     Request,
     Response
 } from 'express';
+import { validateDate } from '../utils/dateValidation.js';
+import { InvitationError } from '../services/invitationService.js';
 
 import {
     getAllStudents,
@@ -120,7 +122,6 @@ export const addStudent = async (
     try {
         const {
             email,
-            password,
             classId,
             firstName,
             lastName,
@@ -128,35 +129,42 @@ export const addStudent = async (
             phoneNumber,
             address,
             gender
-        } = req.body;
+        } = req.body ?? {};
 
-        if (
-            !String(email || '').trim() ||
-            !String(password || '').trim() ||
-            !classId ||
-            !String(firstName || '').trim() ||
-            !String(lastName || '').trim() ||
-            !String(phoneNumber || '').trim() ||
-            !String(address || '').trim() ||
-            !String(gender || '').trim()
-        ) {
-            return res.status(400).json({
-                message:
-                    'Email, password, class, first name, last name, phone number, address and gender are required'
-            });
+        const requiredStrings = [email, firstName, lastName, phoneNumber, address, gender];
+        if (requiredStrings.some(value => typeof value !== 'string' || !value.trim())) {
+            return res.status(400).json({ message: 'All required fields must be non-empty strings' });
         }
+
+        if (email.trim().length > 255 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+            return res.status(400).json({ message: 'A valid email address is required' });
+        }
+
+        if (typeof classId !== 'number' || !Number.isSafeInteger(classId) || classId <= 0 || classId > 2147483647) {
+            return res.status(400).json({ message: 'Class must be a positive integer' });
+        }
+
+        if (firstName.trim().length > 100 || lastName.trim().length > 100 || phoneNumber.trim().length > 20) {
+            return res.status(400).json({ message: 'Names must be at most 100 characters and phone number at most 20 characters' });
+        }
+
+        if (!['male', 'female', 'other'].includes(gender.trim())) {
+            return res.status(400).json({ message: 'Gender must be male, female, or other' });
+        }
+
+        const dateError = validateDate(dateOfBirth, 'Date of birth', 'past', true);
+        if (dateError) return res.status(400).json({ message: dateError });
 
         const student =
             await createStudent(
-                String(email).trim(),
-                String(password),
-                Number(classId),
-                String(firstName).trim(),
-                String(lastName).trim(),
+                email.trim(),
+                classId,
+                firstName.trim(),
+                lastName.trim(),
                 dateOfBirth,
-                String(phoneNumber).trim(),
-                String(address).trim(),
-                String(gender).trim()
+                phoneNumber.trim(),
+                address.trim(),
+                gender.trim()
             );
 
         return res.status(201).json(
@@ -164,6 +172,9 @@ export const addStudent = async (
         );
 
     } catch (error: any) {
+        if (error instanceof InvitationError) {
+            return res.status(error.status).json({ message: error.message });
+        }
         console.error(
             'CREATE STUDENT ERROR:',
             error
@@ -238,6 +249,9 @@ export const editStudent = async (
                     'Class, first name and last name are required'
             });
         }
+
+        const dateError = validateDate(dateOfBirth, 'Date of birth', 'past', true);
+        if (dateError) return res.status(400).json({ message: dateError });
 
         const student =
             await updateStudent(

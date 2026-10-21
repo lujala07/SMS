@@ -4,6 +4,7 @@ import {
 } from 'react';
 
 import axios from 'axios';
+import { confirmDelete } from '../../components/confirmDelete';
 
 import {
     createClass,
@@ -176,7 +177,7 @@ function ClassesPage() {
     const handleDelete = async (
         classItem: ClassItem
     ) => {
-        const confirmed = window.confirm(
+        const confirmed = await confirmDelete(
             `Delete ${classItem.name}?`
         );
 
@@ -215,7 +216,7 @@ function ClassesPage() {
                 </p>
             </div>
 
-            <form
+            <form noValidate
                 onSubmit={handleSubmit}
                 className="bg-white rounded shadow p-5 mb-6"
             >
@@ -267,7 +268,6 @@ function ClassesPage() {
                     <input
                         type="text"
                         inputMode="numeric"
-                        pattern="[0-9]*"
                         value={form.semester}
                         onChange={(event) =>
                             setForm({

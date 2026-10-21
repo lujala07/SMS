@@ -29,7 +29,7 @@ function Sidebar() {
     const [
         open,
         setOpen
-    ] = useState(true);
+    ] = useState(() => window.matchMedia('(min-width: 768px)').matches);
 
     const user = JSON.parse(
         localStorage.getItem(

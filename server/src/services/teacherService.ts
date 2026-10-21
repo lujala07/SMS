@@ -1,5 +1,5 @@
 import pool from '../config/database.js';
-import { hashPassword } from '../utils/password.js';
+import { sendInvitation } from './invitationService.js';
 
 export const getAllTeachers = async () => {
     const result = await pool.query(
@@ -27,7 +27,6 @@ export const getAllTeachers = async () => {
 
 export const createTeacher = async (
     email: string,
-    password: string,
     departmentId: number | null,
     firstName: string,
     lastName: string,
@@ -39,8 +38,6 @@ export const createTeacher = async (
     try {
         await client.query('BEGIN');
 
-        const passwordHash = await hashPassword(password);
-
         const userResult = await client.query(
             `INSERT INTO users (
                 email,
@@ -49,7 +46,7 @@ export const createTeacher = async (
             )
             VALUES ($1, $2, 'teacher')
             RETURNING id, email, role, is_active`,
-            [email, passwordHash]
+            [email, null]
         );
 
         const user = userResult.rows[0];
@@ -75,6 +72,7 @@ export const createTeacher = async (
             ]
         );
 
+        await sendInvitation(client, user.id, email);
         await client.query('COMMIT');
 
         return {

@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { today, validateDate } from '../utils/dateValidation.js';
 
 import {
     getAllAttendance,
@@ -166,13 +167,17 @@ export const addAttendance = async (
             });
         }
 
+        const selectedDate = attendanceDate === undefined ? today() : attendanceDate;
+        const dateError = validateDate(selectedDate, 'Attendance date', 'past');
+        if (dateError) return res.status(400).json({ message: dateError });
+
         const attendance =
             await createAttendance(
                 req.user.userId,
                 Number(studentId),
                 Number(subjectId),
                 status,
-                attendanceDate
+                selectedDate
             );
 
         return res.status(201).json(

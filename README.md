@@ -103,6 +103,11 @@ npm run build
 
 ## Notes
 
+- Students and teachers receive a single-use password invitation instead of an admin-assigned password. Links expire after 24 hours.
+- For Gmail, set `SMTP_USER` to the sending Gmail address and `SMTP_PASSWORD` to its Google app password in `server/.env`. Set `CLIENT_URL` to the frontend URL recipients can open; `MAIL_FROM` defaults to `SMTP_USER`. Account creation fails without saving an account if email delivery fails.
+- Existing databases must apply `database/migrations/002_user_invitations.sql` before using invitations. Existing account passwords are preserved.
+- Existing databases should apply `database/migrations/001_student_code.sql` once to allow student codes beyond STU999.
+- Date validation uses Asia/Kathmandu: assignment deadlines cannot be in the past, attendance permits past dates but rejects future dates, and birth dates cannot be in the future.
 - Uploaded submissions are stored under `server/uploads/` and ignored by Git.
 - The MVP intentionally excludes exams/results, fees, timetables, guardians, and hosted production deployment.
 - Deletes preserve academic history. Records with dependent academic data return a conflict instead of cascading deletion.

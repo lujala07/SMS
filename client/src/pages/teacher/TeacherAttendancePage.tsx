@@ -4,6 +4,7 @@ import {
 } from 'react';
 
 import axios from 'axios';
+import { today } from '../../utils/date';
 
 import api from '../../services/api';
 
@@ -66,9 +67,7 @@ function TeacherAttendancePage() {
 
     const [attendanceDate, setAttendanceDate] =
         useState(
-            new Date()
-                .toISOString()
-                .split('T')[0]
+            today()
         );
 
     const [records, setRecords] =
@@ -202,6 +201,11 @@ function TeacherAttendancePage() {
                 setError(
                     'No students available for this class.'
                 );
+                return;
+            }
+
+            if (!attendanceDate || attendanceDate > today()) {
+                setError('Choose an attendance date on or before today.');
                 return;
             }
 

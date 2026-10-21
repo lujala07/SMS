@@ -26,7 +26,7 @@ export const loginUser = async (
 
     const user = result.rows[0];
 
-    if (!user) {
+    if (!user || !user.password_hash) {
         throw new Error(
             'Invalid email or password'
         );

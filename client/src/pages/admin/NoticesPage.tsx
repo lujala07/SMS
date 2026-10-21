@@ -4,6 +4,7 @@ import {
 } from 'react';
 
 import axios from 'axios';
+import { confirmDelete } from '../../components/confirmDelete';
 
 import {
     createNotice,
@@ -154,7 +155,7 @@ function NoticesPage() {
     const handleDelete = async (
         notice: Notice
     ) => {
-        const confirmed = window.confirm(
+        const confirmed = await confirmDelete(
             `Delete "${notice.title}"?`
         );
 
@@ -193,7 +194,7 @@ function NoticesPage() {
                 </p>
             </div>
 
-            <form
+            <form noValidate
                 onSubmit={handleSubmit}
                 className="bg-white rounded shadow p-5 mb-6"
             >

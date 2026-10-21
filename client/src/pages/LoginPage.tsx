@@ -62,7 +62,7 @@ function LoginPage() {
                     Sign in to continue
                 </p>
 
-                <form
+                <form noValidate
                     onSubmit={handleSubmit}
                     className="space-y-4"
                 >

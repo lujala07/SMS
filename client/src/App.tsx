@@ -6,6 +6,7 @@ import {
 } from 'react-router-dom';
 
 import LoginPage from './pages/LoginPage';
+import SetPasswordPage from './pages/SetPasswordPage';
 
 import DashboardLayout from './layouts/DashboardLayout';
 
@@ -75,6 +76,7 @@ function ProtectedRoute({
 function App() {
     return (
         <Routes>
+            <Route path="/set-password" element={<SetPasswordPage />} />
             <Route
                 path="/"
                 element={

@@ -15,7 +15,6 @@ export interface Student {
 
 export interface CreateStudentData {
     email: string;
-    password: string;
     classId: number;
     firstName: string;
     lastName: string;
