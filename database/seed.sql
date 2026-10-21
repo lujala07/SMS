@@ -1,8 +1,8 @@
 INSERT INTO users (email, password_hash, role)
 VALUES
-    ('admin@sms.local', '$2b$10$t1ci/bmjbk2tlm9WFEF7cexG.SJlbZytXl5YJNbriaccReK2hsM5y', 'admin'),
-    ('teacher@sms.local', '$2b$10$t1ci/bmjbk2tlm9WFEF7cexG.SJlbZytXl5YJNbriaccReK2hsM5y', 'teacher'),
-    ('student@sms.local', '$2b$10$t1ci/bmjbk2tlm9WFEF7cexG.SJlbZytXl5YJNbriaccReK2hsM5y', 'student')
+    ('admin@admin.com', '$2b$10$L/1PfGzNKatTR894w4X.5OLlTfYmzZEbO.OPNRYInf9pj1kDakEca', 'admin'),
+    ('teacher@teacher.com', '$2b$10$L/1PfGzNKatTR894w4X.5OLlTfYmzZEbO.OPNRYInf9pj1kDakEca', 'teacher'),
+    ('student@student.com', '$2b$10$L/1PfGzNKatTR894w4X.5OLlTfYmzZEbO.OPNRYInf9pj1kDakEca', 'student')
 ON CONFLICT (email) DO NOTHING;
 
 INSERT INTO departments (name, code)
@@ -24,7 +24,7 @@ INSERT INTO teachers (user_id, department_id, first_name, last_name, phone_numbe
 SELECT users.id, departments.id, 'Demo', 'Teacher', '9800000001', 'Kathmandu'
 FROM users
 CROSS JOIN departments
-WHERE users.email = 'teacher@sms.local'
+WHERE users.email = 'teacher@teacher.com'
 AND departments.code = 'BCA'
 ON CONFLICT (user_id) DO NOTHING;
 
@@ -49,7 +49,7 @@ SELECT
     'other'
 FROM users
 CROSS JOIN classes
-WHERE users.email = 'student@sms.local'
+WHERE users.email = 'student@student.com'
 AND classes.name = 'BCA 4th Semester'
 AND classes.academic_year = '2081/82'
 ON CONFLICT (user_id) DO NOTHING;
@@ -74,7 +74,7 @@ FROM teachers
 CROSS JOIN subjects
 JOIN users
     ON teachers.user_id = users.id
-WHERE users.email = 'teacher@sms.local'
+WHERE users.email = 'teacher@teacher.com'
 AND subjects.code IN ('BCA401', 'BCA402')
 ON CONFLICT (teacher_id, subject_id) DO NOTHING;
 
@@ -87,9 +87,9 @@ JOIN users
     ON teachers.user_id = users.id
 JOIN users student_users
     ON students.user_id = student_users.id
-WHERE student_users.email = 'student@sms.local'
+WHERE student_users.email = 'student@student.com'
 AND subjects.code = 'BCA401'
-AND users.email = 'teacher@sms.local'
+AND users.email = 'teacher@teacher.com'
 ON CONFLICT (student_id, subject_id, attendance_date)
 DO UPDATE SET status = EXCLUDED.status;
 
@@ -102,9 +102,9 @@ JOIN users
     ON teachers.user_id = users.id
 JOIN users student_users
     ON students.user_id = student_users.id
-WHERE student_users.email = 'student@sms.local'
+WHERE student_users.email = 'student@student.com'
 AND subjects.code = 'BCA402'
-AND users.email = 'teacher@sms.local'
+AND users.email = 'teacher@teacher.com'
 ON CONFLICT (student_id, subject_id, attendance_date)
 DO UPDATE SET status = EXCLUDED.status;
 
@@ -121,7 +121,7 @@ CROSS JOIN teachers
 JOIN users
     ON teachers.user_id = users.id
 WHERE subjects.code = 'BCA401'
-AND users.email = 'teacher@sms.local'
+AND users.email = 'teacher@teacher.com'
 AND NOT EXISTS (
     SELECT 1
     FROM assignments
@@ -141,7 +141,7 @@ CROSS JOIN teachers
 JOIN users
     ON teachers.user_id = users.id
 WHERE subjects.code = 'BCA402'
-AND users.email = 'teacher@sms.local'
+AND users.email = 'teacher@teacher.com'
 AND NOT EXISTS (
     SELECT 1
     FROM assignments
@@ -168,7 +168,7 @@ CROSS JOIN students
 JOIN users student_users
     ON students.user_id = student_users.id
 WHERE assignments.title = 'ER Diagram Practice'
-AND student_users.email = 'student@sms.local'
+AND student_users.email = 'student@student.com'
 ON CONFLICT (assignment_id, student_id)
 DO UPDATE SET
     submission_text = EXCLUDED.submission_text,
@@ -184,7 +184,7 @@ SELECT
     'all',
     'approved'
 FROM users
-WHERE users.email = 'admin@sms.local'
+WHERE users.email = 'admin@admin.com'
 AND NOT EXISTS (
     SELECT 1
     FROM notices

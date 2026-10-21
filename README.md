@@ -168,14 +168,14 @@ http://localhost:5173
 All seeded accounts use:
 
 ```text
-Password@123
+12345678
 ```
 
 | Role | Email |
 | --- | --- |
-| Admin | admin@sms.local |
-| Teacher | teacher@sms.local |
-| Student | student@sms.local |
+| Admin | admin@admin.com |
+| Teacher | teacher@teacher.com |
+| Student | student@student.com |
 
 ## Main Workflow
 
