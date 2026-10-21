@@ -250,7 +250,7 @@ export const createStudentSubmission = async (
                 `
                 SELECT
                     assignments.id,
-                    assignments.due_date,
+                    (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Kathmandu')::date > assignments.due_date AS is_late,
                     subjects.class_id
 
                 FROM assignments
@@ -281,16 +281,8 @@ export const createStudentSubmission = async (
             );
         }
 
-        const dueDate =
-            new Date(
-                assignment.due_date
-            );
-
-        const now =
-            new Date();
-
         const status =
-            now > dueDate
+            assignment.is_late
                 ? 'late'
                 : 'submitted';
 
