@@ -70,7 +70,7 @@ interface NoticeRecord {
     status: 'pending' | 'approved' | 'rejected';
 }
 
-const notifyPublishedNotice = async (client: PoolClient, notice: NoticeRecord) => {
+const notifyPublishedNotice = async (client: PoolClient, notice: NoticeRecord, actorId = notice.author_id) => {
     const recipients = await client.query(
         `SELECT id, role FROM users WHERE id <> $1
          AND (role = 'admin' OR $2 = 'all' OR role = CASE WHEN $2 = 'teachers' THEN 'teacher' ELSE 'student' END)`,
@@ -79,7 +79,7 @@ const notifyPublishedNotice = async (client: PoolClient, notice: NoticeRecord) =
     const notifications = [];
     for (const role of ['admin', 'teacher', 'student']) {
         notifications.push(...await createNotifications(
-            client, recipients.rows.filter(user => user.role === role).map(user => user.id),
+            client, recipients.rows.filter(user => user.role === role && user.id !== actorId).map(user => user.id),
             'New notice', notice.title, role === 'student' ? '/student' : `/${role}/notices`
         ));
     }
@@ -149,7 +149,7 @@ export const reviewNotice = async (
     );
     const notice = result.rows[0];
     if (!notice) return { value: null, notifications: [] };
-    const notifications = status === 'approved' ? await notifyPublishedNotice(client, notice) : [];
+    const notifications = status === 'approved' ? await notifyPublishedNotice(client, notice, adminId) : [];
     notifications.push(...await createNotifications(
         client, [notice.author_id], status === 'approved' ? 'Notice approved' : 'Notice rejected', notice.title, '/teacher/notices'
     ));
