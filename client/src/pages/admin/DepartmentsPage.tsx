@@ -4,6 +4,7 @@ import {
 } from 'react';
 
 import axios from 'axios';
+import EditModal from '../../components/EditModal';
 import { confirmDelete } from '../../components/confirmDelete';
 
 import {
@@ -71,6 +72,7 @@ function DepartmentsPage() {
     };
 
     const resetForm = () => {
+        if (saving) return;
         setForm(emptyForm);
         setEditingDepartment(null);
         setError('');
@@ -188,78 +190,80 @@ function DepartmentsPage() {
                 </p>
             </div>
 
-            <form noValidate
-                onSubmit={handleSubmit}
-                className="bg-white rounded shadow p-5 mb-6"
-            >
-                <h2 className="font-semibold mb-4">
-                    {editingDepartment
-                        ? 'Edit Department'
-                        : 'Create Department'}
-                </h2>
+            <EditModal open={Boolean(editingDepartment)} title="Edit department" busy={saving} onClose={resetForm}>
+                <form noValidate
+                    onSubmit={handleSubmit}
+                    className="bg-white rounded shadow p-5 mb-6"
+                >
+                    <h2 className="font-semibold mb-4">
+                        {editingDepartment
+                            ? 'Edit Department'
+                            : 'Create Department'}
+                    </h2>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <input
-                        value={form.name}
-                        onChange={(event) =>
-                            setForm({
-                                ...form,
-                                name: event.target.value
-                            })
-                        }
-                        placeholder="Department name"
-                        className="border rounded p-2"
-                    />
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <input
+                            value={form.name}
+                            onChange={(event) =>
+                                setForm({
+                                    ...form,
+                                    name: event.target.value
+                                })
+                            }
+                            placeholder="Department name"
+                            className="border rounded p-2"
+                        />
 
-                    <input
-                        value={form.code}
-                        onChange={(event) =>
-                            setForm({
-                                ...form,
-                                code: event.target.value
-                            })
-                        }
-                        placeholder="Code"
-                        className="border rounded p-2"
-                    />
-                </div>
+                        <input
+                            value={form.code}
+                            onChange={(event) =>
+                                setForm({
+                                    ...form,
+                                    code: event.target.value
+                                })
+                            }
+                            placeholder="Code"
+                            className="border rounded p-2"
+                        />
+                    </div>
 
-                {error && (
-                    <p className="text-red-500 mt-3">
-                        {error}
-                    </p>
-                )}
-
-                {success && (
-                    <p className="text-green-600 mt-3">
-                        {success}
-                    </p>
-                )}
-
-                <div className="flex justify-end gap-3 mt-4">
-                    <button
-                        type="submit"
-                        disabled={saving}
-                        className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-4 py-2 rounded"
-                    >
-                        {saving
-                            ? 'Saving...'
-                            : editingDepartment
-                              ? 'Update Department'
-                              : 'Create Department'}
-                    </button>
-
-                    {editingDepartment && (
-                        <button
-                            type="button"
-                            onClick={resetForm}
-                            className="border px-4 py-2 rounded"
-                        >
-                            Cancel
-                        </button>
+                    {error && (
+                        <p className="text-red-500 mt-3">
+                            {error}
+                        </p>
                     )}
-                </div>
-            </form>
+
+                    {success && (
+                        <p className="text-green-600 mt-3">
+                            {success}
+                        </p>
+                    )}
+
+                    <div className="flex justify-end gap-3 mt-4">
+                        <button
+                            type="submit"
+                            disabled={saving}
+                            className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-4 py-2 rounded"
+                        >
+                            {saving
+                                ? 'Saving...'
+                                : editingDepartment
+                                  ? 'Update Department'
+                                  : 'Create Department'}
+                        </button>
+
+                        {editingDepartment && (
+                            <button
+                                type="button"
+                                onClick={resetForm}
+                                className="border px-4 py-2 rounded"
+                            >
+                                Cancel
+                            </button>
+                        )}
+                    </div>
+                </form>
+            </EditModal>
 
             <div className="bg-white rounded shadow overflow-x-auto">
                 <table className="w-full">

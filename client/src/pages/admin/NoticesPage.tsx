@@ -4,12 +4,14 @@ import {
 } from 'react';
 
 import axios from 'axios';
+import EditModal from '../../components/EditModal';
 import { confirmDelete } from '../../components/confirmDelete';
 
 import {
     createNotice,
     deleteNotice,
     getNotices,
+    reviewNotice,
     updateNotice,
     type Notice
 } from '../../services/noticeService';
@@ -21,6 +23,7 @@ const emptyForm = {
 };
 
 function NoticesPage() {
+    const [reviewingId, setReviewingId] = useState<number | null>(null);
     const [notices, setNotices] =
         useState<Notice[]>([]);
     const [form, setForm] =
@@ -38,7 +41,7 @@ function NoticesPage() {
 
     const loadNotices = async () => {
         const data = await getNotices();
-        setNotices(data);
+        setNotices([...data].sort((first, second) => Number(second.status === 'pending') - Number(first.status === 'pending')));
     };
 
     useEffect(() => {
@@ -72,6 +75,7 @@ function NoticesPage() {
     };
 
     const resetForm = () => {
+        if (saving) return;
         setForm(emptyForm);
         setEditingNotice(null);
         setError('');
@@ -89,10 +93,6 @@ function NoticesPage() {
         });
         setError('');
         setSuccess('');
-        window.scrollTo({
-            top: 0,
-            behavior: 'smooth'
-        });
     };
 
     const handleSubmit = async (
@@ -152,6 +152,22 @@ function NoticesPage() {
         }
     };
 
+    const handleReview = async (notice: Notice, status: 'approved' | 'rejected') => {
+        if (reviewingId !== null) return;
+        setReviewingId(notice.id);
+        setError('');
+        setSuccess('');
+        try {
+            await reviewNotice(notice.id, status, notice.revision);
+            await loadNotices();
+            setSuccess(status === 'approved' ? 'Notice approved.' : 'Notice rejected.');
+        } catch (error) {
+            setError(getErrorMessage(error, 'Could not review notice.'));
+        } finally {
+            setReviewingId(null);
+        }
+    };
+
     const handleDelete = async (
         notice: Notice
     ) => {
@@ -194,101 +210,103 @@ function NoticesPage() {
                 </p>
             </div>
 
-            <form noValidate
-                onSubmit={handleSubmit}
-                className="bg-white rounded shadow p-5 mb-6"
-            >
-                <h2 className="font-semibold mb-4">
-                    {editingNotice
-                        ? 'Edit Notice'
-                        : 'Create Notice'}
-                </h2>
+            <EditModal open={Boolean(editingNotice)} title="Edit notice" busy={saving} onClose={resetForm}>
+                <form noValidate
+                    onSubmit={handleSubmit}
+                    className="bg-white rounded shadow p-5 mb-6"
+                >
+                    <h2 className="font-semibold mb-4">
+                        {editingNotice
+                            ? 'Edit Notice'
+                            : 'Create Notice'}
+                    </h2>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <input
-                        value={form.title}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <input
+                            value={form.title}
+                            onChange={(event) =>
+                                setForm({
+                                    ...form,
+                                    title: event.target.value
+                                })
+                            }
+                            placeholder="Title"
+                            className="border rounded p-2 md:col-span-2"
+                        />
+
+                        <select
+                            value={form.audience}
+                            onChange={(event) =>
+                                setForm({
+                                    ...form,
+                                    audience:
+                                        event.target.value
+                                })
+                            }
+                            className="border rounded p-2"
+                        >
+                            <option value="all">
+                                All
+                            </option>
+                            <option value="teachers">
+                                Teachers
+                            </option>
+                            <option value="students">
+                                Students
+                            </option>
+                        </select>
+                    </div>
+
+                    <textarea
+                        value={form.content}
                         onChange={(event) =>
                             setForm({
                                 ...form,
-                                title: event.target.value
+                                content: event.target.value
                             })
                         }
-                        placeholder="Title"
-                        className="border rounded p-2 md:col-span-2"
+                        placeholder="Notice content"
+                        rows={4}
+                        className="border rounded p-2 w-full mt-4"
                     />
 
-                    <select
-                        value={form.audience}
-                        onChange={(event) =>
-                            setForm({
-                                ...form,
-                                audience:
-                                    event.target.value
-                            })
-                        }
-                        className="border rounded p-2"
-                    >
-                        <option value="all">
-                            All
-                        </option>
-                        <option value="teachers">
-                            Teachers
-                        </option>
-                        <option value="students">
-                            Students
-                        </option>
-                    </select>
-                </div>
-
-                <textarea
-                    value={form.content}
-                    onChange={(event) =>
-                        setForm({
-                            ...form,
-                            content: event.target.value
-                        })
-                    }
-                    placeholder="Notice content"
-                    rows={4}
-                    className="border rounded p-2 w-full mt-4"
-                />
-
-                {error && (
-                    <p className="text-red-500 mt-3">
-                        {error}
-                    </p>
-                )}
-
-                {success && (
-                    <p className="text-green-600 mt-3">
-                        {success}
-                    </p>
-                )}
-
-                <div className="flex justify-end gap-3 mt-4">
-                    <button
-                        type="submit"
-                        disabled={saving}
-                        className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-4 py-2 rounded"
-                    >
-                        {saving
-                            ? 'Saving...'
-                            : editingNotice
-                              ? 'Update Notice'
-                              : 'Create Notice'}
-                    </button>
-
-                    {editingNotice && (
-                        <button
-                            type="button"
-                            onClick={resetForm}
-                            className="border px-4 py-2 rounded"
-                        >
-                            Cancel
-                        </button>
+                    {error && (
+                        <p className="text-red-500 mt-3">
+                            {error}
+                        </p>
                     )}
-                </div>
-            </form>
+
+                    {success && (
+                        <p className="text-green-600 mt-3">
+                            {success}
+                        </p>
+                    )}
+
+                    <div className="flex justify-end gap-3 mt-4">
+                        <button
+                            type="submit"
+                            disabled={saving}
+                            className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-4 py-2 rounded"
+                        >
+                            {saving
+                                ? 'Saving...'
+                                : editingNotice
+                                  ? 'Update Notice'
+                                  : 'Create Notice'}
+                        </button>
+
+                        {editingNotice && (
+                            <button
+                                type="button"
+                                onClick={resetForm}
+                                className="border px-4 py-2 rounded"
+                            >
+                                Cancel
+                            </button>
+                        )}
+                    </div>
+                </form>
+            </EditModal>
 
             {loading ? (
                 <div className="bg-white p-4 rounded shadow">
@@ -314,6 +332,7 @@ function NoticesPage() {
                                     <p className="text-sm text-gray-500 capitalize mt-1">
                                         {notice.audience}
                                     </p>
+                                    <p className="mt-1 text-sm text-gray-600">{notice.status === 'pending' ? <span style={{ color: '#92400e', fontWeight: 500 }}>Pending approval</span> : notice.status === 'rejected' ? 'Rejected' : 'Published'}</p>
                                 </div>
 
                                 <div className="flex gap-3">
@@ -358,6 +377,12 @@ function NoticesPage() {
                                     notice.created_at
                                 ).toLocaleDateString()}
                             </div>
+                            {notice.status === 'pending' && (
+                                <div className="mt-4 flex justify-end gap-3 border-t border-gray-200 pt-4">
+                                    <button type="button" disabled={reviewingId !== null} onClick={() => void handleReview(notice, 'rejected')} className="rounded-md border border-red-300 bg-white px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 disabled:opacity-50">Reject</button>
+                                    <button type="button" disabled={reviewingId !== null} onClick={() => void handleReview(notice, 'approved')} className="rounded-md bg-green-700 px-4 py-2 text-sm font-medium text-white hover:bg-green-800 disabled:opacity-50">{reviewingId === notice.id ? 'Saving...' : 'Approve'}</button>
+                                </div>
+                            )}
                         </div>
                     ))}
                 </div>

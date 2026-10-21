@@ -15,6 +15,7 @@ import submissionRoutes from './routes/submissionRoutes.js';
 import noticeRoutes from './routes/noticeRoutes.js';
 import reportRoutes from './routes/reportRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
+import notificationRoutes from './routes/notificationRoutes.js';
 
 const app = express();
 
@@ -29,6 +30,8 @@ app.use(
 app.use(
     express.json()
 );
+
+app.use('/notifications', notificationRoutes);
 
 app.use(
     '/uploads',

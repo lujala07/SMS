@@ -176,12 +176,13 @@ DO UPDATE SET
     feedback = EXCLUDED.feedback,
     status = EXCLUDED.status;
 
-INSERT INTO notices (author_id, title, content, audience)
+INSERT INTO notices (author_id, title, content, audience, status)
 SELECT
     users.id,
     'Welcome to the SMS Demo',
     'This local dataset includes admin, teacher, and student workflows.',
-    'all'
+    'all',
+    'approved'
 FROM users
 WHERE users.email = 'admin@sms.local'
 AND NOT EXISTS (

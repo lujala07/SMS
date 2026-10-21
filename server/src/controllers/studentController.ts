@@ -3,6 +3,7 @@ import {
     Response
 } from 'express';
 import { validateDate } from '../utils/dateValidation.js';
+import { mobileError, normalizeNepalMobile } from '../utils/phone.js';
 import { InvitationError } from '../services/invitationService.js';
 
 import {
@@ -155,6 +156,9 @@ export const addStudent = async (
         const dateError = validateDate(dateOfBirth, 'Date of birth', 'past', true);
         if (dateError) return res.status(400).json({ message: dateError });
 
+        const mobile = normalizeNepalMobile(phoneNumber);
+        if (!mobile) return res.status(400).json({ message: mobileError });
+
         const student =
             await createStudent(
                 email.trim(),
@@ -162,7 +166,7 @@ export const addStudent = async (
                 firstName.trim(),
                 lastName.trim(),
                 dateOfBirth,
-                phoneNumber.trim(),
+                mobile,
                 address.trim(),
                 gender.trim()
             );
@@ -253,6 +257,9 @@ export const editStudent = async (
         const dateError = validateDate(dateOfBirth, 'Date of birth', 'past', true);
         if (dateError) return res.status(400).json({ message: dateError });
 
+        const mobile = normalizeNepalMobile(phoneNumber);
+        if (!mobile) return res.status(400).json({ message: mobileError });
+
         const student =
             await updateStudent(
                 id,
@@ -260,7 +267,7 @@ export const editStudent = async (
                 firstName,
                 lastName,
                 dateOfBirth,
-                phoneNumber,
+                mobile,
                 address,
                 gender
             );

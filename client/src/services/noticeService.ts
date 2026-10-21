@@ -7,6 +7,8 @@ export interface Notice {
     audience: string;
     created_at: string;
     author_email?: string;
+    status: 'pending' | 'approved' | 'rejected';
+    revision: number;
 }
 
 export interface NoticeData {
@@ -17,6 +19,11 @@ export interface NoticeData {
 
 export const getNotices = async () => {
     const response = await api.get('/notices');
+    return response.data;
+};
+
+export const reviewNotice = async (id: number, status: 'approved' | 'rejected', revision: number) => {
+    const response = await api.patch(`/notices/${id}/approval`, { status, revision });
     return response.data;
 };
 

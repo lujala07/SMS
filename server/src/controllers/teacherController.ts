@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { mobileError, normalizeNepalMobile } from '../utils/phone.js';
 import { InvitationError } from '../services/invitationService.js';
 
 import {
@@ -70,12 +71,15 @@ export const addTeacher = async (
             });
         }
 
+        const mobile = normalizeNepalMobile(phoneNumber);
+        if (!mobile) return res.status(400).json({ message: mobileError });
+
         const teacher = await createTeacher(
             String(email).trim(),
             Number(departmentId),
             String(firstName).trim(),
             String(lastName).trim(),
-            String(phoneNumber).trim(),
+            mobile,
             String(address).trim()
         );
 
@@ -142,6 +146,9 @@ export const editTeacher = async (
             });
         }
 
+        const mobile = normalizeNepalMobile(phoneNumber);
+        if (!mobile) return res.status(400).json({ message: mobileError });
+
         const teacher = await updateTeacher(
             id,
             departmentId
@@ -149,7 +156,7 @@ export const editTeacher = async (
                 : null,
             firstName,
             lastName,
-            phoneNumber,
+            mobile,
             address
         );
 

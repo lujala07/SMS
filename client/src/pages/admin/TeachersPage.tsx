@@ -4,6 +4,8 @@ import {
 } from 'react';
 
 import axios from 'axios';
+import { mobileError, normalizeNepalMobile } from '../../utils/phone';
+import EditModal from '../../components/EditModal';
 import { confirmDelete } from '../../components/confirmDelete';
 
 import {
@@ -74,6 +76,7 @@ function TeachersPage() {
     }, []);
 
     const resetForm = () => {
+        if (saving) return;
         setForm(emptyForm);
         setEditingTeacher(null);
         setError('');
@@ -97,10 +100,6 @@ function TeachersPage() {
         });
         setError('');
         setSuccess('');
-        window.scrollTo({
-            top: 0,
-            behavior: 'smooth'
-        });
     };
 
     const getErrorMessage = (
@@ -138,6 +137,12 @@ function TeachersPage() {
             return;
         }
 
+        const mobile = normalizeNepalMobile(form.phoneNumber);
+        if (!mobile) {
+            setError(mobileError);
+            return;
+        }
+
         setSaving(true);
 
         try {
@@ -151,8 +156,7 @@ function TeachersPage() {
                 firstName: form.firstName.trim(),
                 lastName: form.lastName.trim(),
                 phoneNumber:
-                    form.phoneNumber.trim() ||
-                    undefined,
+                    mobile,
                 address:
                     form.address.trim() ||
                     undefined
@@ -224,126 +228,128 @@ function TeachersPage() {
             </div>
 
             {editingTeacher && (
-                <form noValidate
-                    onSubmit={handleSubmit}
-                    className="bg-white rounded shadow p-5 mb-6"
-                >
-                    <h2 className="font-semibold mb-4">
-                        Edit Teacher
-                    </h2>
+                <EditModal open={Boolean(editingTeacher)} title="Edit teacher" busy={saving} onClose={resetForm}>
+                    <form noValidate
+                        onSubmit={handleSubmit}
+                        className="bg-white rounded shadow p-5 mb-6"
+                    >
+                        <h2 className="font-semibold mb-4">
+                            Edit Teacher
+                        </h2>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <input
-                            value={form.firstName}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <input
+                                value={form.firstName}
+                                onChange={(event) =>
+                                    setForm({
+                                        ...form,
+                                        firstName:
+                                            event.target.value
+                                    })
+                                }
+                                placeholder="First name"
+                                className="border rounded p-2"
+                            />
+
+                            <input
+                                value={form.lastName}
+                                onChange={(event) =>
+                                    setForm({
+                                        ...form,
+                                        lastName:
+                                            event.target.value
+                                    })
+                                }
+                                placeholder="Last name"
+                                className="border rounded p-2"
+                            />
+
+                            <input
+                                value={form.phoneNumber}
+                                onChange={(event) =>
+                                    setForm({
+                                        ...form,
+                                        phoneNumber:
+                                            event.target.value
+                                    })
+                                }
+                                placeholder="Phone number"
+                                className="border rounded p-2"
+                            />
+
+                            <select
+                                value={form.departmentId}
+                                onChange={(event) =>
+                                    setForm({
+                                        ...form,
+                                        departmentId:
+                                            event.target.value
+                                    })
+                                }
+                                className="border rounded p-2"
+                            >
+                                <option value="">
+                                    No department
+                                </option>
+                                {departments.map(
+                                    (department) => (
+                                        <option
+                                            key={department.id}
+                                            value={department.id}
+                                        >
+                                            {department.code} - {department.name}
+                                        </option>
+                                    )
+                                )}
+                            </select>
+                        </div>
+
+                        <textarea
+                            value={form.address}
                             onChange={(event) =>
                                 setForm({
                                     ...form,
-                                    firstName:
-                                        event.target.value
+                                    address: event.target.value
                                 })
                             }
-                            placeholder="First name"
-                            className="border rounded p-2"
+                            placeholder="Address"
+                            rows={3}
+                            className="border rounded p-2 w-full mt-4"
                         />
 
-                        <input
-                            value={form.lastName}
-                            onChange={(event) =>
-                                setForm({
-                                    ...form,
-                                    lastName:
-                                        event.target.value
-                                })
-                            }
-                            placeholder="Last name"
-                            className="border rounded p-2"
-                        />
+                        {error && (
+                            <p className="text-red-500 mt-3">
+                                {error}
+                            </p>
+                        )}
 
-                        <input
-                            value={form.phoneNumber}
-                            onChange={(event) =>
-                                setForm({
-                                    ...form,
-                                    phoneNumber:
-                                        event.target.value
-                                })
-                            }
-                            placeholder="Phone number"
-                            className="border rounded p-2"
-                        />
+                        {success && (
+                            <p className="text-green-600 mt-3">
+                                {success}
+                            </p>
+                        )}
 
-                        <select
-                            value={form.departmentId}
-                            onChange={(event) =>
-                                setForm({
-                                    ...form,
-                                    departmentId:
-                                        event.target.value
-                                })
-                            }
-                            className="border rounded p-2"
-                        >
-                            <option value="">
-                                No department
-                            </option>
-                            {departments.map(
-                                (department) => (
-                                    <option
-                                        key={department.id}
-                                        value={department.id}
-                                    >
-                                        {department.code} - {department.name}
-                                    </option>
-                                )
-                            )}
-                        </select>
-                    </div>
+                        <div className="flex justify-end gap-3 mt-4">
+                            <button
+                                type="button"
+                                onClick={resetForm}
+                                className="border px-4 py-2 rounded"
+                            >
+                                Cancel
+                            </button>
 
-                    <textarea
-                        value={form.address}
-                        onChange={(event) =>
-                            setForm({
-                                ...form,
-                                address: event.target.value
-                            })
-                        }
-                        placeholder="Address"
-                        rows={3}
-                        className="border rounded p-2 w-full mt-4"
-                    />
-
-                    {error && (
-                        <p className="text-red-500 mt-3">
-                            {error}
-                        </p>
-                    )}
-
-                    {success && (
-                        <p className="text-green-600 mt-3">
-                            {success}
-                        </p>
-                    )}
-
-                    <div className="flex justify-end gap-3 mt-4">
-                        <button
-                            type="button"
-                            onClick={resetForm}
-                            className="border px-4 py-2 rounded"
-                        >
-                            Cancel
-                        </button>
-
-                        <button
-                            type="submit"
-                            disabled={saving}
-                            className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-4 py-2 rounded"
-                        >
-                            {saving
-                                ? 'Saving...'
-                                : 'Update Teacher'}
-                        </button>
-                    </div>
-                </form>
+                            <button
+                                type="submit"
+                                disabled={saving}
+                                className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-4 py-2 rounded"
+                            >
+                                {saving
+                                    ? 'Saving...'
+                                    : 'Update Teacher'}
+                            </button>
+                        </div>
+                    </form>
+                </EditModal>
             )}
 
             {!editingTeacher && error && (

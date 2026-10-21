@@ -9,8 +9,24 @@ import {
     createNotice,
     updateNotice,
     deleteNotice,
-    getNoticesByAudience
+    getNoticesByAudience,
+    reviewNotice
 } from '../services/noticeService.js';
+
+export const moderateNotice = async (req: Request, res: Response) => {
+    const id = Number(req.params.id);
+    const { status, revision } = req.body ?? {};
+    if (!Number.isInteger(id) || id <= 0 || id > 2147483647 || !['approved', 'rejected'].includes(status) || !Number.isSafeInteger(revision) || revision <= 0) {
+        return res.status(400).json({ message: 'Invalid approval request' });
+    }
+    try {
+        const notice = await reviewNotice(id, req.user!.userId, status, revision);
+        if (!notice) return res.status(409).json({ message: 'This notice has changed or was already reviewed. Refresh and try again.' });
+        return res.json({ message: status === 'approved' ? 'Notice approved.' : 'Notice rejected.', notice });
+    } catch {
+        return res.status(500).json({ message: 'Could not review notice. Please try again.' });
+    }
+};
 
 export const getNotices = async (
     req: Request,
@@ -31,8 +47,9 @@ export const getNotices = async (
             );
         }
 
-        const notices =
-            await getAllNotices();
+        const notices = req.user?.role === 'admin'
+            ? await getAllNotices()
+            : await getNoticesByAudience('students');
 
         return res.status(200).json(
             notices
@@ -67,11 +84,11 @@ export const addNotice = async (
             title,
             content,
             audience
-        } = req.body;
+        } = req.body ?? {};
 
         if (
-            !title ||
-            !content ||
+            typeof title !== 'string' || !title.trim() || title.trim().length > 255 ||
+            typeof content !== 'string' || !content.trim() ||
             !audience
         ) {
             return res.status(400).json({
@@ -117,7 +134,7 @@ export const addNotice = async (
 
         return res.status(201).json({
             message:
-                'Notice created successfully',
+                notice.status === 'pending' ? 'Notice submitted for approval' : 'Notice created successfully',
             notice
         });
 
@@ -156,12 +173,12 @@ export const editNotice = async (
             title,
             content,
             audience
-        } = req.body;
+        } = req.body ?? {};
 
         if (
-            !id ||
-            !title ||
-            !content ||
+            !Number.isInteger(id) || id <= 0 || id > 2147483647 ||
+            typeof title !== 'string' || !title.trim() || title.trim().length > 255 ||
+            typeof content !== 'string' || !content.trim() ||
             !audience
         ) {
             return res.status(400).json({
@@ -216,7 +233,7 @@ export const editNotice = async (
 
         return res.status(200).json({
             message:
-                'Notice updated successfully',
+                notice.status === 'pending' ? 'Notice submitted for approval' : 'Notice updated successfully',
             notice
         });
 
@@ -292,6 +309,11 @@ export const getAudienceNotices = async (
             String(
                 req.params.audience
             );
+
+        const allowedAudience = req.user?.role === 'teacher' ? 'teachers' : 'students';
+        if (!['all', 'teachers', 'students'].includes(audience) || (req.user?.role !== 'admin' && audience !== 'all' && audience !== allowedAudience)) {
+            return res.status(403).json({ message: 'You cannot view these notices' });
+        }
 
         const notices =
             await getNoticesByAudience(

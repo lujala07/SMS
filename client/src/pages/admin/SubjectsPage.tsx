@@ -4,6 +4,7 @@ import {
 } from 'react';
 
 import axios from 'axios';
+import EditModal from '../../components/EditModal';
 import { confirmDelete } from '../../components/confirmDelete';
 
 import {
@@ -85,6 +86,7 @@ function SubjectsPage() {
     };
 
     const resetForm = () => {
+        if (saving) return;
         setForm(emptyForm);
         setEditingSubject(null);
         setError('');
@@ -203,105 +205,107 @@ function SubjectsPage() {
                 </p>
             </div>
 
-            <form noValidate
-                onSubmit={handleSubmit}
-                className="bg-white rounded shadow p-5 mb-6"
-            >
-                <h2 className="font-semibold mb-4">
-                    {editingSubject
-                        ? 'Edit Subject'
-                        : 'Create Subject'}
-                </h2>
+            <EditModal open={Boolean(editingSubject)} title="Edit subject" busy={saving} onClose={resetForm}>
+                <form noValidate
+                    onSubmit={handleSubmit}
+                    className="bg-white rounded shadow p-5 mb-6"
+                >
+                    <h2 className="font-semibold mb-4">
+                        {editingSubject
+                            ? 'Edit Subject'
+                            : 'Create Subject'}
+                    </h2>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <select
-                        value={form.classId}
-                        onChange={(event) =>
-                            setForm({
-                                ...form,
-                                classId:
-                                    event.target.value
-                            })
-                        }
-                        className="border rounded p-2"
-                    >
-                        <option value="">
-                            Select Class
-                        </option>
-                        {classes.map((classItem) => (
-                            <option
-                                key={classItem.id}
-                                value={classItem.id}
-                            >
-                                {classItem.name}
-                                {classItem.semester
-                                    ? ` - Semester ${classItem.semester}`
-                                    : ''}
-                            </option>
-                        ))}
-                    </select>
-
-                    <input
-                        value={form.name}
-                        onChange={(event) =>
-                            setForm({
-                                ...form,
-                                name: event.target.value
-                            })
-                        }
-                        placeholder="Subject name"
-                        className="border rounded p-2"
-                    />
-
-                    <input
-                        value={form.code}
-                        onChange={(event) =>
-                            setForm({
-                                ...form,
-                                code: event.target.value
-                            })
-                        }
-                        placeholder="Code"
-                        className="border rounded p-2"
-                    />
-                </div>
-
-                {error && (
-                    <p className="text-red-500 mt-3">
-                        {error}
-                    </p>
-                )}
-
-                {success && (
-                    <p className="text-green-600 mt-3">
-                        {success}
-                    </p>
-                )}
-
-                <div className="flex justify-end gap-3 mt-4">
-                    <button
-                        type="submit"
-                        disabled={saving}
-                        className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-4 py-2 rounded"
-                    >
-                        {saving
-                            ? 'Saving...'
-                            : editingSubject
-                              ? 'Update Subject'
-                              : 'Create Subject'}
-                    </button>
-
-                    {editingSubject && (
-                        <button
-                            type="button"
-                            onClick={resetForm}
-                            className="border px-4 py-2 rounded"
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <select
+                            value={form.classId}
+                            onChange={(event) =>
+                                setForm({
+                                    ...form,
+                                    classId:
+                                        event.target.value
+                                })
+                            }
+                            className="border rounded p-2"
                         >
-                            Cancel
-                        </button>
+                            <option value="">
+                                Select Class
+                            </option>
+                            {classes.map((classItem) => (
+                                <option
+                                    key={classItem.id}
+                                    value={classItem.id}
+                                >
+                                    {classItem.name}
+                                    {classItem.semester
+                                        ? ` - Semester ${classItem.semester}`
+                                        : ''}
+                                </option>
+                            ))}
+                        </select>
+
+                        <input
+                            value={form.name}
+                            onChange={(event) =>
+                                setForm({
+                                    ...form,
+                                    name: event.target.value
+                                })
+                            }
+                            placeholder="Subject name"
+                            className="border rounded p-2"
+                        />
+
+                        <input
+                            value={form.code}
+                            onChange={(event) =>
+                                setForm({
+                                    ...form,
+                                    code: event.target.value
+                                })
+                            }
+                            placeholder="Code"
+                            className="border rounded p-2"
+                        />
+                    </div>
+
+                    {error && (
+                        <p className="text-red-500 mt-3">
+                            {error}
+                        </p>
                     )}
-                </div>
-            </form>
+
+                    {success && (
+                        <p className="text-green-600 mt-3">
+                            {success}
+                        </p>
+                    )}
+
+                    <div className="flex justify-end gap-3 mt-4">
+                        <button
+                            type="submit"
+                            disabled={saving}
+                            className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-4 py-2 rounded"
+                        >
+                            {saving
+                                ? 'Saving...'
+                                : editingSubject
+                                  ? 'Update Subject'
+                                  : 'Create Subject'}
+                        </button>
+
+                        {editingSubject && (
+                            <button
+                                type="button"
+                                onClick={resetForm}
+                                className="border px-4 py-2 rounded"
+                            >
+                                Cancel
+                            </button>
+                        )}
+                    </div>
+                </form>
+            </EditModal>
 
             <div className="bg-white rounded shadow overflow-x-auto">
                 <table className="w-full">

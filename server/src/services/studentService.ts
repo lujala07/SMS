@@ -175,8 +175,8 @@ export const getStudentDashboardData = async (
                 ON notices.author_id = users.id
 
              WHERE
-                notices.audience = 'all'
-                OR notices.audience = 'students'
+                notices.status = 'approved'
+                AND (notices.audience = 'all' OR notices.audience = 'students')
 
              ORDER BY notices.created_at DESC
 

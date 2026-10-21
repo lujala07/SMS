@@ -5,7 +5,8 @@ import {
     addNotice,
     editNotice,
     removeNotice,
-    getAudienceNotices
+    getAudienceNotices,
+    moderateNotice
 } from '../controllers/noticeController.js';
 
 import {
@@ -17,6 +18,8 @@ import {
 } from '../middleware/roleMiddleware.js';
 
 const router = Router();
+
+router.patch('/:id/approval', authenticate, authorizeRoles('admin'), moderateNotice);
 
 router.get(
     '/',

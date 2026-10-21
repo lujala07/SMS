@@ -1,4 +1,5 @@
 import pool from '../config/database.js';
+import { createNotifications, withNotificationTransaction } from './notificationService.js';
 
 export const getAllSubmissions = async () => {
     const result = await pool.query(
@@ -220,108 +221,115 @@ export const createStudentSubmission = async (
     submissionText?: string,
     fileUrl?: string
 ) => {
-    const studentResult =
-        await pool.query(
+    return withNotificationTransaction(async client => {
+        const studentResult =
+            await client.query(
+                `
+                SELECT
+                    students.id,
+                    students.class_id
+
+                FROM students
+
+                WHERE students.user_id = $1
+                `,
+                [userId]
+            );
+
+        const student =
+            studentResult.rows[0];
+
+        if (!student) {
+            throw new Error(
+                'Student profile not found'
+            );
+        }
+
+        const assignmentResult =
+            await client.query(
+                `
+                SELECT
+                    assignments.id,
+                    assignments.due_date,
+                    subjects.class_id
+
+                FROM assignments
+
+                JOIN subjects
+                    ON assignments.subject_id = subjects.id
+
+                WHERE assignments.id = $1
+                `,
+                [assignmentId]
+            );
+
+        const assignment =
+            assignmentResult.rows[0];
+
+        if (!assignment) {
+            throw new Error(
+                'Assignment not found'
+            );
+        }
+
+        if (
+            Number(assignment.class_id) !==
+            Number(student.class_id)
+        ) {
+            throw new Error(
+                'This assignment does not belong to your class'
+            );
+        }
+
+        const dueDate =
+            new Date(
+                assignment.due_date
+            );
+
+        const now =
+            new Date();
+
+        const status =
+            now > dueDate
+                ? 'late'
+                : 'submitted';
+
+        const result = await client.query(
             `
-            SELECT
-                students.id,
-                students.class_id
+            INSERT INTO submissions (
+                assignment_id,
+                student_id,
+                submission_text,
+                file_url,
+                status
+            )
 
-            FROM students
+            VALUES (
+                $1,
+                $2,
+                $3,
+                $4,
+                $5
+            )
 
-            WHERE students.user_id = $1
+            RETURNING *
             `,
-            [userId]
+            [
+                assignmentId,
+                student.id,
+                submissionText || null,
+                fileUrl || null,
+                status
+            ]
         );
 
-    const student =
-        studentResult.rows[0];
-
-    if (!student) {
-        throw new Error(
-            'Student profile not found'
-        );
-    }
-
-    const assignmentResult =
-        await pool.query(
-            `
-            SELECT
-                assignments.id,
-                assignments.due_date,
-                subjects.class_id
-
-            FROM assignments
-
-            JOIN subjects
-                ON assignments.subject_id = subjects.id
-
-            WHERE assignments.id = $1
-            `,
+        const recipients = await client.query(
+            'SELECT teachers.user_id, assignments.title FROM assignments JOIN teachers ON assignments.teacher_id = teachers.id WHERE assignments.id = $1',
             [assignmentId]
         );
-
-    const assignment =
-        assignmentResult.rows[0];
-
-    if (!assignment) {
-        throw new Error(
-            'Assignment not found'
-        );
-    }
-
-    if (
-        Number(assignment.class_id) !==
-        Number(student.class_id)
-    ) {
-        throw new Error(
-            'This assignment does not belong to your class'
-        );
-    }
-
-    const dueDate =
-        new Date(
-            assignment.due_date
-        );
-
-    const now =
-        new Date();
-
-    const status =
-        now > dueDate
-            ? 'late'
-            : 'submitted';
-
-    const result = await pool.query(
-        `
-        INSERT INTO submissions (
-            assignment_id,
-            student_id,
-            submission_text,
-            file_url,
-            status
-        )
-
-        VALUES (
-            $1,
-            $2,
-            $3,
-            $4,
-            $5
-        )
-
-        RETURNING *
-        `,
-        [
-            assignmentId,
-            student.id,
-            submissionText || null,
-            fileUrl || null,
-            status
-        ]
-    );
-
-    return result.rows[0];
+        const notifications = await createNotifications(client, recipients.rows.map(teacher => teacher.user_id), 'New submission', `A student submitted ${recipients.rows[0].title}.`, '/teacher/submissions');
+        return { value: result.rows[0], notifications };
+    });
 };
 
 export const reviewSubmission = async (
@@ -330,75 +338,82 @@ export const reviewSubmission = async (
     marksObtained: number,
     feedback?: string
 ) => {
-    const submissionResult =
-        await pool.query(
-            `
-            SELECT
-                submissions.id,
-                assignments.total_marks
+    return withNotificationTransaction(async client => {
+        const submissionResult =
+            await client.query(
+                `
+                SELECT
+                    submissions.id,
+                    assignments.total_marks
 
-            FROM submissions
+                FROM submissions
 
-            JOIN assignments
-                ON submissions.assignment_id =
-                   assignments.id
+                JOIN assignments
+                    ON submissions.assignment_id =
+                       assignments.id
 
-            JOIN teachers
-                ON assignments.teacher_id =
-                   teachers.id
+                JOIN teachers
+                    ON assignments.teacher_id =
+                       teachers.id
 
-            WHERE submissions.id = $1
-            AND teachers.user_id = $2
-            `,
-            [
-                id,
-                userId
-            ]
+                WHERE submissions.id = $1
+                AND teachers.user_id = $2
+                `,
+                [
+                    id,
+                    userId
+                ]
+            );
+
+        const submission =
+            submissionResult.rows[0];
+
+        if (!submission) {
+            throw new Error(
+                'Submission not found or you cannot review it'
+            );
+        }
+
+        if (
+            marksObtained < 0 ||
+            marksObtained >
+                Number(
+                    submission.total_marks
+                )
+        ) {
+            throw new Error(
+                `Marks must be between 0 and ${submission.total_marks}`
+            );
+        }
+
+        const result =
+            await client.query(
+                `
+                UPDATE submissions
+
+                SET
+                    marks_obtained = $1,
+                    feedback = $2,
+                    status = 'reviewed'
+
+                WHERE id = $3
+
+                RETURNING *
+                `,
+                [
+                    marksObtained,
+                    feedback || null,
+                    id
+                ]
+            );
+
+        const recipients = await client.query(
+            'SELECT students.user_id, assignments.title FROM submissions JOIN students ON submissions.student_id = students.id JOIN assignments ON submissions.assignment_id = assignments.id WHERE submissions.id = $1',
+            [id]
         );
-
-    const submission =
-        submissionResult.rows[0];
-
-    if (!submission) {
-        throw new Error(
-            'Submission not found or you cannot review it'
-        );
-    }
-
-    if (
-        marksObtained < 0 ||
-        marksObtained >
-            Number(
-                submission.total_marks
-            )
-    ) {
-        throw new Error(
-            `Marks must be between 0 and ${submission.total_marks}`
-        );
-    }
-
-    const result =
-        await pool.query(
-            `
-            UPDATE submissions
-
-            SET
-                marks_obtained = $1,
-                feedback = $2,
-                status = 'reviewed'
-
-            WHERE id = $3
-
-            RETURNING *
-            `,
-            [
-                marksObtained,
-                feedback || null,
-                id
-            ]
-        );
-
-    return result.rows[0];
+        const notifications = await createNotifications(client, recipients.rows.map(student => student.user_id), 'Submission reviewed', `Your submission for ${recipients.rows[0].title} has been reviewed.`, '/student/assignments');
+        return { value: result.rows[0], notifications };
+    });
 };
 
 export const getSubmissionsByAssignment =

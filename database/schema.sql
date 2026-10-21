@@ -21,6 +21,19 @@ CREATE TABLE departments (
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE notifications (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    title VARCHAR(255) NOT NULL,
+    message TEXT NOT NULL,
+    link VARCHAR(255) NOT NULL,
+    read_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_notifications_user_id_id ON notifications (user_id, id DESC);
+CREATE INDEX idx_notifications_unread ON notifications (user_id) WHERE read_at IS NULL;
+
 CREATE TABLE classes (
     id SERIAL PRIMARY KEY,
     department_id INTEGER NOT NULL,
@@ -166,6 +179,11 @@ CREATE TABLE notices(
     content TEXT NOT NULL,
     audience VARCHAR(20) NOT NULL 
         CHECK (audience IN ('all', 'teachers', 'students')),
+    status VARCHAR(20) NOT NULL DEFAULT 'pending'
+        CHECK (status IN ('pending', 'approved', 'rejected')),
+    reviewed_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
+    reviewed_at TIMESTAMPTZ,
+    revision INTEGER NOT NULL DEFAULT 1,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     FOREIGN KEY (author_id)
@@ -174,6 +192,8 @@ CREATE TABLE notices(
 
 CREATE INDEX idx_classes_department_id
     ON classes(department_id);
+
+CREATE INDEX idx_notices_status ON notices(status);
 
 CREATE INDEX idx_students_class_id
     ON students(class_id);

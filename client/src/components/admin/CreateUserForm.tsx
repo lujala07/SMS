@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import { mobileError, normalizeNepalMobile } from '../../utils/phone';
 
 import { createAdmin } from '../../services/adminService';
 import { createStudent } from '../../services/studentService';
@@ -185,6 +186,12 @@ function CreateUserForm({ onSuccess }: Props) {
             return;
         }
 
+        const mobile = normalizeNepalMobile(phoneNumber);
+        if (role !== 'admin' && !mobile) {
+            setError(mobileError);
+            return;
+        }
+
         setLoading(true);
 
         try {
@@ -209,7 +216,7 @@ function CreateUserForm({ onSuccess }: Props) {
                             : undefined,
 
                     phoneNumber:
-                        trimmedPhoneNumber,
+                        mobile!,
                     address:
                         trimmedAddress
                 });
@@ -224,7 +231,7 @@ function CreateUserForm({ onSuccess }: Props) {
                         trimmedLastName,
                     classId: Number(classId),
                     phoneNumber:
-                        trimmedPhoneNumber,
+                        mobile!,
                     address:
                         trimmedAddress,
                     gender

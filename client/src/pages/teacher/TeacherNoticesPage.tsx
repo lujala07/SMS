@@ -4,6 +4,7 @@ import {
 } from 'react';
 
 import axios from 'axios';
+import EditModal from '../../components/EditModal';
 import { confirmDelete } from '../../components/confirmDelete';
 
 import api from '../../services/api';
@@ -26,6 +27,7 @@ interface Notice {
     author_role?: string;
 
     is_own?: boolean;
+    status: 'pending' | 'approved' | 'rejected';
 }
 
 function TeacherNoticesPage() {
@@ -164,7 +166,7 @@ function TeacherNoticesPage() {
                 );
 
                 setSuccess(
-                    'Notice updated successfully.'
+                    'Changes submitted for approval.'
                 );
 
             } else {
@@ -174,7 +176,7 @@ function TeacherNoticesPage() {
                 );
 
                 setSuccess(
-                    'Notice posted successfully.'
+                    'Notice submitted for approval.'
                 );
             }
 
@@ -238,14 +240,11 @@ function TeacherNoticesPage() {
         setError('');
         setSuccess('');
 
-        window.scrollTo({
-            top: 0,
-            behavior: 'smooth'
-        });
     };
 
     const handleCancelEdit =
         () => {
+            if (saving) return;
             clearForm();
             setError('');
             setSuccess('');
@@ -329,144 +328,146 @@ function TeacherNoticesPage() {
                 </h1>
 
                 <p className="text-gray-500 mt-1">
-                    Post notices and view announcements.
+                    Submit notices for approval and view announcements.
                 </p>
             </div>
 
-            <div className="bg-white rounded shadow p-6 mb-6">
-                <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-lg font-semibold">
-                        {editingId
-                            ? 'Edit Notice'
-                            : 'Post Notice'}
-                    </h2>
+            <EditModal open={Boolean(editingId)} title="Edit notice" busy={saving} onClose={handleCancelEdit}>
+                <div className="bg-white rounded shadow p-6 mb-6">
+                    <div className="flex justify-between items-center mb-4">
+                        <h2 className="text-lg font-semibold">
+                            {editingId
+                                ? 'Edit Notice'
+                                : 'Submit Notice'}
+                        </h2>
 
-                    {editingId && (
+                        {editingId && (
+                            <button
+                                type="button"
+                                onClick={
+                                    handleCancelEdit
+                                }
+                                className="text-gray-600 hover:underline"
+                            >
+                                Cancel Edit
+                            </button>
+                        )}
+                    </div>
+
+                    <form noValidate
+                        onSubmit={
+                            handleSubmit
+                        }
+                        className="space-y-4"
+                    >
+                        <div>
+                            <label className="block font-medium mb-1">
+                                Title
+                            </label>
+
+                            <input
+                                type="text"
+                                value={
+                                    title
+                                }
+                                onChange={(
+                                    event
+                                ) =>
+                                    setTitle(
+                                        event
+                                            .target
+                                            .value
+                                    )
+                                }
+                                placeholder="Notice title"
+                                className="w-full border rounded p-2"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block font-medium mb-1">
+                                Audience
+                            </label>
+
+                            <select
+                                value={
+                                    audience
+                                }
+                                onChange={(
+                                    event
+                                ) =>
+                                    setAudience(
+                                        event
+                                            .target
+                                            .value as
+                                            | 'all'
+                                            | 'students'
+                                    )
+                                }
+                                className="w-full border rounded p-2"
+                            >
+                                <option value="students">
+                                    Students
+                                </option>
+
+                                <option value="all">
+                                    Everyone
+                                </option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label className="block font-medium mb-1">
+                                Content
+                            </label>
+
+                            <textarea
+                                value={
+                                    content
+                                }
+                                onChange={(
+                                    event
+                                ) =>
+                                    setContent(
+                                        event
+                                            .target
+                                            .value
+                                    )
+                                }
+                                rows={5}
+                                placeholder="Write the notice..."
+                                className="w-full border rounded p-2"
+                            />
+                        </div>
+
                         <button
-                            type="button"
-                            onClick={
-                                handleCancelEdit
+                            type="submit"
+                            disabled={
+                                saving
                             }
-                            className="text-gray-600 hover:underline"
+                            className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-5 py-2 rounded"
                         >
-                            Cancel Edit
+                            {saving
+                                ? 'Saving...'
+                                : editingId
+                                  ? 'Update Notice'
+                                  : 'Submit for approval'}
                         </button>
+                    </form>
+
+                    {error && (
+                        <p className="text-red-500 mt-4">
+                            {error}
+                        </p>
+                    )}
+
+                    {success && (
+                        <p className="text-green-600 mt-4">
+                            {success}
+                        </p>
                     )}
                 </div>
-
-                <form noValidate
-                    onSubmit={
-                        handleSubmit
-                    }
-                    className="space-y-4"
-                >
-                    <div>
-                        <label className="block font-medium mb-1">
-                            Title
-                        </label>
-
-                        <input
-                            type="text"
-                            value={
-                                title
-                            }
-                            onChange={(
-                                event
-                            ) =>
-                                setTitle(
-                                    event
-                                        .target
-                                        .value
-                                )
-                            }
-                            placeholder="Notice title"
-                            className="w-full border rounded p-2"
-                        />
-                    </div>
-
-                    <div>
-                        <label className="block font-medium mb-1">
-                            Audience
-                        </label>
-
-                        <select
-                            value={
-                                audience
-                            }
-                            onChange={(
-                                event
-                            ) =>
-                                setAudience(
-                                    event
-                                        .target
-                                        .value as
-                                        | 'all'
-                                        | 'students'
-                                )
-                            }
-                            className="w-full border rounded p-2"
-                        >
-                            <option value="students">
-                                Students
-                            </option>
-
-                            <option value="all">
-                                Everyone
-                            </option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label className="block font-medium mb-1">
-                            Content
-                        </label>
-
-                        <textarea
-                            value={
-                                content
-                            }
-                            onChange={(
-                                event
-                            ) =>
-                                setContent(
-                                    event
-                                        .target
-                                        .value
-                                )
-                            }
-                            rows={5}
-                            placeholder="Write the notice..."
-                            className="w-full border rounded p-2"
-                        />
-                    </div>
-
-                    <button
-                        type="submit"
-                        disabled={
-                            saving
-                        }
-                        className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-5 py-2 rounded"
-                    >
-                        {saving
-                            ? 'Saving...'
-                            : editingId
-                              ? 'Update Notice'
-                              : 'Post Notice'}
-                    </button>
-                </form>
-
-                {error && (
-                    <p className="text-red-500 mt-4">
-                        {error}
-                    </p>
-                )}
-
-                {success && (
-                    <p className="text-green-600 mt-4">
-                        {success}
-                    </p>
-                )}
-            </div>
+            </EditModal>
 
             <div>
                 <h2 className="text-lg font-semibold mb-4">
@@ -527,6 +528,10 @@ function TeacherNoticesPage() {
                                             notice.author_email
                                         }
                                     </p>
+
+                                    {notice.is_own && (
+                                        <p className="mt-2 text-sm text-gray-600">{notice.status === 'pending' ? <span style={{ color: '#92400e', fontWeight: 500 }}>Pending approval</span> : notice.status === 'rejected' ? 'Rejected' : 'Published'}</p>
+                                    )}
 
                                     {notice.is_own && (
                                         <div className="flex gap-4 mt-4 border-t pt-4">

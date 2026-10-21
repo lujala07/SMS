@@ -103,6 +103,9 @@ npm run build
 
 ## Notes
 
+- Teacher notices require admin approval. Pending and rejected notices are visible only to admins and their author; teacher edits require approval again. Admin notices publish immediately. Apply `database/migrations/004_notice_approval.sql` to existing databases; notices published before the migration remain published.
+- Live notifications use authenticated Socket.IO connections on the API server. Notices, assignments, submissions, and reviews create per-user notifications with persistent read status. Active users see bottom-right popups; the top-right bell opens their notification history.
+- Existing databases must apply `database/migrations/003_notifications.sql` before starting the updated API server. Socket.IO uses the same API URL and `CORS_ORIGIN` as HTTP requests.
 - Students and teachers receive a single-use password invitation instead of an admin-assigned password. Links expire after 24 hours.
 - For Gmail, set `SMTP_USER` to the sending Gmail address and `SMTP_PASSWORD` to its Google app password in `server/.env`. Set `CLIENT_URL` to the frontend URL recipients can open; `MAIL_FROM` defaults to `SMTP_USER`. Account creation fails without saving an account if email delivery fails.
 - Existing databases must apply `database/migrations/002_user_invitations.sql` before using invitations. Existing account passwords are preserved.

@@ -4,6 +4,7 @@ import {
 } from 'react';
 
 import axios from 'axios';
+import EditModal from '../../components/EditModal';
 import { confirmDelete } from '../../components/confirmDelete';
 import { today } from '../../utils/date';
 
@@ -265,13 +266,10 @@ function TeacherAssignmentsPage() {
         setError('');
         setSuccess('');
 
-        window.scrollTo({
-            top: 0,
-            behavior: 'smooth'
-        });
     };
 
     const handleCancelEdit = () => {
+        if (saving) return;
         clearForm();
 
         setError('');
@@ -354,181 +352,183 @@ function TeacherAssignmentsPage() {
                 </p>
             </div>
 
-            <div className="bg-white p-6 rounded shadow mb-6">
-                <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-lg font-semibold">
-                        {editingId
-                            ? 'Edit Assignment'
-                            : 'Create Assignment'}
-                    </h2>
+            <EditModal open={Boolean(editingId)} title="Edit assignment" busy={saving} onClose={handleCancelEdit}>
+                <div className="bg-white p-6 rounded shadow mb-6">
+                    <div className="flex items-center justify-between mb-4">
+                        <h2 className="text-lg font-semibold">
+                            {editingId
+                                ? 'Edit Assignment'
+                                : 'Create Assignment'}
+                        </h2>
 
-                    {editingId && (
-                        <button
-                            type="button"
-                            onClick={
-                                handleCancelEdit
-                            }
-                            className="text-gray-600 hover:underline"
-                        >
-                            Cancel Edit
-                        </button>
+                        {editingId && (
+                            <button
+                                type="button"
+                                onClick={
+                                    handleCancelEdit
+                                }
+                                className="text-gray-600 hover:underline"
+                            >
+                                Cancel Edit
+                            </button>
+                        )}
+                    </div>
+
+                    <form noValidate
+                        onSubmit={handleSubmit}
+                        className="grid grid-cols-1 md:grid-cols-2 gap-4"
+                    >
+                        <div className="md:col-span-2">
+                            <label className="block mb-1 font-medium">
+                                Subject
+                            </label>
+
+                            <select
+                                value={subjectId}
+                                onChange={(event) =>
+                                    setSubjectId(
+                                        event.target.value
+                                    )
+                                }
+                                className="w-full border p-2 rounded"
+                            >
+                                <option value="">
+                                    Select Subject
+                                </option>
+
+                                {subjects.map(
+                                    (subject) => (
+                                        <option
+                                            key={
+                                                subject.id
+                                            }
+                                            value={
+                                                subject.id
+                                            }
+                                        >
+                                            {
+                                                subject.code
+                                            }
+                                            {' - '}
+                                            {
+                                                subject.name
+                                            }
+
+                                            {subject.class_name
+                                                ? ` | ${subject.class_name}`
+                                                : ''}
+
+                                            {subject.semester
+                                                ? ` Semester ${subject.semester}`
+                                                : ''}
+                                        </option>
+                                    )
+                                )}
+                            </select>
+                        </div>
+
+                        <div className="md:col-span-2">
+                            <label className="block mb-1 font-medium">
+                                Title
+                            </label>
+
+                            <input
+                                type="text"
+                                value={title}
+                                onChange={(event) =>
+                                    setTitle(
+                                        event.target.value
+                                    )
+                                }
+                                placeholder="Assignment title"
+                                className="w-full border p-2 rounded"
+                            />
+                        </div>
+
+                        <div className="md:col-span-2">
+                            <label className="block mb-1 font-medium">
+                                Description
+                            </label>
+
+                            <textarea
+                                value={description}
+                                onChange={(event) =>
+                                    setDescription(
+                                        event.target.value
+                                    )
+                                }
+                                placeholder="Assignment description"
+                                rows={4}
+                                className="w-full border p-2 rounded"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block mb-1 font-medium">
+                                Due Date
+                            </label>
+
+                            <input
+                                type="date"
+                                value={dueDate}
+                                onChange={(event) =>
+                                    setDueDate(
+                                        event.target.value
+                                    )
+                                }
+                                className="w-full border p-2 rounded"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block mb-1 font-medium">
+                                Total Marks
+                            </label>
+
+                            <input
+                                type="text"
+                                inputMode="decimal"
+                                value={totalMarks}
+                                onChange={(event) =>
+                                    handleMarksChange(
+                                        event.target.value
+                                    )
+                                }
+                                placeholder="e.g. 20"
+                                className="w-full border p-2 rounded"
+                            />
+                        </div>
+
+                        <div className="md:col-span-2">
+                            <button
+                                type="submit"
+                                disabled={saving}
+                                className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-5 py-2 rounded"
+                            >
+                                {saving
+                                    ? editingId
+                                        ? 'Updating...'
+                                        : 'Creating...'
+                                    : editingId
+                                      ? 'Update Assignment'
+                                      : 'Create Assignment'}
+                            </button>
+                        </div>
+                    </form>
+
+                    {error && (
+                        <p className="text-red-500 mt-4">
+                            {error}
+                        </p>
+                    )}
+
+                    {success && (
+                        <p className="text-green-600 mt-4">
+                            {success}
+                        </p>
                     )}
                 </div>
-
-                <form noValidate
-                    onSubmit={handleSubmit}
-                    className="grid grid-cols-1 md:grid-cols-2 gap-4"
-                >
-                    <div className="md:col-span-2">
-                        <label className="block mb-1 font-medium">
-                            Subject
-                        </label>
-
-                        <select
-                            value={subjectId}
-                            onChange={(event) =>
-                                setSubjectId(
-                                    event.target.value
-                                )
-                            }
-                            className="w-full border p-2 rounded"
-                        >
-                            <option value="">
-                                Select Subject
-                            </option>
-
-                            {subjects.map(
-                                (subject) => (
-                                    <option
-                                        key={
-                                            subject.id
-                                        }
-                                        value={
-                                            subject.id
-                                        }
-                                    >
-                                        {
-                                            subject.code
-                                        }
-                                        {' - '}
-                                        {
-                                            subject.name
-                                        }
-
-                                        {subject.class_name
-                                            ? ` | ${subject.class_name}`
-                                            : ''}
-
-                                        {subject.semester
-                                            ? ` Semester ${subject.semester}`
-                                            : ''}
-                                    </option>
-                                )
-                            )}
-                        </select>
-                    </div>
-
-                    <div className="md:col-span-2">
-                        <label className="block mb-1 font-medium">
-                            Title
-                        </label>
-
-                        <input
-                            type="text"
-                            value={title}
-                            onChange={(event) =>
-                                setTitle(
-                                    event.target.value
-                                )
-                            }
-                            placeholder="Assignment title"
-                            className="w-full border p-2 rounded"
-                        />
-                    </div>
-
-                    <div className="md:col-span-2">
-                        <label className="block mb-1 font-medium">
-                            Description
-                        </label>
-
-                        <textarea
-                            value={description}
-                            onChange={(event) =>
-                                setDescription(
-                                    event.target.value
-                                )
-                            }
-                            placeholder="Assignment description"
-                            rows={4}
-                            className="w-full border p-2 rounded"
-                        />
-                    </div>
-
-                    <div>
-                        <label className="block mb-1 font-medium">
-                            Due Date
-                        </label>
-
-                        <input
-                            type="date"
-                            value={dueDate}
-                            onChange={(event) =>
-                                setDueDate(
-                                    event.target.value
-                                )
-                            }
-                            className="w-full border p-2 rounded"
-                        />
-                    </div>
-
-                    <div>
-                        <label className="block mb-1 font-medium">
-                            Total Marks
-                        </label>
-
-                        <input
-                            type="text"
-                            inputMode="decimal"
-                            value={totalMarks}
-                            onChange={(event) =>
-                                handleMarksChange(
-                                    event.target.value
-                                )
-                            }
-                            placeholder="e.g. 20"
-                            className="w-full border p-2 rounded"
-                        />
-                    </div>
-
-                    <div className="md:col-span-2">
-                        <button
-                            type="submit"
-                            disabled={saving}
-                            className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-5 py-2 rounded"
-                        >
-                            {saving
-                                ? editingId
-                                    ? 'Updating...'
-                                    : 'Creating...'
-                                : editingId
-                                  ? 'Update Assignment'
-                                  : 'Create Assignment'}
-                        </button>
-                    </div>
-                </form>
-
-                {error && (
-                    <p className="text-red-500 mt-4">
-                        {error}
-                    </p>
-                )}
-
-                {success && (
-                    <p className="text-green-600 mt-4">
-                        {success}
-                    </p>
-                )}
-            </div>
+            </EditModal>
 
             <div>
                 <h2 className="text-lg font-semibold mb-4">

@@ -1,4 +1,5 @@
 import pool from '../config/database.js';
+import { createNotifications, withNotificationTransaction } from './notificationService.js';
 
 export const getAllAssignments = async () => {
     const result = await pool.query(
@@ -113,58 +114,65 @@ export const createAssignment = async (
     dueDate: string,
     totalMarks: number
 ) => {
-    const teacherResult = await pool.query(
-        `
-        SELECT teachers.id
+    return withNotificationTransaction(async client => {
+        const teacherResult = await client.query(
+            `
+            SELECT teachers.id
 
-        FROM teachers
+            FROM teachers
 
-        JOIN teacher_subjects
-            ON teacher_subjects.teacher_id = teachers.id
+            JOIN teacher_subjects
+                ON teacher_subjects.teacher_id = teachers.id
 
-        WHERE teachers.user_id = $1
-        AND teacher_subjects.subject_id = $2
-        `,
-        [
-            userId,
-            subjectId
-        ]
-    );
-
-    const teacher = teacherResult.rows[0];
-
-    if (!teacher) {
-        throw new Error(
-            'You are not assigned to this subject'
+            WHERE teachers.user_id = $1
+            AND teacher_subjects.subject_id = $2
+            `,
+            [
+                userId,
+                subjectId
+            ]
         );
-    }
 
-    const result = await pool.query(
-        `
-        INSERT INTO assignments (
-            subject_id,
-            teacher_id,
-            title,
-            description,
-            due_date,
-            total_marks
-        )
+        const teacher = teacherResult.rows[0];
 
-        VALUES ($1, $2, $3, $4, $5, $6)
+        if (!teacher) {
+            throw new Error(
+                'You are not assigned to this subject'
+            );
+        }
 
-        RETURNING *
-        `,
-        [
-            subjectId,
-            teacher.id,
-            title,
-            description || null,
-            dueDate,
-            totalMarks
-        ]
-    );
+        const result = await client.query(
+            `
+            INSERT INTO assignments (
+                subject_id,
+                teacher_id,
+                title,
+                description,
+                due_date,
+                total_marks
+            )
 
-    return result.rows[0];
+            VALUES ($1, $2, $3, $4, $5, $6)
+
+            RETURNING *
+            `,
+            [
+                subjectId,
+                teacher.id,
+                title,
+                description || null,
+                dueDate,
+                totalMarks
+            ]
+        );
+
+        const recipients = await client.query(
+            'SELECT students.user_id FROM students JOIN subjects ON students.class_id = subjects.class_id WHERE subjects.id = $1',
+            [subjectId]
+        );
+        const notifications = await createNotifications(client, recipients.rows.map(student => student.user_id), 'New assignment', title, '/student/assignments');
+        return { value: result.rows[0], notifications };
+    });
 };
 
 export const updateAssignment = async (

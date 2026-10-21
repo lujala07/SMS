@@ -43,16 +43,6 @@ interface Assignment {
     marks_obtained?: number | null;
 }
 
-interface Notice {
-    id: number;
-
-    title: string;
-    content: string;
-
-    created_at: string;
-    author_email?: string;
-}
-
 interface DashboardData {
     student: Student;
 
@@ -62,8 +52,6 @@ interface DashboardData {
     assignments:
         Assignment[];
 
-    notices:
-        Notice[];
 }
 
 function StudentDashboard() {
@@ -438,51 +426,6 @@ function StudentDashboard() {
                 </div>
             </div>
 
-            <div>
-                <h2 className="text-lg font-semibold mb-4">
-                    Recent Notices
-                </h2>
-
-                {data.notices.length ===
-                0 ? (
-                    <div className="bg-white rounded shadow p-5 text-gray-500">
-                        No notices available.
-                    </div>
-                ) : (
-                    <div className="space-y-4">
-                        {data.notices.map(
-                            (
-                                notice
-                            ) => (
-                                <div
-                                    key={
-                                        notice.id
-                                    }
-                                    className="bg-white rounded shadow p-5"
-                                >
-                                    <h3 className="font-semibold">
-                                        {
-                                            notice.title
-                                        }
-                                    </h3>
-
-                                    <p className="mt-2">
-                                        {
-                                            notice.content
-                                        }
-                                    </p>
-
-                                    <p className="text-sm text-gray-500 mt-3">
-                                        {new Date(
-                                            notice.created_at
-                                        ).toLocaleString()}
-                                    </p>
-                                </div>
-                            )
-                        )}
-                    </div>
-                )}
-            </div>
         </div>
     );
 }

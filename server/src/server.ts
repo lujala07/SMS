@@ -1,6 +1,8 @@
 import 'dotenv/config';
 import app from './app.js';
 import pool from './config/database.js';
+import { createServer } from 'node:http';
+import { initializeRealtime } from './realtime.js';
 
 const PORT = Number(process.env.PORT) || 5000;
 
@@ -12,7 +14,9 @@ const startServer = async (): Promise<void> => {
             'PostgreSQL connected successfully'
         );
 
-        app.listen(PORT, () => {
+        const server = createServer(app);
+        initializeRealtime(server);
+        server.listen(PORT, () => {
             console.log(
                 `Server is running on http://localhost:${PORT}`
             );

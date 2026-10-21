@@ -1,9 +1,13 @@
 import {
     useEffect,
+    useRef,
     useState
 } from 'react';
 
 import axios from 'axios';
+import { mobileError, normalizeNepalMobile } from '../../utils/phone';
+import { X } from 'lucide-react';
+import './StudentsPage.css';
 import { confirmDelete } from '../../components/confirmDelete';
 
 import {
@@ -18,6 +22,8 @@ import {
     type Student
 } from '../../services/studentService';
 
+const inputClassName = 'student-edit-input';
+
 const emptyForm = {
     classId: '',
     firstName: '',
@@ -28,6 +34,7 @@ const emptyForm = {
 };
 
 function StudentsPage() {
+    const editDialog = useRef<HTMLDialogElement>(null);
     const [students, setStudents] =
         useState<Student[]>([]);
     const [classes, setClasses] =
@@ -44,6 +51,11 @@ function StudentsPage() {
         useState('');
     const [success, setSuccess] =
         useState('');
+
+    useEffect(() => {
+        if (editingStudent) editDialog.current?.showModal();
+        else editDialog.current?.close();
+    }, [editingStudent]);
 
     const loadData = async () => {
         const [studentData, classData] =
@@ -87,6 +99,7 @@ function StudentsPage() {
     };
 
     const resetForm = () => {
+        if (saving) return;
         setForm(emptyForm);
         setEditingStudent(null);
         setError('');
@@ -108,10 +121,6 @@ function StudentsPage() {
         });
         setError('');
         setSuccess('');
-        window.scrollTo({
-            top: 0,
-            behavior: 'smooth'
-        });
     };
 
     const handleSubmit = async (
@@ -137,6 +146,12 @@ function StudentsPage() {
             return;
         }
 
+        const mobile = normalizeNepalMobile(form.phoneNumber);
+        if (!mobile) {
+            setError(mobileError);
+            return;
+        }
+
         setSaving(true);
 
         try {
@@ -149,8 +164,7 @@ function StudentsPage() {
                     lastName:
                         form.lastName.trim(),
                     phoneNumber:
-                        form.phoneNumber.trim() ||
-                        undefined,
+                        mobile,
                     address:
                         form.address.trim() ||
                         undefined,
@@ -219,164 +233,82 @@ function StudentsPage() {
                 </p>
             </div>
 
-            {editingStudent && (
-                <form noValidate
-                    onSubmit={handleSubmit}
-                    className="bg-white rounded shadow p-5 mb-6"
-                >
-                    <h2 className="font-semibold mb-4">
-                        Edit Student
-                    </h2>
+            <dialog
+                ref={editDialog}
+                aria-labelledby="edit-student-title"
+                onCancel={event => {
+                    event.preventDefault();
+                    resetForm();
+                }}
+                onClick={event => {
+                    if (event.target !== event.currentTarget) return;
+                    const bounds = event.currentTarget.getBoundingClientRect();
+                    if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) resetForm();
+                }}
+                className="student-edit-modal"
+            >
+                {editingStudent && (
+                    <form noValidate onSubmit={handleSubmit} aria-busy={saving} className="student-edit-form">
+                        <header className="student-edit-header">
+                            <div className="min-w-0">
+                                <h2 id="edit-student-title" className="text-xl font-semibold text-gray-900">Edit student</h2>
+                                <p className="mt-1 break-all text-sm text-gray-500">{editingStudent.email}</p>
+                            </div>
+                            <button type="button" onClick={resetForm} disabled={saving} aria-label="Close edit student" className="student-edit-close">
+                                <X size={20} aria-hidden="true" />
+                            </button>
+                        </header>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <input
-                            value={
-                                editingStudent.student_code
-                            }
-                            readOnly
-                            placeholder="Student code"
-                            className="border rounded p-2 bg-gray-100 text-gray-600"
-                        />
+                        <div className="student-edit-body">
+                            <p className="student-edit-code">Student code: <span>{editingStudent.student_code}</span></p>
+                            <div className="student-edit-fields">
+                                <div>
+                                    <label htmlFor="student-first-name" className="mb-1.5 block text-sm font-medium text-gray-700">First name</label>
+                                    <input autoFocus id="student-first-name" value={form.firstName} onChange={event => setForm({ ...form, firstName: event.target.value })} className={inputClassName} />
+                                </div>
+                                <div>
+                                    <label htmlFor="student-last-name" className="mb-1.5 block text-sm font-medium text-gray-700">Last name</label>
+                                    <input id="student-last-name" value={form.lastName} onChange={event => setForm({ ...form, lastName: event.target.value })} className={inputClassName} />
+                                </div>
+                                <div>
+                                    <label htmlFor="student-class" className="mb-1.5 block text-sm font-medium text-gray-700">Class</label>
+                                    <select id="student-class" value={form.classId} onChange={event => setForm({ ...form, classId: event.target.value })} className={inputClassName}>
+                                        <option value="">Select class</option>
+                                        {classes.map(classItem => (
+                                            <option key={classItem.id} value={classItem.id}>
+                                                {classItem.name}{classItem.semester ? ` - Semester ${classItem.semester}` : ''}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label htmlFor="student-gender" className="mb-1.5 block text-sm font-medium text-gray-700">Gender</label>
+                                    <select id="student-gender" value={form.gender} onChange={event => setForm({ ...form, gender: event.target.value })} className={inputClassName}>
+                                        <option value="">Select gender</option>
+                                        <option value="male">Male</option>
+                                        <option value="female">Female</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+                                <div className="student-edit-fullwidth">
+                                    <label htmlFor="student-phone" className="mb-1.5 block text-sm font-medium text-gray-700">Phone number</label>
+                                    <input id="student-phone" type="tel" value={form.phoneNumber} onChange={event => setForm({ ...form, phoneNumber: event.target.value })} className={inputClassName} />
+                                </div>
+                                <div className="student-edit-fullwidth">
+                                    <label htmlFor="student-address" className="mb-1.5 block text-sm font-medium text-gray-700">Address</label>
+                                    <input id="student-address" type="text" value={form.address} onChange={event => setForm({ ...form, address: event.target.value })} className={inputClassName} />
+                                </div>
+                            </div>
+                            {error && <p role="alert" className="student-edit-error">{error}</p>}
+                        </div>
 
-                        <select
-                            value={form.classId}
-                            onChange={(event) =>
-                                setForm({
-                                    ...form,
-                                    classId:
-                                        event.target.value
-                                })
-                            }
-                            className="border rounded p-2"
-                        >
-                            <option value="">
-                                Select Class
-                            </option>
-                            {classes.map((classItem) => (
-                                <option
-                                    key={classItem.id}
-                                    value={classItem.id}
-                                >
-                                    {classItem.name}
-                                    {classItem.semester
-                                        ? ` - Semester ${classItem.semester}`
-                                        : ''}
-                                </option>
-                            ))}
-                        </select>
-
-                        <input
-                            value={form.firstName}
-                            onChange={(event) =>
-                                setForm({
-                                    ...form,
-                                    firstName:
-                                        event.target.value
-                                })
-                            }
-                            placeholder="First name"
-                            className="border rounded p-2"
-                        />
-
-                        <input
-                            value={form.lastName}
-                            onChange={(event) =>
-                                setForm({
-                                    ...form,
-                                    lastName:
-                                        event.target.value
-                                })
-                            }
-                            placeholder="Last name"
-                            className="border rounded p-2"
-                        />
-
-                        <input
-                            value={form.phoneNumber}
-                            onChange={(event) =>
-                                setForm({
-                                    ...form,
-                                    phoneNumber:
-                                        event.target.value
-                                })
-                            }
-                            placeholder="Phone number"
-                            className="border rounded p-2"
-                        />
-
-                        <select
-                            value={form.gender}
-                            onChange={(event) =>
-                                setForm({
-                                    ...form,
-                                    gender:
-                                        event.target.value
-                                })
-                            }
-                            className="border rounded p-2"
-                        >
-                            <option value="">
-                                Select Gender
-                            </option>
-                            <option value="male">
-                                Male
-                            </option>
-                            <option value="female">
-                                Female
-                            </option>
-                            <option value="other">
-                                Other
-                            </option>
-                        </select>
-                    </div>
-
-                    <textarea
-                        value={form.address}
-                        onChange={(event) =>
-                            setForm({
-                                ...form,
-                                address:
-                                    event.target.value
-                            })
-                        }
-                        placeholder="Address"
-                        rows={3}
-                        className="border rounded p-2 w-full mt-4"
-                    />
-
-                    {error && (
-                        <p className="text-red-500 mt-3">
-                            {error}
-                        </p>
-                    )}
-
-                    {success && (
-                        <p className="text-green-600 mt-3">
-                            {success}
-                        </p>
-                    )}
-
-                    <div className="flex justify-end gap-3 mt-4">
-                        <button
-                            type="submit"
-                            disabled={saving}
-                            className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-4 py-2 rounded"
-                        >
-                            {saving
-                                ? 'Saving...'
-                                : 'Update Student'}
-                        </button>
-
-                        <button
-                            type="button"
-                            onClick={resetForm}
-                            className="border px-4 py-2 rounded"
-                        >
-                            Cancel
-                        </button>
-                    </div>
-                </form>
-            )}
+                        <footer className="student-edit-actions">
+                            <button type="button" onClick={resetForm} disabled={saving}>Cancel</button>
+                            <button type="submit" disabled={saving} className="student-edit-save">{saving ? 'Saving...' : 'Save changes'}</button>
+                        </footer>
+                    </form>
+                )}
+            </dialog>
 
             {!editingStudent && error && (
                 <p className="text-red-500 mb-4">
