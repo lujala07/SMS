@@ -1,116 +1,257 @@
-# Role-Based Student Academic Management System
+# Student Management System
 
-PERN stack academic MVP for a role-based Student Management System. The app supports admin setup, teacher attendance and assignment workflows, and student dashboard/submission views.
+A web-based Student Management System developed for managing academic records, attendance, assignments, submissions, notices, and basic reports.
 
-## Stack
+The system provides separate dashboards and permissions for Admin, Teacher, and Student users.
 
+## Features
+
+### Admin
+- Manage users, students, teachers, departments, classes, and subjects
+- Assign teachers to subjects
+- Manage notices
+- View academic reports
+- Create additional admin accounts
+
+### Teacher
+- View assigned subjects
+- Mark student attendance
+- Create and manage assignments
+- Review student submissions
+- Give marks and feedback
+- Create notices for admin approval
+- View reports
+
+### Student
+- View attendance records
+- View assignments
+- Submit written responses or PDF files
+- View marks and teacher feedback
+- View published notices
+
+### Other Features
+- Role-based authentication and authorization
+- Search, sorting, filtering, and pagination
+- Automatic student code generation
+- PDF assignment submissions
+- Email invitations for student and teacher accounts
+- Live notifications using Socket.IO
+- Responsive sidebar and mobile navigation
+
+## Technologies Used
+
+**Frontend**
+- React
+- TypeScript
+- Vite
+- Tailwind CSS
+- React Router
+- Axios
+
+**Backend**
+- Node.js
+- Express
+- TypeScript
+- Socket.IO
+
+**Database**
 - PostgreSQL
-- Express + TypeScript
-- React + Vite + TypeScript
-- JWT authentication
-- Filesystem uploads for assignment submissions
+
+**Authentication**
+- JWT
+- bcrypt
+
+**Other Tools**
+- Multer for file uploads
+- Nodemailer for account invitations
+- Git and GitHub
+- Postman
+
+## Project Structure
+
+```text
+SMS/
+├── client/          # React frontend
+├── server/          # Node.js and Express backend
+├── database/
+│   ├── schema.sql
+│   ├── seed.sql
+│   └── migrations/
+└── README.md
+```
 
 ## Local Setup
 
-1. Create a PostgreSQL database, for example `sms_db`.
-2. Copy `server/.env.example` to `server/.env` and fill the values.
-3. Install dependencies:
+### 1. Requirements
+
+Make sure you have:
+
+- Node.js
+- npm
+- PostgreSQL
+
+### 2. Install Dependencies
+
+From the project root:
 
 ```bash
-cd server
-npm install
-cd ../client
-npm install
+npm --prefix server install
+npm --prefix client install
 ```
 
-4. Create tables and seed demo data:
+### 3. Configure Environment
+
+Copy:
+
+```text
+server/.env.example
+```
+
+to:
+
+```text
+server/.env
+```
+
+Then configure your PostgreSQL connection and JWT secret.
+
+Example:
+
+```env
+PORT=5000
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=sms_db
+DB_USER=postgres
+DB_PASSWORD=your_password
+JWT_SECRET=your_secret
+CORS_ORIGIN=http://localhost:5173
+CLIENT_URL=http://localhost:5173
+```
+
+SMTP configuration is only required when creating new Student or Teacher accounts through email invitations.
+
+### 4. Create the Database
 
 ```bash
-cd server
-npm run db:schema
-npm run db:seed
+createdb -U postgres sms_db
+
+psql -U postgres -d sms_db -f database/schema.sql
+
+psql -U postgres -d sms_db -f database/seed.sql
 ```
 
-5. Start both apps:
+### 5. Run the Application
+
+Backend:
 
 ```bash
 cd server
 npm run dev
 ```
+
+Frontend:
 
 ```bash
 cd client
 npm run dev
 ```
 
-Default URLs:
+Open:
 
-- Client: `http://localhost:5173`
-- API: `http://localhost:5000`
-
-## Environment
-
-Server variables:
-
-- `PORT=5000`
-- `CORS_ORIGIN=http://localhost:5173`
-- `DB_HOST=localhost`
-- `DB_PORT=5432`
-- `DB_NAME=sms_db`
-- `DB_USER=postgres`
-- `DB_PASSWORD=your_password`
-- `JWT_SECRET=replace_with_a_strong_secret`
-
-Client variable:
-
-- `VITE_API_URL=http://localhost:5000`
+```text
+http://localhost:5173
+```
 
 ## Demo Accounts
 
-All seeded accounts use password `Password@123`.
+All seeded accounts use:
 
-- Admin: `admin@sms.local`
-- Teacher: `teacher@sms.local`
-- Student: `student@sms.local`
+```text
+Password@123
+```
 
-## Feature Matrix
+| Role | Email |
+| --- | --- |
+| Admin | admin@sms.local |
+| Teacher | teacher@sms.local |
+| Student | student@sms.local |
 
-- Admin: dashboard, users, students, teachers, departments, classes, subjects, teacher-subject assignments, notices, reports.
-- Teacher: dashboard, assigned subjects, attendance, assignments, submission review, notices, reports.
-- Student: dashboard, attendance, assignments, PDF submission, marks, feedback, notices.
+## Main Workflow
 
-## Verification
+### Account Management
+
+The Admin creates and manages academic records and user accounts.
+
+Student and Teacher accounts can receive an email invitation to create their password.
+
+### Attendance
+
+Teachers select an assigned subject and date, then mark students as Present, Absent, or Late.
+
+Students can view their attendance history.
+
+### Assignments and Submissions
+
+Teachers create assignments for assigned subjects.
+
+Students can submit:
+- written responses
+- PDF files
+- or both
+
+Teachers can review submissions and provide marks and feedback.
+
+### Notices
+
+Admins can publish notices directly.
+
+Teacher notices require Admin approval before publication.
+
+### Notifications
+
+The application supports notification history, unread counts, and live notifications using Socket.IO.
+
+Notifications are generated for events such as:
+- new assignments
+- new submissions
+- reviewed submissions
+- notice approvals
+- published notices
+
+## Development Commands
+
+Backend:
 
 ```bash
-cd server
+npm run dev
 npm run type-check
 npm run build
 ```
 
+Frontend:
+
 ```bash
-cd client
+npm run dev
 npm run lint
 npm run build
 ```
 
-## Demo Flow
+## Project Scope
 
-1. Login as admin and confirm departments, teachers, students, classes, subjects, notices, and reports load.
-2. Create or edit a teacher and department from the admin pages.
-3. Login as teacher and mark attendance for an assigned subject.
-4. Create an assignment and review a student submission.
-5. Login as student and view dashboard, attendance, assignments, marks, and feedback.
+The system currently covers:
 
-## Notes
+- User and academic record management
+- Attendance
+- Assignments and submissions
+- Notices
+- Notifications
+- Basic reports
 
-- Teacher notices require admin approval. Pending and rejected notices are visible only to admins and their author; teacher edits require approval again. Admin notices publish immediately. Apply `database/migrations/004_notice_approval.sql` to existing databases; notices published before the migration remain published.
-- Live notifications use authenticated Socket.IO connections on the API server. Notices, assignments, submissions, and reviews create per-user notifications with persistent read status. Active users see bottom-right popups; the top-right bell opens their notification history.
-- Existing databases must apply `database/migrations/003_notifications.sql` before starting the updated API server. Socket.IO uses the same API URL and `CORS_ORIGIN` as HTTP requests.
-- Students and teachers receive a single-use password invitation instead of an admin-assigned password. Links expire after 24 hours.
-- For Gmail, set `SMTP_USER` to the sending Gmail address and `SMTP_PASSWORD` to its Google app password in `server/.env`. Set `CLIENT_URL` to the frontend URL recipients can open; `MAIL_FROM` defaults to `SMTP_USER`. Account creation fails without saving an account if email delivery fails.
-- Existing databases must apply `database/migrations/002_user_invitations.sql` before using invitations. Existing account passwords are preserved.
-- Existing databases should apply `database/migrations/001_student_code.sql` once to allow student codes beyond STU999.
-- Date validation uses Asia/Kathmandu: assignment deadlines cannot be in the past, attendance permits past dates but rejects future dates, and birth dates cannot be in the future.
-- Uploaded submissions are stored under `server/uploads/` and ignored by Git.
-- The MVP intentionally excludes exams/results, fees, timetables, guardians, and hosted production deployment.
-- Deletes preserve academic history. Records with dependent academic data return a conflict instead of cascading deletion.
+The following are outside the current scope:
+
+- Fee management
+- Examination and result processing
+- Timetables
+- Guardian accounts
+- Production deployment
