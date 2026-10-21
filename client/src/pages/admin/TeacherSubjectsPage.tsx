@@ -8,6 +8,7 @@ import {
 } from 'react';
 
 import axios from 'axios';
+import EditModal from '../../components/EditModal';
 import { confirmDelete } from '../../components/confirmDelete';
 
 import api from '../../services/api';
@@ -42,6 +43,7 @@ interface TeacherSubject {
 }
 
 function TeacherSubjectsPage() {
+    const [formOpen, setFormOpen] = useState(false);
     const [teachers, setTeachers] =
         useState<Teacher[]>([]);
 
@@ -126,10 +128,20 @@ function TeacherSubjectsPage() {
         loadData();
     }, []);
 
+    const closeForm = () => {
+        if (saving) return;
+        setFormOpen(false);
+        setTeacherId('');
+        setSubjectId('');
+        setError('');
+        setSuccess('');
+    };
+
     const handleAssign = async (
         event: React.FormEvent
     ) => {
         event.preventDefault();
+        if (saving) return;
 
         setError('');
         setSuccess('');
@@ -167,6 +179,7 @@ function TeacherSubjectsPage() {
             setSubjectId('');
 
             await loadAssignments();
+            setFormOpen(false);
 
         } catch (error) {
             console.error(error);
@@ -262,6 +275,11 @@ function TeacherSubjectsPage() {
                 </p>
             </div>
 
+            <button type="button" onClick={() => { closeForm(); setFormOpen(true); }} className="mb-6 rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">Assign Teacher</button>
+            {!formOpen && error && <p role="alert" className="mb-4 text-red-500">{error}</p>}
+            {!formOpen && success && <p role="status" className="mb-4 text-green-600">{success}</p>}
+
+            {formOpen && <EditModal open={formOpen} title="Assign teacher" busy={saving} onClose={closeForm}>
             <div className="bg-white p-6 rounded shadow mb-6">
                 <h2 className="text-lg font-semibold mb-4">
                     Assign Teacher
@@ -277,6 +295,7 @@ function TeacherSubjectsPage() {
                         </label>
 
                         <select
+                            aria-label="Teacher"
                             value={teacherId}
                             onChange={(event) =>
                                 setTeacherId(
@@ -321,6 +340,7 @@ function TeacherSubjectsPage() {
                         </label>
 
                         <select
+                            aria-label="Subject"
                             value={subjectId}
                             onChange={(event) =>
                                 setSubjectId(
@@ -360,7 +380,8 @@ function TeacherSubjectsPage() {
                         </select>
                     </div>
 
-                    <div className="md:col-span-2 flex justify-end">
+                    <div className="md:col-span-2 flex justify-end gap-3">
+                        <button type="button" onClick={closeForm} disabled={saving} className="rounded border px-4 py-2">Cancel</button>
                         <button
                             type="submit"
                             disabled={saving}
@@ -385,6 +406,7 @@ function TeacherSubjectsPage() {
                     </p>
                 )}
             </div>
+            </EditModal>}
 
             <div>
                 <h2 className="text-lg font-semibold mb-4">

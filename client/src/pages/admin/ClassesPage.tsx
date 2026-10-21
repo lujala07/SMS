@@ -32,6 +32,7 @@ const emptyForm = {
 };
 
 function ClassesPage() {
+    const [formOpen, setFormOpen] = useState(false);
     const [classes, setClasses] =
         useState<ClassItem[]>([]);
     const [departments, setDepartments] =
@@ -99,6 +100,7 @@ function ClassesPage() {
 
     const resetForm = () => {
         if (saving) return;
+        setFormOpen(false);
         setForm(emptyForm);
         setEditingClass(null);
         setError('');
@@ -108,6 +110,7 @@ function ClassesPage() {
     const startEdit = (
         classItem: ClassItem
     ) => {
+        setFormOpen(true);
         setEditingClass(classItem);
         setForm({
             departmentId: String(
@@ -128,6 +131,7 @@ function ClassesPage() {
         event: React.FormEvent
     ) => {
         event.preventDefault();
+        if (saving) return;
         setError('');
         setSuccess('');
 
@@ -175,6 +179,7 @@ function ClassesPage() {
             await loadData();
             setForm(emptyForm);
             setEditingClass(null);
+            setFormOpen(false);
         } catch (error) {
             setError(
                 getErrorMessage(
@@ -229,7 +234,11 @@ function ClassesPage() {
                 </p>
             </div>
 
-            <EditModal open={Boolean(editingClass)} title="Edit class" busy={saving} onClose={resetForm}>
+            <button type="button" onClick={() => { resetForm(); setFormOpen(true); }} className="mb-6 rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">Create Class</button>
+            {!formOpen && error && <p role="alert" className="mb-4 text-red-500">{error}</p>}
+            {!formOpen && success && <p role="status" className="mb-4 text-green-600">{success}</p>}
+
+            {formOpen && <EditModal open={formOpen} title={editingClass ? 'Edit class' : 'Create class'} busy={saving} onClose={resetForm}>
                 <form noValidate
                     onSubmit={handleSubmit}
                     className="bg-white rounded shadow p-5 mb-6"
@@ -336,18 +345,17 @@ function ClassesPage() {
                                   : 'Create Class'}
                         </button>
 
-                        {editingClass && (
                             <button
                                 type="button"
                                 onClick={resetForm}
+                                disabled={saving}
                                 className="border px-4 py-2 rounded"
                             >
                                 Cancel
                             </button>
-                        )}
                     </div>
                 </form>
-            </EditModal>
+            </EditModal>}
 
             <div className="bg-white rounded shadow overflow-x-auto">
                 <TableToolbar {...classesPagination} label="Classes" />

@@ -31,6 +31,7 @@ const emptyForm = {
 };
 
 function SubjectsPage() {
+    const [formOpen, setFormOpen] = useState(false);
     const [subjects, setSubjects] =
         useState<Subject[]>([]);
     const [classes, setClasses] =
@@ -97,6 +98,7 @@ function SubjectsPage() {
 
     const resetForm = () => {
         if (saving) return;
+        setFormOpen(false);
         setForm(emptyForm);
         setEditingSubject(null);
         setError('');
@@ -106,6 +108,7 @@ function SubjectsPage() {
     const startEdit = (
         subject: Subject
     ) => {
+        setFormOpen(true);
         setEditingSubject(subject);
         setForm({
             classId: String(subject.class_id),
@@ -120,6 +123,7 @@ function SubjectsPage() {
         event: React.FormEvent
     ) => {
         event.preventDefault();
+        if (saving) return;
         setError('');
         setSuccess('');
 
@@ -161,6 +165,7 @@ function SubjectsPage() {
             await loadData();
             setForm(emptyForm);
             setEditingSubject(null);
+            setFormOpen(false);
         } catch (error) {
             setError(
                 getErrorMessage(
@@ -215,7 +220,11 @@ function SubjectsPage() {
                 </p>
             </div>
 
-            <EditModal open={Boolean(editingSubject)} title="Edit subject" busy={saving} onClose={resetForm}>
+            <button type="button" onClick={() => { resetForm(); setFormOpen(true); }} className="mb-6 rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">Create Subject</button>
+            {!formOpen && error && <p role="alert" className="mb-4 text-red-500">{error}</p>}
+            {!formOpen && success && <p role="status" className="mb-4 text-green-600">{success}</p>}
+
+            {formOpen && <EditModal open={formOpen} title={editingSubject ? 'Edit subject' : 'Create subject'} busy={saving} onClose={resetForm}>
                 <form noValidate
                     onSubmit={handleSubmit}
                     className="bg-white rounded shadow p-5 mb-6"
@@ -304,18 +313,17 @@ function SubjectsPage() {
                                   : 'Create Subject'}
                         </button>
 
-                        {editingSubject && (
                             <button
                                 type="button"
                                 onClick={resetForm}
+                                disabled={saving}
                                 className="border px-4 py-2 rounded"
                             >
                                 Cancel
                             </button>
-                        )}
                     </div>
                 </form>
-            </EditModal>
+            </EditModal>}
 
             <div className="bg-white rounded shadow overflow-x-auto">
                 <TableToolbar {...subjectsPagination} label="Subjects" />

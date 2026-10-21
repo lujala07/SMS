@@ -25,6 +25,7 @@ const emptyForm = {
 };
 
 function DepartmentsPage() {
+    const [formOpen, setFormOpen] = useState(false);
     const [departments, setDepartments] =
         useState<Department[]>([]);
     const [form, setForm] =
@@ -82,6 +83,7 @@ function DepartmentsPage() {
 
     const resetForm = () => {
         if (saving) return;
+        setFormOpen(false);
         setForm(emptyForm);
         setEditingDepartment(null);
         setError('');
@@ -91,6 +93,7 @@ function DepartmentsPage() {
     const startEdit = (
         department: Department
     ) => {
+        setFormOpen(true);
         setEditingDepartment(department);
         setForm({
             name: department.name,
@@ -104,6 +107,7 @@ function DepartmentsPage() {
         event: React.FormEvent
     ) => {
         event.preventDefault();
+        if (saving) return;
         setError('');
         setSuccess('');
 
@@ -143,6 +147,7 @@ function DepartmentsPage() {
             await loadDepartments();
             setForm(emptyForm);
             setEditingDepartment(null);
+            setFormOpen(false);
         } catch (error) {
             setError(
                 getErrorMessage(
@@ -199,7 +204,11 @@ function DepartmentsPage() {
                 </p>
             </div>
 
-            <EditModal open={Boolean(editingDepartment)} title="Edit department" busy={saving} onClose={resetForm}>
+            <button type="button" onClick={() => { resetForm(); setFormOpen(true); }} className="mb-6 rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">Create Department</button>
+            {!formOpen && error && <p role="alert" className="mb-4 text-red-500">{error}</p>}
+            {!formOpen && success && <p role="status" className="mb-4 text-green-600">{success}</p>}
+
+            {formOpen && <EditModal open={formOpen} title={editingDepartment ? 'Edit department' : 'Create department'} busy={saving} onClose={resetForm}>
                 <form noValidate
                     onSubmit={handleSubmit}
                     className="bg-white rounded shadow p-5 mb-6"
@@ -261,18 +270,17 @@ function DepartmentsPage() {
                                   : 'Create Department'}
                         </button>
 
-                        {editingDepartment && (
                             <button
                                 type="button"
                                 onClick={resetForm}
+                                disabled={saving}
                                 className="border px-4 py-2 rounded"
                             >
                                 Cancel
                             </button>
-                        )}
                     </div>
                 </form>
-            </EditModal>
+            </EditModal>}
 
             <div className="bg-white rounded shadow overflow-x-auto">
                 <TableToolbar {...departmentsPagination} label="Departments" />

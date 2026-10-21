@@ -35,6 +35,7 @@ interface Assignment {
 }
 
 function TeacherAssignmentsPage() {
+    const [formOpen, setFormOpen] = useState(false);
     const [subjects, setSubjects] =
         useState<Subject[]>([]);
 
@@ -121,6 +122,7 @@ function TeacherAssignmentsPage() {
     }, []);
 
     const clearForm = () => {
+        setFormOpen(false);
         setSubjectId('');
         setTitle('');
         setDescription('');
@@ -144,6 +146,7 @@ function TeacherAssignmentsPage() {
         event: React.FormEvent
     ) => {
         event.preventDefault();
+        if (saving) return;
 
         setError('');
         setSuccess('');
@@ -243,6 +246,7 @@ function TeacherAssignmentsPage() {
     const handleEdit = (
         assignment: Assignment
     ) => {
+        setFormOpen(true);
         setEditingId(
             assignment.id
         );
@@ -363,7 +367,11 @@ function TeacherAssignmentsPage() {
                 </p>
             </div>
 
-            <EditModal open={Boolean(editingId)} title="Edit assignment" busy={saving} onClose={handleCancelEdit}>
+            <button type="button" onClick={() => { clearForm(); setError(''); setSuccess(''); setFormOpen(true); }} className="mb-6 rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">Create Assignment</button>
+            {!formOpen && error && <p role="alert" className="mb-4 text-red-500">{error}</p>}
+            {!formOpen && success && <p role="status" className="mb-4 text-green-600">{success}</p>}
+
+            {formOpen && <EditModal open={formOpen} title={editingId !== null ? 'Edit assignment' : 'Create assignment'} busy={saving} onClose={handleCancelEdit}>
                 <div className="bg-white p-6 rounded shadow mb-6">
                     <div className="flex items-center justify-between mb-4">
                         <h2 className="text-lg font-semibold">
@@ -510,7 +518,8 @@ function TeacherAssignmentsPage() {
                             />
                         </div>
 
-                        <div className="md:col-span-2">
+                        <div className="md:col-span-2 flex justify-end gap-3">
+                            <button type="button" disabled={saving} onClick={handleCancelEdit} className="rounded border px-4 py-2">Cancel</button>
                             <button
                                 type="submit"
                                 disabled={saving}
@@ -539,7 +548,7 @@ function TeacherAssignmentsPage() {
                         </p>
                     )}
                 </div>
-            </EditModal>
+            </EditModal>}
 
             <div>
                 <h2 className="text-lg font-semibold mb-4">
