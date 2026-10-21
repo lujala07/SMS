@@ -1,3 +1,5 @@
+import TableToolbar from '../../components/TableToolbar';
+import SortableHeader from '../../components/SortableHeader';
 import Pagination from '../../components/Pagination';
 import { usePagination } from '../../hooks/usePagination';
 import {
@@ -76,7 +78,12 @@ function TeacherSubjectsPage() {
         setAssignments(response.data);
     };
 
-    const teacherSubjectsPagination = usePagination(assignments);
+    const teacherSubjectsPagination = usePagination(assignments, undefined, [
+        { label: 'Teacher', value: 'teacher_name' },
+        { label: 'Subject', value: 'subject_name' },
+        { label: 'Code', value: 'subject_code' },
+        { label: 'Class', value: item => `${item.class_name ?? ''} ${item.semester ? `Semester ${item.semester}` : ''}` }
+    ]);
 
     useEffect(() => {
         const loadData = async () => {
@@ -385,24 +392,25 @@ function TeacherSubjectsPage() {
                 </h2>
 
                 <div className="bg-white rounded shadow overflow-x-auto">
+                    <TableToolbar {...teacherSubjectsPagination} label="Teacher subjects" />
                     <table className="w-full">
                         <thead className="bg-gray-100">
                             <tr>
-                                <th className="text-left p-3">
+                                <SortableHeader column={0} {...teacherSubjectsPagination} className="text-left p-3">
                                     Teacher
-                                </th>
+                                </SortableHeader>
 
-                                <th className="text-left p-3">
+                                <SortableHeader column={1} {...teacherSubjectsPagination} className="text-left p-3">
                                     Subject
-                                </th>
+                                </SortableHeader>
 
-                                <th className="text-left p-3">
+                                <SortableHeader column={2} {...teacherSubjectsPagination} className="text-left p-3">
                                     Code
-                                </th>
+                                </SortableHeader>
 
-                                <th className="text-left p-3">
+                                <SortableHeader column={3} {...teacherSubjectsPagination} className="text-left p-3">
                                     Class
-                                </th>
+                                </SortableHeader>
 
                                 <th className="text-left p-3">
                                     Actions

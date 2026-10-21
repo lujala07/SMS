@@ -1,3 +1,5 @@
+import TableToolbar from '../../components/TableToolbar';
+import SortableHeader from '../../components/SortableHeader';
 import Pagination from '../../components/Pagination';
 import { usePagination } from '../../hooks/usePagination';
 import {
@@ -57,7 +59,11 @@ function SubjectsPage() {
         setClasses(classData);
     };
 
-    const subjectsPagination = usePagination(subjects);
+    const subjectsPagination = usePagination(subjects, undefined, [
+        { label: 'Code', value: 'code' },
+        { label: 'Subject', value: 'name' },
+        { label: 'Class', value: 'class_name' }
+    ]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -312,18 +318,19 @@ function SubjectsPage() {
             </EditModal>
 
             <div className="bg-white rounded shadow overflow-x-auto">
+                <TableToolbar {...subjectsPagination} label="Subjects" />
                 <table className="w-full">
                     <thead className="bg-gray-100">
                         <tr>
-                            <th className="text-left p-3">
+                            <SortableHeader column={0} {...subjectsPagination} className="text-left p-3">
                                 Code
-                            </th>
-                            <th className="text-left p-3">
+                            </SortableHeader>
+                            <SortableHeader column={1} {...subjectsPagination} className="text-left p-3">
                                 Subject
-                            </th>
-                            <th className="text-left p-3">
+                            </SortableHeader>
+                            <SortableHeader column={2} {...subjectsPagination} className="text-left p-3">
                                 Class
-                            </th>
+                            </SortableHeader>
                             <th className="text-left p-3">
                                 Actions
                             </th>

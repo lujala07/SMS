@@ -1,3 +1,5 @@
+import TableToolbar from '../../components/TableToolbar';
+import SortableHeader from '../../components/SortableHeader';
 import Pagination from '../../components/Pagination';
 import { usePagination } from '../../hooks/usePagination';
 import {
@@ -55,7 +57,13 @@ function TeacherReportsPage() {
         setError
     ] = useState('');
 
-    const assignmentSummaryPagination = usePagination(assignments);
+    const assignmentSummaryPagination = usePagination(assignments, undefined, [
+        { label: 'Assignment', value: 'title' },
+        { label: 'Subject', value: item => `${item.subject_code ?? ''} ${item.subject_name ?? ''}` },
+        { label: 'Due date', value: 'due_date' },
+        { label: 'Submissions', value: 'total_submissions', numeric: true },
+        { label: 'Reviewed', value: 'reviewed_submissions', numeric: true }
+    ]);
 
     useEffect(() => {
         const loadReports =
@@ -297,28 +305,29 @@ function TeacherReportsPage() {
                 </h2>
 
                 <div className="bg-white rounded shadow overflow-x-auto">
+                    <TableToolbar {...assignmentSummaryPagination} label="Assignment summary" />
                     <table className="w-full">
                         <thead className="bg-gray-100">
                             <tr>
-                                <th className="text-left p-3">
+                                <SortableHeader column={0} {...assignmentSummaryPagination} className="text-left p-3">
                                     Assignment
-                                </th>
+                                </SortableHeader>
 
-                                <th className="text-left p-3">
+                                <SortableHeader column={1} {...assignmentSummaryPagination} className="text-left p-3">
                                     Subject
-                                </th>
+                                </SortableHeader>
 
-                                <th className="text-left p-3">
+                                <SortableHeader column={2} {...assignmentSummaryPagination} className="text-left p-3">
                                     Due Date
-                                </th>
+                                </SortableHeader>
 
-                                <th className="text-left p-3">
+                                <SortableHeader column={3} {...assignmentSummaryPagination} className="text-left p-3">
                                     Submissions
-                                </th>
+                                </SortableHeader>
 
-                                <th className="text-left p-3">
+                                <SortableHeader column={4} {...assignmentSummaryPagination} className="text-left p-3">
                                     Reviewed
-                                </th>
+                                </SortableHeader>
                             </tr>
                         </thead>
 

@@ -25,6 +25,7 @@ const emptyForm = {
 };
 
 function NoticesPage() {
+    const [formOpen, setFormOpen] = useState(false);
     const [reviewingId, setReviewingId] = useState<number | null>(null);
     const [notices, setNotices] =
         useState<Notice[]>([]);
@@ -82,6 +83,7 @@ function NoticesPage() {
         if (saving) return;
         setForm(emptyForm);
         setEditingNotice(null);
+        setFormOpen(false);
         setError('');
         setSuccess('');
     };
@@ -89,6 +91,7 @@ function NoticesPage() {
     const startEdit = (
         notice: Notice
     ) => {
+        setFormOpen(true);
         setEditingNotice(notice);
         setForm({
             title: notice.title,
@@ -103,6 +106,7 @@ function NoticesPage() {
         event: React.FormEvent
     ) => {
         event.preventDefault();
+        if (saving) return;
         setError('');
         setSuccess('');
 
@@ -144,6 +148,7 @@ function NoticesPage() {
             await loadNotices();
             setForm(emptyForm);
             setEditingNotice(null);
+            setFormOpen(false);
         } catch (error) {
             setError(
                 getErrorMessage(
@@ -212,9 +217,15 @@ function NoticesPage() {
                 <p className="text-gray-500 mt-1">
                     Create and manage notices.
                 </p>
+                <button type="button" onClick={() => { resetForm(); setFormOpen(true); }} className="mt-4 rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">
+                    Create Notice
+                </button>
             </div>
 
-            <EditModal open={Boolean(editingNotice)} title="Edit notice" busy={saving} onClose={resetForm}>
+            {!formOpen && error && <p role="alert" className="mb-4 text-red-500">{error}</p>}
+            {!formOpen && success && <p role="status" className="mb-4 text-green-600">{success}</p>}
+
+            {formOpen && <EditModal open={formOpen} title={editingNotice ? 'Edit notice' : 'Create notice'} busy={saving} onClose={resetForm}>
                 <form noValidate
                     onSubmit={handleSubmit}
                     className="bg-white rounded shadow p-5 mb-6"
@@ -227,6 +238,8 @@ function NoticesPage() {
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <input
+                            aria-label="Title"
+                            maxLength={255}
                             value={form.title}
                             onChange={(event) =>
                                 setForm({
@@ -239,6 +252,7 @@ function NoticesPage() {
                         />
 
                         <select
+                            aria-label="Audience"
                             value={form.audience}
                             onChange={(event) =>
                                 setForm({
@@ -262,6 +276,7 @@ function NoticesPage() {
                     </div>
 
                     <textarea
+                        aria-label="Notice content"
                         value={form.content}
                         onChange={(event) =>
                             setForm({
@@ -299,18 +314,17 @@ function NoticesPage() {
                                   : 'Create Notice'}
                         </button>
 
-                        {editingNotice && (
                             <button
                                 type="button"
                                 onClick={resetForm}
+                                disabled={saving}
                                 className="border px-4 py-2 rounded"
                             >
                                 Cancel
                             </button>
-                        )}
                     </div>
                 </form>
-            </EditModal>
+            </EditModal>}
 
             {loading ? (
                 <div className="bg-white p-4 rounded shadow">

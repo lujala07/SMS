@@ -1,3 +1,5 @@
+import TableToolbar from '../../components/TableToolbar';
+import SortableHeader from '../../components/SortableHeader';
 import Pagination from '../../components/Pagination';
 import { usePagination } from '../../hooks/usePagination';
 import {
@@ -54,7 +56,13 @@ function StudentsPage() {
     const [success, setSuccess] =
         useState('');
 
-    const studentsPagination = usePagination(students);
+    const studentsPagination = usePagination(students, undefined, [
+        { label: 'Code', value: 'student_code' },
+        { label: 'Name', value: item => `${item.first_name} ${item.last_name}` },
+        { label: 'Class', value: 'class_name' },
+        { label: 'Email', value: 'email' },
+        { label: 'Phone', value: 'phone_number' }
+    ]);
 
     useEffect(() => {
         if (editingStudent) editDialog.current?.showModal();
@@ -258,7 +266,9 @@ function StudentsPage() {
                                 <h2 id="edit-student-title" className="text-xl font-semibold text-gray-900">Edit student</h2>
                                 <p className="mt-1 break-all text-sm text-gray-500">{editingStudent.email}</p>
                             </div>
-                            <button type="button" onClick={resetForm} disabled={saving} aria-label="Close edit student" className="student-edit-close">
+                            <button
+                                type="button"
+                                onClick={resetForm} disabled={saving} aria-label="Close edit student" className="student-edit-close">
                                 <X size={20} aria-hidden="true" />
                             </button>
                         </header>
@@ -327,24 +337,25 @@ function StudentsPage() {
             )}
 
             <div className="bg-white rounded shadow overflow-x-auto">
+                <TableToolbar {...studentsPagination} label="Students" />
                 <table className="w-full">
                     <thead className="bg-gray-100">
                         <tr>
-                            <th className="text-left p-3">
+                            <SortableHeader column={0} {...studentsPagination} className="text-left p-3">
                                 Code
-                            </th>
-                            <th className="text-left p-3">
+                            </SortableHeader>
+                            <SortableHeader column={1} {...studentsPagination} className="text-left p-3">
                                 Name
-                            </th>
-                            <th className="text-left p-3">
+                            </SortableHeader>
+                            <SortableHeader column={2} {...studentsPagination} className="text-left p-3">
                                 Class
-                            </th>
-                            <th className="text-left p-3">
+                            </SortableHeader>
+                            <SortableHeader column={3} {...studentsPagination} className="text-left p-3">
                                 Email
-                            </th>
-                            <th className="text-left p-3">
+                            </SortableHeader>
+                            <SortableHeader column={4} {...studentsPagination} className="text-left p-3">
                                 Phone
-                            </th>
+                            </SortableHeader>
                             <th className="text-left p-3">
                                 Actions
                             </th>

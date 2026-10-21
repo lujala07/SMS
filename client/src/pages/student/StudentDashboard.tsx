@@ -1,3 +1,7 @@
+import Pagination from '../../components/Pagination';
+import TableToolbar from '../../components/TableToolbar';
+import SortableHeader from '../../components/SortableHeader';
+import { usePagination } from '../../hooks/usePagination';
 import {
     useEffect,
     useState
@@ -71,6 +75,13 @@ function StudentDashboard() {
         error,
         setError
     ] = useState('');
+
+    const assignmentsPagination = usePagination(data?.assignments ?? [], undefined, [
+        { label: 'Assignment', value: 'title' },
+        { label: 'Subject', value: item => `${item.subject_code} ${item.subject_name}` },
+        { label: 'Due date', value: 'due_date' },
+        { label: 'Status', value: item => item.submission_status ?? 'Not Submitted' }
+    ]);
 
     useEffect(() => {
         const loadDashboard =
@@ -337,28 +348,29 @@ function StudentDashboard() {
 
             <div className="mb-8">
                 <h2 className="text-lg font-semibold mb-4">
-                    Recent Assignments
+                    Assignments
                 </h2>
 
                 <div className="bg-white rounded shadow overflow-x-auto">
+                    <TableToolbar {...assignmentsPagination} label="Assignments" />
                     <table className="w-full">
                         <thead className="bg-gray-100">
                             <tr>
-                                <th className="text-left p-3">
+                                <SortableHeader column={0} {...assignmentsPagination} className="text-left p-3">
                                     Assignment
-                                </th>
+                                </SortableHeader>
 
-                                <th className="text-left p-3">
+                                <SortableHeader column={1} {...assignmentsPagination} className="text-left p-3">
                                     Subject
-                                </th>
+                                </SortableHeader>
 
-                                <th className="text-left p-3">
+                                <SortableHeader column={2} {...assignmentsPagination} className="text-left p-3">
                                     Due Date
-                                </th>
+                                </SortableHeader>
 
-                                <th className="text-left p-3">
+                                <SortableHeader column={3} {...assignmentsPagination} className="text-left p-3">
                                     Status
-                                </th>
+                                </SortableHeader>
                             </tr>
                         </thead>
 
@@ -376,11 +388,7 @@ function StudentDashboard() {
                                     </td>
                                 </tr>
                             ) : (
-                                data.assignments
-                                    .slice(
-                                        0,
-                                        5
-                                    )
+                                assignmentsPagination.items
                                     .map(
                                         (
                                             assignment
@@ -423,6 +431,7 @@ function StudentDashboard() {
                             )}
                         </tbody>
                     </table>
+                    <Pagination {...assignmentsPagination} label="Assignments" />
                 </div>
             </div>
 

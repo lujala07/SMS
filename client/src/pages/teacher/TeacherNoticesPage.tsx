@@ -33,6 +33,7 @@ interface Notice {
 }
 
 function TeacherNoticesPage() {
+    const [formOpen, setFormOpen] = useState(false);
     const [
         notices,
         setNotices
@@ -119,6 +120,7 @@ function TeacherNoticesPage() {
     }, []);
 
     const clearForm = () => {
+        setFormOpen(false);
         setTitle('');
         setContent('');
         setAudience(
@@ -133,6 +135,7 @@ function TeacherNoticesPage() {
         event: React.FormEvent
     ) => {
         event.preventDefault();
+        if (saving) return;
 
         setError('');
         setSuccess('');
@@ -218,6 +221,7 @@ function TeacherNoticesPage() {
     const handleEdit = (
         notice: Notice
     ) => {
+        setFormOpen(true);
         setEditingId(
             notice.id
         );
@@ -334,9 +338,15 @@ function TeacherNoticesPage() {
                 <p className="text-gray-500 mt-1">
                     Submit notices for approval and view announcements.
                 </p>
+                <button type="button" onClick={() => { clearForm(); setError(''); setSuccess(''); setFormOpen(true); }} className="mt-4 rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">
+                    Create Notice
+                </button>
             </div>
 
-            <EditModal open={Boolean(editingId)} title="Edit notice" busy={saving} onClose={handleCancelEdit}>
+            {!formOpen && error && <p role="alert" className="mb-4 text-red-500">{error}</p>}
+            {!formOpen && success && <p role="status" className="mb-4 text-green-600">{success}</p>}
+
+            {formOpen && <EditModal open={formOpen} title={editingId !== null ? 'Edit notice' : 'Create notice'} busy={saving} onClose={handleCancelEdit}>
                 <div className="bg-white rounded shadow p-6 mb-6">
                     <div className="flex justify-between items-center mb-4">
                         <h2 className="text-lg font-semibold">
@@ -371,6 +381,8 @@ function TeacherNoticesPage() {
 
                             <input
                                 type="text"
+                                aria-label="Title"
+                                maxLength={255}
                                 value={
                                     title
                                 }
@@ -394,6 +406,7 @@ function TeacherNoticesPage() {
                             </label>
 
                             <select
+                                aria-label="Audience"
                                 value={
                                     audience
                                 }
@@ -426,6 +439,7 @@ function TeacherNoticesPage() {
                             </label>
 
                             <textarea
+                                aria-label="Content"
                                 value={
                                     content
                                 }
@@ -444,6 +458,10 @@ function TeacherNoticesPage() {
                             />
                         </div>
 
+                        <div className="flex justify-end gap-3">
+                        <button type="button" disabled={saving} onClick={handleCancelEdit} className="rounded border px-4 py-2">
+                            Cancel
+                        </button>
                         <button
                             type="submit"
                             disabled={
@@ -457,6 +475,7 @@ function TeacherNoticesPage() {
                                   ? 'Update Notice'
                                   : 'Submit for approval'}
                         </button>
+                        </div>
                     </form>
 
                     {error && (
@@ -471,7 +490,7 @@ function TeacherNoticesPage() {
                         </p>
                     )}
                 </div>
-            </EditModal>
+            </EditModal>}
 
             <div>
                 <h2 className="text-lg font-semibold mb-4">

@@ -1,3 +1,5 @@
+import TableToolbar from '../../components/TableToolbar';
+import SortableHeader from '../../components/SortableHeader';
 import Pagination from '../../components/Pagination';
 import { usePagination } from '../../hooks/usePagination';
 import {
@@ -94,8 +96,17 @@ function TeacherAttendancePage() {
         setRecords(response.data);
     };
 
-    const studentsPagination = usePagination(students, selectedSubject);
-    const attendanceHistoryPagination = usePagination(records);
+    const studentsPagination = usePagination(students, selectedSubject, [
+        { label: 'Code', value: 'student_code' },
+        { label: 'Name', value: item => `${item.first_name} ${item.last_name}` },
+        { label: 'Status', value: item => statuses[item.id] ?? 'present' }
+    ]);
+    const attendanceHistoryPagination = usePagination(records, undefined, [
+        { label: 'Name', value: item => `${item.first_name} ${item.last_name}` },
+        { label: 'Subject', value: item => `${item.subject_code ?? ''} ${item.subject_name ?? ''}` },
+        { label: 'Date', value: 'attendance_date' },
+        { label: 'Status', value: 'status' }
+    ]);
 
     useEffect(() => {
         const loadInitialData = async () => {
@@ -382,20 +393,21 @@ function TeacherAttendancePage() {
 
                 {students.length > 0 && (
                     <div className="overflow-x-auto">
+                        <TableToolbar {...studentsPagination} label="Students" />
                         <table className="w-full">
                             <thead className="bg-gray-100">
                                 <tr>
-                                    <th className="text-left p-3">
+                                    <SortableHeader column={0} {...studentsPagination} className="text-left p-3">
                                         Student Code
-                                    </th>
+                                    </SortableHeader>
 
-                                    <th className="text-left p-3">
+                                    <SortableHeader column={1} {...studentsPagination} className="text-left p-3">
                                         Student
-                                    </th>
+                                    </SortableHeader>
 
-                                    <th className="text-left p-3">
+                                    <SortableHeader column={2} {...studentsPagination} className="text-left p-3">
                                         Status
-                                    </th>
+                                    </SortableHeader>
                                 </tr>
                             </thead>
 
@@ -502,24 +514,25 @@ function TeacherAttendancePage() {
                 </h2>
 
                 <div className="bg-white rounded shadow overflow-x-auto">
+                    <TableToolbar {...attendanceHistoryPagination} label="Attendance history" />
                     <table className="w-full">
                         <thead className="bg-gray-100">
                             <tr>
-                                <th className="text-left p-3">
+                                <SortableHeader column={0} {...attendanceHistoryPagination} className="text-left p-3">
                                     Student
-                                </th>
+                                </SortableHeader>
 
-                                <th className="text-left p-3">
+                                <SortableHeader column={1} {...attendanceHistoryPagination} className="text-left p-3">
                                     Subject
-                                </th>
+                                </SortableHeader>
 
-                                <th className="text-left p-3">
+                                <SortableHeader column={2} {...attendanceHistoryPagination} className="text-left p-3">
                                     Date
-                                </th>
+                                </SortableHeader>
 
-                                <th className="text-left p-3">
+                                <SortableHeader column={3} {...attendanceHistoryPagination} className="text-left p-3">
                                     Status
-                                </th>
+                                </SortableHeader>
                             </tr>
                         </thead>
 

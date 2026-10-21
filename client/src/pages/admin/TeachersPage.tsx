@@ -1,3 +1,5 @@
+import TableToolbar from '../../components/TableToolbar';
+import SortableHeader from '../../components/SortableHeader';
 import Pagination from '../../components/Pagination';
 import { usePagination } from '../../hooks/usePagination';
 import {
@@ -61,7 +63,13 @@ function TeachersPage() {
         setDepartments(departmentData);
     };
 
-    const teachersPagination = usePagination(teachers);
+    const teachersPagination = usePagination(teachers, undefined, [
+        { label: 'Name', value: item => `${item.first_name} ${item.last_name}` },
+        { label: 'Email', value: 'email' },
+        { label: 'Department', value: 'department_name' },
+        { label: 'Phone', value: 'phone_number' },
+        { label: 'Status', value: item => item.is_active ? 'Active' : 'Inactive' }
+    ]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -369,24 +377,25 @@ function TeachersPage() {
             )}
 
             <div className="bg-white rounded shadow overflow-x-auto">
+                <TableToolbar {...teachersPagination} label="Teachers" />
                 <table className="w-full">
                     <thead className="bg-gray-100">
                         <tr>
-                            <th className="text-left p-3">
+                            <SortableHeader column={0} {...teachersPagination} className="text-left p-3">
                                 Teacher
-                            </th>
-                            <th className="text-left p-3">
+                            </SortableHeader>
+                            <SortableHeader column={1} {...teachersPagination} className="text-left p-3">
                                 Email
-                            </th>
-                            <th className="text-left p-3">
+                            </SortableHeader>
+                            <SortableHeader column={2} {...teachersPagination} className="text-left p-3">
                                 Department
-                            </th>
-                            <th className="text-left p-3">
+                            </SortableHeader>
+                            <SortableHeader column={3} {...teachersPagination} className="text-left p-3">
                                 Phone
-                            </th>
-                            <th className="text-left p-3">
+                            </SortableHeader>
+                            <SortableHeader column={4} {...teachersPagination} className="text-left p-3">
                                 Status
-                            </th>
+                            </SortableHeader>
                             <th className="text-left p-3">
                                 Actions
                             </th>
