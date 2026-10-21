@@ -1,7 +1,6 @@
 import { Outlet, useLocation } from 'react-router-dom';
 
 import Sidebar from '../components/Sidebar';
-import Footer from '../components/Footer';
 import NotificationCenter from '../components/NotificationCenter';
 
 function DashboardLayout() {
@@ -17,8 +16,6 @@ function DashboardLayout() {
                 <main className="min-w-0 flex-1 p-4 sm:p-6">
                     <Outlet key={location.key} />
                 </main>
-
-                <Footer />
             </div>
         </div>
     );
